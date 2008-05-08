@@ -1,0 +1,152 @@
+
+//////////////////////////////////////////////////////////////////////////////
+// This software module is developed by SCIDM team in 1999-2008.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+//////////////////////////////////////////////////////////////////////////////
+
+#ifndef __acc_str_h__
+#define __acc_str_h__
+
+#ifndef __acc_str_cpp__
+
+extern const char* TRUE_STR;
+extern const char* FALSE_STR;
+extern const char* YES_STR;
+extern const char* NO_STR;
+extern const char* Y_STR;
+extern const char* N_STR;
+extern const char* T_STR;
+extern const char* F_STR;
+extern const char* EMPTY_STR;
+extern const char* ZERO_STR;
+extern const char* ONE_STR;
+extern const char* MINUS_ONE_STR;
+extern const char* TWO_STR;
+extern const char* MINUS_TWO_STR;
+extern const char* THREE_STR;
+extern const char* MINUS_THREE_STR;
+extern const char* NAME_STR;
+extern const char* NUMBER_STR;
+extern const char* FILENAME_STR;
+extern const char* INTEGER_STR;
+extern const char* BOOLEAN_STR;
+extern const char* STRING_STR;
+extern const char* FLOAT_STR;
+extern const char* DOUBLE_STR;
+extern const char* OBJNAME_STR;
+
+extern const char* FAIL_OPEN_SUBSYSTEM;
+extern const char* FAIL_CLONE_TYPE;
+extern const char* FAIL_NARROW_TYPE;
+extern const char* FAIL_NARROW_IDSETMGR;
+extern const char* FAIL_NARROW_LOCKMGR;
+extern const char* FAIL_NARROW_RIGHTSMGR;
+extern const char* FAIL_NARROW_SET;
+extern const char* FAIL_OPEN_ACCESSOR;
+extern const char* FAIL_NARROW_ACCESSOR;
+
+extern const char* TEXT_TYPE_NAME;
+extern const char* DICTIONARY_TYPE_NAME;
+extern const char* ORDER_TYPE_NAME;
+
+extern const char* OBJNUMBERING_TYPE_NAME;
+
+extern const char* INFOSOURCE_TYPE_NAME;
+extern const char* CALCLOG_TYPE_NAME;
+extern const char* UPDATE_TYPE_NAME;
+extern const char* ALIAS_TYPE_NAME;
+extern const char* NOMENCLATURE_TYPE_NAME;
+extern const char* SYNONYM_TYPE_NAME;
+
+extern const char* CLASSIFICATION_TYPE_NAME;
+extern const char* CLASSIFIEDTYPES_TYPE_NAME;
+extern const char* HIERARCHYLEVEL_TYPE_NAME;
+extern const char* CLASSINSTANCE_TYPE_NAME;
+extern const char* ANNOTATION_TYPE_NAME;
+extern const char* EVIDENCE_TYPE_NAME;
+extern const char* ASSOCIATION_TYPE_NAME;
+extern const char* PAIR_TYPE_NAME;
+extern const char* CLUSTERING_TYPE_NAME;
+extern const char* CLUSTER_TYPE_NAME;
+extern const char* CLUSTER_MAP_TYPE_NAME;
+extern const char* DAGVERTEX_TYPE_NAME;
+extern const char* DAGEDGE_TYPE_NAME;
+extern const char* MWCLUSTER_TYPE_NAME;
+extern const char* MWCINDEX_TYPE_NAME;
+
+extern const char* PHILODISTMATRIX_TYPE_NAME;
+extern const char* GENETICCODE_TYPE_NAME;
+extern const char* AMINOACID_TYPE_NAME;
+
+extern const char* LITREF_TYPE_NAME;
+extern const char* ORGANISM_TYPE_NAME;
+
+extern const char* PSEQ_TYPE_NAME;
+extern const char* NSEQ_TYPE_NAME;
+extern const char* PSEQSET_TYPE_NAME;
+extern const char* NSEQSET_TYPE_NAME;
+extern const char* SEQINFO_TYPE_NAME;
+extern const char* FEATURE_TYPE_NAME;
+extern const char* FEATUREDATA_TYPE_NAME;
+extern const char* FEATURELOCATIONMAP_TYPE_NAME;
+extern const char* FRAGSET_TYPE_NAME;
+extern const char* SEQLIT_TYPE_NAME;
+
+extern const char* KTUPLECOUNTS_TYPE_NAME;
+extern const char* WEIGHTMATRIX_TYPE_NAME;
+extern const char* SIMMATRIX_TYPE_NAME;
+extern const char* SIM_TYPE_NAME;
+extern const char* SIMBATCHES_TYPE_NAME;
+
+extern const char* SEQMODEL_TYPE_NAME;
+extern const char* DOMAINLEAF_TYPE_NAME;
+extern const char* DOMAINBRANCH_TYPE_NAME;
+
+extern const char* ALIGNMENT_TYPE_NAME;
+extern const char* BLOCKELEM_TYPE_NAME;
+extern const char* BLOCK_TYPE_NAME;
+extern const char* BLOCKALIGNMENT_TYPE_NAME;
+
+extern const char* CLONELIBRARY_TYPE_NAME;
+extern const char* CLONE_TYPE_NAME;
+extern const char* CLONESEQ_TYPE_NAME;
+
+extern const char* ACCESSION_NOMEN_ABBR;
+extern const char* VERSION_NOMEN_ABBR;
+extern const char* LOCUS_NOMEN_ABBR;
+extern const char* GID_NOMEN_ABBR;
+extern const char* NCBI_TAXID_NOMEN_ABBR;
+
+extern const char* FEATURE_KEYS_CLASSIFICATION_NAME;
+extern const char* FEATURE_QUALS_CLASSIFICATION_NAME;
+extern const char* NCBI_TAXONOMY_CLASSIFICATION_NAME;
+
+extern const char* NUCL_GC_ASSOC_NAME;
+extern const char* MITO_GC_ASSOC_NAME;
+extern const char* CHLO_GC_ASSOC_NAME;
+
+
+#endif
+
+#include <stddef.h>
+
+const char* inverse_bs (const char* bs); // inverse_bool_string
+bool bool_eval (const char* bs, bool* value = NULL); // returns True if valid boolean value and sets value; otherwice returns false
+const char* bool_str (bool val);
+
+#endif // __seqtools_acc_str_h__
