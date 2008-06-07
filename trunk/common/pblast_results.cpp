@@ -23,9 +23,12 @@
 #include "gapstat.h"
 #include <math.h>
 
-PblastResults::PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval, unsigned res_per_qry)
+
+SimMergerBase PblastResults :: null_merger_;
+
+PblastResults::PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval, unsigned res_per_qry, SimMergerBase& merger)
 :
-AlignResultStorage (res_per_qry),
+MergingResultStorage (merger, res_per_qry),
 total_found_ (0),
 min_score_ (min_score),
 min_len_ (min_len),

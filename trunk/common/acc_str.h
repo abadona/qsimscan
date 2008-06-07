@@ -140,6 +140,16 @@ extern const char* NUCL_GC_ASSOC_NAME;
 extern const char* MITO_GC_ASSOC_NAME;
 extern const char* CHLO_GC_ASSOC_NAME;
 
+extern const char* SYSTEM_TYPE_CLASSIF_NAME;
+extern const char* SYSTEM_TYPE_CLASSIF_DESC;
+
+extern const char* NUCL_GC_CLASS_NAME;
+extern const char* MITO_GC_CLASS_NAME;
+extern const char* CHLO_GC_CLASS_NAME;
+
+extern const char* SEQ_SIM_CLUSTERING_NAME;
+extern const char* SEQ_MAP_CLUSTERING_NAME;
+
 
 #endif
 

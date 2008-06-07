@@ -28,7 +28,7 @@
 struct req
 {
     longlong uid;
-    int rev;
+    char rev;
     req ()
     {
         uid = -1;

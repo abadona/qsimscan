@@ -22,14 +22,16 @@
 #ifndef __pblast_results_h__
 #define __pblast_results_h__
 
+#pragma warning (disable : 4786)
 #include <platform.h>
-#include "align_result_storage.h"
 #include "result_reciever_pblast.h"
+#include "merging_result_storage.h"
 #include "gaplibshim.h"
 
 
-class PblastResults : public ResultReciever_pblast, public AlignResultStorage
+class PblastResults : public ResultReciever_pblast, public MergingResultStorage
 {
+    static SimMergerBase null_merger_;
     int total_found_;
     int min_len_;
     double min_score_;
@@ -43,7 +45,7 @@ class PblastResults : public ResultReciever_pblast, public AlignResultStorage
     double K0mean_, lambda0mean_, Hmean_, alpha_mean_;
     ResFreqType trg_freq_;
 public:
-    PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval = true, unsigned res_per_qry = 0);
+    PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval = true, unsigned res_per_qry = 0, SimMergerBase& merger = null_merger_);
     bool match_found  (SEQ& query_seq, SEQ& target_seq, BATCH* batches, int batch_no, double score, double q_auto_score, double t_auto_score);
     int totalFound ();
 };

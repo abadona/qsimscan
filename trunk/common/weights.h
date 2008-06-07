@@ -151,7 +151,6 @@ WEIGHTS<T, dim>::WEIGHTS (const char* name, const char* fname, float gip, float 
 {
     int ii = 0;
     int jj = 0;
-    int tmp;
 
     MemWrapper <char> alpha_buf (dim);
     MemWrapper <T> value_buf (dim*dim);

@@ -38,13 +38,13 @@ class PQueueUnderflow:   public PQueueError {};
 class PQueueNotAHeap:    public PQueueError {};
 class PQueueRestructure: public PQueueError {};
 
-template <typename T>
+template <class T>
 bool greater (T const& v1, T const& v2)
 {
     return v2 < v1;
 }
 
-template <typename T>
+template <class T>
 class PQueue
 {
 public:
@@ -52,13 +52,26 @@ public:
     typedef std::vector <T> ElemVec;
 private:
 
+	class GreaterType
+	{
+	public:
+		bool operator () (const T& a, const T& b) const
+		{
+			if (a < b)
+				return false;
+			else
+				return true;
+		}
+	};
+	GreaterType Greater;
+
     ElemVec     values_;
     unsigned    n_ : 31;
     bool        heap_ok_ : 1;
 
     void heapify ()
     {
-        std::make_heap (values_.begin (), values_.begin () + n_, greater<T>);
+        std::make_heap (values_.begin (), values_.begin () + n_, Greater);
         heap_ok_ = true;
     }
 
@@ -82,8 +95,9 @@ public:
         if (!n_) throw PQueueUnderflow ();
         return values_.front ();
     }
-    void push (T const& val) throw (PQueueNotAHeap)
+    bool push (T const& val) throw (PQueueNotAHeap)
     {
+        bool toR = false;
         if (!heap_ok_) throw PQueueNotAHeap ();
         if (n_ == values_.size ())
         {
@@ -91,22 +105,25 @@ public:
             // if the smallest element (at head) is smaller then it.
             if (values_.front () < val)
             {
-                std::pop_heap (values_.begin (), values_.end (), greater<T>);
+                std::pop_heap (values_.begin (), values_.end (), Greater);
                 values_.back () = val;
-                std::push_heap (values_.begin (), values_.end (), greater<T>);
+                std::push_heap (values_.begin (), values_.end (), Greater);
+                toR = true;
             }
         }
         else
         {
             values_ [n_++] = val;
-            std::push_heap (values_.begin (), values_.begin () + n_, greater<T>);
+            std::push_heap (values_.begin (), values_.begin () + n_, Greater);
+            toR = true;
         }
+        return toR;
     }
     void pop () throw (PQueueUnderflow, PQueueNotAHeap)
     {
         if (!heap_ok_) throw PQueueNotAHeap ();
         if (!n_) throw PQueueUnderflow ();
-        std::pop_heap (values_.begin (), values_.begin () + n_--, greater<T>);
+        std::pop_heap (values_.begin (), values_.begin () + n_--, Greater);
     }
     bool empty ()
     {
@@ -131,7 +148,7 @@ public:
         // this is not sort_heap, just sort - because different predicate then heapifying one is used
         values_.resize (n_);
         // std::sort (values_.begin (), values_.end ());
-        std::sort_heap (values_.begin (), values_.end (), greater<T>);
+        std::sort_heap (values_.begin (), values_.end (), Greater);
         heap_ok_ = false;
         return values_;
     }

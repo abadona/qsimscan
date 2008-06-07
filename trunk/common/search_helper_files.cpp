@@ -321,7 +321,19 @@ bool Search_helper_files::output_results_nn (AlignResultStorage& resrec, unsigne
                 // print batch parameters
                 out_file << std::endl << "     [Result " << resno+1 << "]";
                 out_file << std::endl << "     " << target_.cur_name () << " (" << cur_search.len << " bp), " << target_.cur_hdr ();
-                out_file << std::endl << "     " << ((cur_res->reverse_)?("REVERSE") : ("FORWARD")) << ", SCORE " << cur_res->al_score_ << ", CHI-2 " << cur_res->chi2_;
+                out_file << std::endl << "     " << ((cur_res->reverse_)?("REVERSE") : ("FORWARD")) << ", SCORE " << cur_res->al_score_;
+                if (cur_res->evalue_ != 0)   out_file << ", EVALUE " << cur_res->evalue_;
+                if (cur_res->chi2_ != 0)     out_file << ", CHI-2 " << cur_res->chi2_;
+                if (cur_res->bitscore_ != 0) out_file << ", BITSCORE " << cur_res->bitscore_;
+                if (cur_res->score_ != 0)    out_file << ", MATCH_SCORE " << cur_res->score_;
+                if (cur_res->q_auto_score_ || cur_res->t_auto_score_)
+                {
+                    out_file << std::endl << "     ";
+                    if (cur_res->q_auto_score_) out_file << "QUERY AUTO SCORE " << cur_res->q_auto_score_;
+                    if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
+                    if (cur_res->q_auto_score_) out_file << "TARGET AUTO SCORE " << cur_res->t_auto_score_;
+                }
+
                 out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
 
                 // print batch
@@ -380,7 +392,18 @@ bool Search_helper_files::output_results_aa (AlignResultStorage& resrec, unsigne
                 // print batch parameters
                 out_file << std::endl << "     [Result " << resno+1 << "]";
                 out_file << std::endl << "     " << target_.cur_name () << " (" << cur_search.len << " bp), " << target_.cur_hdr ();
-                out_file << std::endl << "     SCORE " << cur_res->al_score_ << ", evaluue " << cur_res->evalue_ << ", bitscore " << cur_res->bitscore_ << ", identity " << cur_res->score_;
+                out_file << std::endl << "     SCORE " << cur_res->al_score_;
+                if (cur_res->evalue_ != 0)   out_file << ", EVALUE " << cur_res->evalue_;
+                if (cur_res->chi2_ != 0)     out_file << ", CHI-2 " << cur_res->chi2_;
+                if (cur_res->bitscore_ != 0) out_file << ", BITSCORE " << cur_res->bitscore_;
+                if (cur_res->score_ != 0)    out_file << ", MATCH_SCORE " << cur_res->score_;
+                if (cur_res->q_auto_score_ || cur_res->t_auto_score_)
+                {
+                    out_file << std::endl << "     ";
+                    if (cur_res->q_auto_score_) out_file << "QUERY AUTO SCORE " << cur_res->q_auto_score_;
+                    if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
+                    if (cur_res->q_auto_score_) out_file << "TARGET AUTO SCORE " << cur_res->t_auto_score_;
+                }
                 out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
 
                 // print batch
@@ -441,7 +464,18 @@ bool Search_helper_files::output_results_an (AlignResultStorage& resrec, unsigne
                 out_file << std::endl << "     " << target_.cur_name () << " (" << cur_search.len << " bp), " << target_.cur_hdr ();
                 if (cur_res->reverse_) out_file << std::endl << "     Reverse chain ";
                 else                   out_file << std::endl << "     Forward chain ";
-                out_file << std::endl << "     SCORE " << cur_res->al_score_ << ", AUTHO " << cur_res->q_auto_score_;
+                out_file << std::endl << "     SCORE " << cur_res->al_score_;
+                if (cur_res->evalue_ != 0)   out_file << ", EVALUE " << cur_res->evalue_;
+                if (cur_res->chi2_ != 0)     out_file << ", CHI-2 " << cur_res->chi2_;
+                if (cur_res->bitscore_ != 0) out_file << ", BITSCORE " << cur_res->bitscore_;
+                if (cur_res->score_ != 0)    out_file << ", MATCH_SCORE " << cur_res->score_;
+                if (cur_res->q_auto_score_ || cur_res->t_auto_score_)
+                {
+                    out_file << std::endl << "     ";
+                    if (cur_res->q_auto_score_) out_file << "QUERY AUTO SCORE " << cur_res->q_auto_score_;
+                    if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
+                    if (cur_res->q_auto_score_) out_file << "TARGET AUTO SCORE " << cur_res->t_auto_score_;
+                }
                 out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
 
                 // print batch
@@ -510,7 +544,19 @@ bool Search_helper_files::output_results_na (AlignResultStorage& resrec, unsigne
                 out_file << std::endl << "     " << target_.cur_name () << "   " << cur_search.len << "aa, " << target_.cur_hdr ();
                 if (!cur_res->reverse_) out_file << std::endl << "     Matches REVERSE chain of query";
                 else                    out_file << std::endl << "     Matches FORWARD chain of query";
-                out_file << std::endl << "     SCORE " << cur_res->al_score_ << ", AUTHO " << cur_res->q_auto_score_;
+                out_file << std::endl << "     SCORE " << cur_res->al_score_;
+                if (cur_res->evalue_ != 0)   out_file << ", EVALUE " << cur_res->evalue_;
+                if (cur_res->chi2_ != 0)     out_file << ", CHI-2 " << cur_res->chi2_;
+                if (cur_res->bitscore_ != 0) out_file << ", BITSCORE " << cur_res->bitscore_;
+                if (cur_res->score_ != 0)    out_file << ", MATCH_SCORE " << cur_res->score_;
+                if (cur_res->q_auto_score_ || cur_res->t_auto_score_)
+                {
+                    out_file << std::endl << "     ";
+                    if (cur_res->q_auto_score_) out_file << "QUERY AUTO SCORE " << cur_res->q_auto_score_;
+                    if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
+                    if (cur_res->q_auto_score_) out_file << "TARGET AUTO SCORE " << cur_res->t_auto_score_;
+                }
+
                 out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
 
                 // print batch

@@ -26,7 +26,12 @@
 
 //#ifndef __ncbi_weight_matrix_cpp__
 extern const char* ERR_BadMatrix;
+
+#ifndef _MSC_VER
 extern const int STD_PROT_MATRIX_SIZE;
+#else
+const int STD_PROT_MATRIX_SIZE = 24;
+#endif
 //#endif
 
 MAKE_ERROR_TYPE (BadMatrixFormat, ERR_BadMatrix);

@@ -27,6 +27,12 @@
 extern const char* volatile_section_name;
 static const char* MIN_SEQ_LEN_DEFAULT = "50"; // 50 bases. Could require overwriting for protein and SW searches
 static const char* MAX_SEQ_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
+static const char* MAX_QRY_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
+static const char* MERGE_DOMAINS_DEFAULT = FALSE_STR;
+static const char* MERGE_REPEATS_DEFAULT = FALSE_STR;
+static const char* MAX_DOM_OVL_DEFAULT = "20";
+static const char* MAX_REP_ORP_DEFAULT = "30";
+static const char* GAP_CAP_DEFAULT = "4.0";
 static const char* RES_PER_QUERY_DEFAULT = "500";
 static const char* PRINT_ALIGNS_DEFAULT = "50";
 static const char* OUT_MODE_DEFAULT = "TEXT";
@@ -41,6 +47,12 @@ static const char* OUTPUT_NAME_DEFAULT = EMPTY_STR;
 
 static const char* MIN_SEQ_LEN_HELP = "Minimal length of input sequence (skip shorter ones)";
 static const char* MAX_SEQ_LEN_HELP = "Maximal length of input sequence (skip longer ones)";
+static const char* MAX_QRY_LEN_HELP = "Maximal length of input sequence (skip longer ones)";
+static const char* MERGE_DOMAINS_HELP = "Merge distant non-overlapping similarities for a sequence pair";
+static const char* MERGE_REPEATS_HELP = "Select only one best representative per group of repeatitive similarities";
+static const char* MAX_DOM_OVL_HELP = "Maximum overlap of merged domains";
+static const char* MAX_REP_ORP_HELP = "Maximum orphan for reduced repeats";
+static const char* GAP_CAP_HELP = "Gap cost limiting factor for long-range similarity merge: multiplier for gap initiaition cost";
 static const char* RES_PER_QUERY_HELP = "Number of best matches to keep per query";
 static const char* PRINT_ALIGNS_HELP = "Number of alignments to print in the report";
 static const char* OUT_MODE_HELP = "Output mode. Valid modes are TEXT, TAB, TABX, M8, M9";
@@ -55,6 +67,7 @@ static const char* OUTPUT_NAME_HELP = "Results file name";
 
 const char* PRE_FILTERS_SECTNAME = "PRE_FILTERS";
 const char* SEARCH_OUTPUT_SECTNAME = "SEARCH_OUTPUT";
+const char* SIM_MERGE_SECTNAME = "SIM_MERGE";
 
 
 Search_params::Search_params (const char* header, const char* procname, const char* version)
@@ -68,22 +81,28 @@ static const char* loqend   []     = {"qend", NULL};
 static const char* lotbeg   []     = {"tbeg", NULL};
 static const char* lotend   []     = {"tend", NULL};
 static const char* lomxlen  []     = {"maxslen", NULL};
+static const char* lomxqlen []     = {"maxqlen", NULL};
 static const char* lomnlen  []     = {"minslen", NULL};
 static const char* lorespq  []     = {"rpq", "res_per_qry", NULL};
 static const char* lopral   []     = {"apq", "print_align", NULL};
 static const char* looutmode[]     = {"om", "omode", "outmode", NULL};
 static const char* loappend []     = {"ap", "append", NULL};
+static const char* lomdom   []     = {"md", "mdom", NULL};
+static const char* lomrep   []     = {"mr", "mrep", NULL};
+static const char* lodovl   []     = {"do", "dovl", NULL};
+static const char* lororp   []     = {"ro", "rorp", NULL};
+static const char* logcap   []     = {"gc", "gcap", NULL};
 
 void Search_params::add_cmdline_trg_bounds ()
 {
-    keys_format_.push_back (KeyFormat ("", lotbeg,    "tbeg",    PRE_FILTERS_SECTNAME,  "T_BEG",               true, true, INTEGER_STR, t_beg_default (),      t_beg_help ()));
-    keys_format_.push_back (KeyFormat ("", lotend,    "tend",    PRE_FILTERS_SECTNAME,  "T_END",               true, true, INTEGER_STR, t_end_default (),      t_end_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lotbeg,    "tbeg",    PRE_FILTERS_SECTNAME,  "T_BEG",               true, true, INTEGER_STR, t_beg_default (),      t_beg_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lotend,    "tend",    PRE_FILTERS_SECTNAME,  "T_END",               true, true, INTEGER_STR, t_end_default (),      t_end_help ()));
 }
 
 void Search_params::add_cmdline_qry_bounds ()
 {
-    keys_format_.push_back (KeyFormat ("", loqbeg,    "qbeg",    PRE_FILTERS_SECTNAME,  "Q_BEG",               true, true, INTEGER_STR, q_beg_default (),      q_beg_help ()));
-    keys_format_.push_back (KeyFormat ("", loqend,    "qend",    PRE_FILTERS_SECTNAME,  "Q_END",               true, true, INTEGER_STR, q_end_default (),      q_end_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, loqbeg,    "qbeg",    PRE_FILTERS_SECTNAME,  "Q_BEG",               true, true, INTEGER_STR, q_beg_default (),      q_beg_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, loqend,    "qend",    PRE_FILTERS_SECTNAME,  "Q_END",               true, true, INTEGER_STR, q_end_default (),      q_end_help ()));
 }
 void Search_params::add_cmdline_set_bounds ()
 {
@@ -92,8 +111,13 @@ void Search_params::add_cmdline_set_bounds ()
 }
 void Search_params::add_cmdline_seqlen_cutoffs ()
 {
-    keys_format_.push_back (KeyFormat ("", lomxlen,   "maxslen",  PRE_FILTERS_SECTNAME,  "MAX_SEQ_LEN",            true, true, INTEGER_STR, max_seq_len_default (),max_seq_len_help ()));
-    keys_format_.push_back (KeyFormat ("", lomnlen,   "minslen",  PRE_FILTERS_SECTNAME,  "MIN_SEQ_LEN",            true, true, INTEGER_STR, min_seq_len_default (),min_seq_len_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lomxlen,   "maxslen",  PRE_FILTERS_SECTNAME,  "MAX_SEQ_LEN",            true, true, INTEGER_STR, max_seq_len_default (),max_seq_len_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lomnlen,   "minslen",  PRE_FILTERS_SECTNAME,  "MIN_SEQ_LEN",            true, true, INTEGER_STR, min_seq_len_default (),min_seq_len_help ()));
+    add_cmdline_qrylen_cutoffs ();
+}
+void Search_params::add_cmdline_qrylen_cutoffs ()
+{
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lomxqlen,  "maxqlen",  PRE_FILTERS_SECTNAME,  "MAX_QRY_LEN",            true, true, INTEGER_STR, max_qry_len_default (),max_qry_len_help ()));
 }
 void Search_params::add_cmdline_args ()
 {
@@ -107,13 +131,21 @@ void Search_params::add_cmdline_append_control ()
 }
 void Search_params::add_cmdline_dbout_control ()
 {
-    keys_format_.push_back (KeyFormat ("", looutmode,   "outmode",       SEARCH_OUTPUT_SECTNAME,  "OUT_MODE",           true, true, STRING_STR, out_mode_default (), out_mode_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, looutmode,   "outmode",       SEARCH_OUTPUT_SECTNAME,  "OUT_MODE",           true, true, STRING_STR, out_mode_default (), out_mode_help ()));
 }
 void Search_params::add_cmdline_res_filters ()
 {
-    keys_format_.push_back (KeyFormat ("", lorespq,   "res_per_qry",  SEARCH_OUTPUT_SECTNAME,  "RES_PER_QUERY",    true, true, INTEGER_STR, res_per_query_default (), res_per_query_help ()));
-    keys_format_.push_back (KeyFormat ("", lopral,    "print_aligns", SEARCH_OUTPUT_SECTNAME,  "PRINT_ALIGNS",     true, true, INTEGER_STR, print_aligns_default (), print_aligns_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lorespq,   "res_per_qry",  SEARCH_OUTPUT_SECTNAME,  "RES_PER_QUERY",    true, true, INTEGER_STR, res_per_query_default (), res_per_query_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lopral,    "print_aligns", SEARCH_OUTPUT_SECTNAME,  "PRINT_ALIGNS",     true, true, INTEGER_STR, print_aligns_default (), print_aligns_help ()));
 
+}
+void Search_params::add_cmdline_merge ()
+{
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lomdom,  "mergedom",       SIM_MERGE_SECTNAME,  "MERGE_DOM",      true, false, BOOLEAN_STR, inverse_bs (merge_domains_default ()), merge_domains_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lomrep,  "mergerep",       SIM_MERGE_SECTNAME,  "MERGE_REP",      true, false, BOOLEAN_STR, inverse_bs (merge_repeats_default ()), merge_repeats_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lodovl,  "domovl",         SIM_MERGE_SECTNAME,  "MAX_DOM_OVL",    true, true,  INTEGER_STR, max_dom_ovl_default (), max_dom_ovl_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lororp,  "reporp",         SIM_MERGE_SECTNAME,  "MAX_REP_ORP",    true, true,  INTEGER_STR, max_rep_orp_default (), max_rep_orp_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, logcap,  "gapcap",         SIM_MERGE_SECTNAME,  "GAP_CAP",        true, false, FLOAT_STR,   gap_cap_default (), gap_cap_help ()));
 }
 
 bool Search_params::prepareCmdlineFormat ()
@@ -123,6 +155,7 @@ bool Search_params::prepareCmdlineFormat ()
     {
         add_cmdline_set_bounds ();
         add_cmdline_seqlen_cutoffs ();
+        add_cmdline_merge ();
         add_cmdline_append_control ();
         add_cmdline_dbout_control ();
         add_cmdline_res_filters ();
@@ -156,10 +189,19 @@ void Search_params::add_parameters_set_bounds ()
 }
 void Search_params::add_parameters_seqlen_cutoffs ()
 {
+    add_parameters_qrylen_cutoffs ();
     Parameter_descr PRE_SCAN_FILTERS_SECTION [] =
     {
         {"MAX_SEQ_LEN", INTEGER_STR, max_seq_len_default (), max_seq_len_help ()},
         {"MIN_SEQ_LEN", INTEGER_STR, min_seq_len_default (), min_seq_len_help ()},
+    };
+    parameters_->addSection (PRE_FILTERS_SECTNAME,         "Pre-scan filters",             PRE_SCAN_FILTERS_SECTION,   sizeof (PRE_SCAN_FILTERS_SECTION) / sizeof (Parameter_descr));
+}
+void Search_params::add_parameters_qrylen_cutoffs ()
+{
+    Parameter_descr PRE_SCAN_FILTERS_SECTION [] =
+    {
+        {"MAX_QRY_LEN", INTEGER_STR, max_qry_len_default (), max_qry_len_help ()},
     };
     parameters_->addSection (PRE_FILTERS_SECTNAME,         "Pre-scan filters",             PRE_SCAN_FILTERS_SECTION,   sizeof (PRE_SCAN_FILTERS_SECTION) / sizeof (Parameter_descr));
 }
@@ -188,6 +230,18 @@ void Search_params::add_parameters_res_filters ()
     };
     parameters_->addSection (SEARCH_OUTPUT_SECTNAME, "Search output parameters", SEARCH_OUTPUT_SECTION, sizeof (SEARCH_OUTPUT_SECTION) / sizeof (Parameter_descr));
 }
+void Search_params::add_parameters_merge ()
+{
+    Parameter_descr SIM_MERGE_SECTION [] =
+    {
+        {"MERGE_DOM",   BOOLEAN_STR,  merge_domains_default (), merge_domains_help ()},
+        {"MERGE_REP",   BOOLEAN_STR,  merge_repeats_default (), merge_repeats_help ()},
+        {"MAX_DOM_OVL", INTEGER_STR,  max_dom_ovl_default (), max_dom_ovl_help ()},
+        {"MAX_REP_ORP", INTEGER_STR,  max_rep_orp_default (), max_rep_orp_help ()},
+        {"GAP_CAP",     FLOAT_STR,    gap_cap_default (), gap_cap_help ()},
+    };
+    parameters_->addSection (SIM_MERGE_SECTNAME, "Search output parameters", SIM_MERGE_SECTION, sizeof (SIM_MERGE_SECTION) / sizeof (Parameter_descr));
+}
 void Search_params::add_parameters_args ()
 {
     Parameter_descr ARGUMENTS_SECTION [] =
@@ -208,6 +262,7 @@ bool Search_params::prepareParameters ()
         add_parameters_seqlen_cutoffs ();
         add_parameters_append_control ();
         add_parameters_dbout_control ();
+        add_parameters_merge ();
         add_parameters_res_filters ();
         add_parameters_args ();
     }
@@ -218,11 +273,17 @@ bool Search_params::interpreteParameters ()
 {
     if (!Process_params::interpreteParameters ()) return false;
     max_seq_len (parameters_->getInteger (PRE_FILTERS_SECTNAME, "MAX_SEQ_LEN"));
+    max_qry_len (parameters_->getInteger (PRE_FILTERS_SECTNAME, "MAX_QRY_LEN"));
     min_seq_len (parameters_->getInteger (PRE_FILTERS_SECTNAME, "MIN_SEQ_LEN"));
     q_beg (parameters_->getInteger (PRE_FILTERS_SECTNAME, "Q_BEG"));
     q_end (parameters_->getInteger (PRE_FILTERS_SECTNAME, "Q_END"));
     t_beg (parameters_->getInteger (PRE_FILTERS_SECTNAME, "T_BEG"));
     t_end (parameters_->getInteger (PRE_FILTERS_SECTNAME, "T_END"));
+    merge_domains  (parameters_->getBoolean (SIM_MERGE_SECTNAME, "MERGE_DOM"));
+    merge_repeats  (parameters_->getBoolean (SIM_MERGE_SECTNAME, "MERGE_REP"));
+    max_dom_ovl    (parameters_->getInteger (SIM_MERGE_SECTNAME, "MAX_DOM_OVL"));
+    max_rep_orp    (parameters_->getInteger (SIM_MERGE_SECTNAME, "MAX_REP_ORP"));
+    gap_cap        (parameters_->getFloat (SIM_MERGE_SECTNAME, "GAP_CAP"));
     res_per_query  (parameters_->getInteger (SEARCH_OUTPUT_SECTNAME, "RES_PER_QUERY"));
     print_aligns   (parameters_->getInteger (SEARCH_OUTPUT_SECTNAME, "PRINT_ALIGNS"));
 
@@ -251,6 +312,11 @@ const char* Search_params::max_seq_len_default () const
     return MAX_SEQ_LEN_DEFAULT;
 }
 
+const char* Search_params::max_qry_len_default () const
+{
+    return MAX_QRY_LEN_DEFAULT;
+}
+
 const char* Search_params::min_seq_len_default () const
 {
     return MIN_SEQ_LEN_DEFAULT;
@@ -274,6 +340,31 @@ const char* Search_params::out_mode_default () const
 const char* Search_params::append_default () const
 {
     return APPEND_DEFAULT;
+}
+
+const char* Search_params::merge_domains_default () const
+{
+    return MERGE_DOMAINS_DEFAULT;
+}
+
+const char* Search_params::merge_repeats_default () const
+{
+    return MERGE_REPEATS_DEFAULT;
+}
+
+const char* Search_params::max_dom_ovl_default () const
+{
+    return MAX_DOM_OVL_DEFAULT;
+}
+
+const char* Search_params::max_rep_orp_default () const
+{
+    return MAX_REP_ORP_DEFAULT;
+}
+
+const char* Search_params::gap_cap_default () const
+{
+    return GAP_CAP_DEFAULT;
 }
 
 const char* Search_params::query_name_default () const
@@ -318,6 +409,11 @@ const char* Search_params::max_seq_len_help () const
     return MAX_SEQ_LEN_HELP;
 }
 
+const char* Search_params::max_qry_len_help () const
+{
+    return MAX_QRY_LEN_HELP;
+}
+
 const char* Search_params::min_seq_len_help () const
 {
     return MIN_SEQ_LEN_HELP;
@@ -341,6 +437,31 @@ const char* Search_params::out_mode_help () const
 const char* Search_params::append_help () const
 {
     return APPEND_HELP;
+}
+
+const char* Search_params::merge_domains_help () const
+{
+    return MERGE_DOMAINS_HELP;
+}
+
+const char* Search_params::merge_repeats_help () const
+{
+    return MERGE_REPEATS_HELP;
+}
+
+const char* Search_params::gap_cap_help () const
+{
+    return GAP_CAP_HELP;
+}
+
+const char* Search_params::max_dom_ovl_help () const
+{
+    return MAX_DOM_OVL_HELP;
+}
+
+const char* Search_params::max_rep_orp_help () const
+{
+    return MAX_REP_ORP_HELP;
 }
 
 const char* Search_params::query_name_help () const

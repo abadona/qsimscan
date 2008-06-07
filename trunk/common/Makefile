@@ -43,6 +43,7 @@ OBJS = \
 ParametersSection.o \
 common_errors.o \
 fileutils.o \
+transitive_closure.o \
 misc_utils.o \
 platform.o \
 rerror.o \
@@ -56,9 +57,12 @@ process_thread.o \
 align.o \
 align_result.o \
 align_result_storage.o \
+merging_result_storage.o \
 biosequence.o \
 blast_results.o \
 blast_results_batch.o \
+seg_align.o \
+sim_merger.o \
 fasta.o \
 filters.o \
 kt_srch_gx.o \

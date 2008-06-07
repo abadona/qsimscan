@@ -1,13 +1,35 @@
+
+//////////////////////////////////////////////////////////////////////////////
+// This software module is developed by SCIDM team in 1999-2008.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+//////////////////////////////////////////////////////////////////////////////
+
 #pragma warning (disable: 4786)
 #include <platform.h>
 #include "blast_results_batch.h"
 #include "align.h"
 #include "filters.h"
 
+SimMergerBase  BlastResultsBatch :: null_merger_;
 
-BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int rep_len, int rep_perc, bool triangle_only)
+BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int rep_len, int rep_perc, bool triangle_only, SimMergerBase& merger)
 :
-AlignResultStorage (keep_per_query),
+MergingResultStorage (merger, keep_per_query),
 rep_percent_ (rep_perc),
 rep_len_ (rep_len),
 total_found_ (0),
@@ -51,5 +73,5 @@ bool BlastResultsBatch :: match_found  (NN_SEQ& xseq, NN_SEQ& yseq, BATCH* batch
     passed_repeats_ ++;
 
     // save the result
-    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) nscore, matches, chi2score, 0, 0, tot_blen, tot_blen, batch_no, batches);
+    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) matches - (int) (tot_blen - matches), matches, chi2score, 0, nscore, tot_blen, tot_blen, batch_no, batches);
 }

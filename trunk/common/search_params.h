@@ -38,10 +38,17 @@ public:
 
     int  max_seq_len_;
     int  min_seq_len_;
+    int  max_qry_len_;
     int  q_beg_;
     int  q_end_;
     int  t_beg_;
     int  t_end_;
+
+    bool merge_domains_;
+    bool merge_repeats_;
+    int  max_dom_ovl_;
+    int  max_rep_orp_;
+    float gap_cap_;
 
     OUT_MODE out_mode_;
     bool append_;
@@ -58,18 +65,22 @@ protected:
     virtual void add_cmdline_qry_bounds ();
     virtual void add_cmdline_set_bounds ();
     virtual void add_cmdline_seqlen_cutoffs ();
+    virtual void add_cmdline_qrylen_cutoffs ();
     virtual void add_cmdline_append_control ();
     virtual void add_cmdline_dbout_control ();
     virtual void add_cmdline_res_filters ();
+    virtual void add_cmdline_merge ();
     virtual void add_cmdline_args ();
 
     virtual void add_parameters_trg_bounds ();
     virtual void add_parameters_qry_bounds ();
     virtual void add_parameters_set_bounds ();
     virtual void add_parameters_seqlen_cutoffs ();
+    virtual void add_parameters_qrylen_cutoffs ();
     virtual void add_parameters_append_control ();
     virtual void add_parameters_dbout_control ();
     virtual void add_parameters_res_filters ();
+    virtual void add_parameters_merge ();
     virtual void add_parameters_args ();
 
 
@@ -82,6 +93,12 @@ public:
 
     int  min_seq_len () const {return min_seq_len_;}
     int  max_seq_len () const {return max_seq_len_;}
+    int  max_qry_len () const {return max_qry_len_;}
+    bool merge_domains () const {return merge_domains_;}
+    bool merge_repeats () const {return merge_repeats_;}
+    int  max_dom_ovl () const {return max_dom_ovl_;}
+    int  max_rep_orp () const {return max_rep_orp_;}
+    float gap_cap () const {return gap_cap_;}
     int  res_per_query () const {return res_per_query_;}
     int  print_aligns () const {return print_aligns_;}
     OUT_MODE out_mode () const {return out_mode_;}
@@ -96,6 +113,12 @@ public:
 
     void min_seq_len (int opt) {min_seq_len_ = opt;}
     void max_seq_len (int opt) {max_seq_len_ = opt;}
+    void max_qry_len (int opt) {max_qry_len_ = opt;}
+    void merge_domains (bool opt) {merge_domains_ = opt;}
+    void merge_repeats (bool opt) {merge_repeats_ = opt;}
+    void max_dom_ovl (int opt) {max_dom_ovl_ = opt;}
+    void max_rep_orp (int opt) {max_rep_orp_ = opt;}
+    void gap_cap (float opt) {gap_cap_ = opt;}
     void res_per_query (int opt) {res_per_query_ = opt;}
     void print_aligns (int opt) {print_aligns_ = opt;}
     void out_mode (OUT_MODE opt) {out_mode_ = opt;}
@@ -110,6 +133,12 @@ public:
 
     virtual const char* min_seq_len_default () const;
     virtual const char* max_seq_len_default () const;
+    virtual const char* max_qry_len_default () const;
+    virtual const char* merge_domains_default () const;
+    virtual const char* merge_repeats_default () const;
+    virtual const char* max_dom_ovl_default () const;
+    virtual const char* max_rep_orp_default () const;
+    virtual const char* gap_cap_default () const;
     virtual const char* res_per_query_default () const;
     virtual const char* print_aligns_default () const;
     virtual const char* out_mode_default () const;
@@ -124,6 +153,12 @@ public:
 
     virtual const char* min_seq_len_help () const;
     virtual const char* max_seq_len_help () const;
+    virtual const char* max_qry_len_help () const;
+    virtual const char* merge_domains_help () const;
+    virtual const char* merge_repeats_help () const;
+    virtual const char* max_dom_ovl_help () const;
+    virtual const char* max_rep_orp_help () const;
+    virtual const char* gap_cap_help () const;
     virtual const char* res_per_query_help () const;
     virtual const char* print_aligns_help () const;
     virtual const char* out_mode_help () const;
