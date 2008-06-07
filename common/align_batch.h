@@ -29,6 +29,13 @@ struct BATCH
     unsigned xpos;
     unsigned ypos;
     unsigned len;
+    BATCH () : xpos ((unsigned) 0), ypos ((unsigned) 0), len ((unsigned) 0) {}
+    BATCH (unsigned x, unsigned y, unsigned l) : xpos (x), ypos (y), len (l) {}
+    bool intersects (const BATCH& other) const
+    {
+        // same diagonal and beg1 < end2 and beg2 < end1
+        return ((int) ypos - (int) xpos == int (other.ypos) - int (other.xpos)) && (xpos < other.xpos + other.len) && (other.xpos < xpos + len);
+    }
 };
 #pragma pack (pop)
 

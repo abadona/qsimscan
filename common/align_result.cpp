@@ -43,37 +43,14 @@ batch_no_ (batch_no)
     std::copy (batches, batches + batch_no, (BATCH*) batches_);
 }
 
-AlignResult::AlignResult ()
-:
-uid_ (0),
-reverse_ (false),
-al_score_ (0.0),
-score_ (0),
-chi2_ (0.0),
-evalue_ (0.0),
-bitscore_ (0.0),
-q_auto_score_ (0),
-t_auto_score_ (0),
-batch_no_ (0)
-{
-}
 
-bool AlignResult::operator < (const AlignResult& other) const
+bool AlignResult::intersects (const AlignResult& other) const
 {
-    if (al_score_ < other.al_score_) return true;
-    if (al_score_ > other.al_score_) return false;
-    if (evalue_ < other.evalue_) return true;
-    if (evalue_ > other.evalue_) return false;
-    if (chi2_ < other.chi2_) return true;
+    for (int b1 = 0; b1 != batch_no_; b1 ++)
+        for (int b2 = 0; b2 != other.batch_no_; b2++)
+            if (batches_ [b1].intersects (other.batches_ [b2]))
+                return true;
     return false;
 }
-bool AlignResult::operator == (const AlignResult& other) const
-{
-    return (al_score_ == other.al_score_ &&
-            evalue_ == other.evalue_ &&
-            chi2_ == other.chi2_);
-
-}
-
 
 

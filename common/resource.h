@@ -176,22 +176,22 @@ public:
     {
         return ptr_;
     }
-    ValueType& operator [] (unsigned idx)
-    {
-        return ptr_ [idx];
-    }
-    ValueType& operator [] (int idx)
-    {
-        return ptr_ [(unsigned) idx];
-    }
-    ValueType operator [] (unsigned idx) const
-    {
-        return ptr_ [idx];
-    }
-    ValueType operator [] (int idx) const
-    {
-        return ptr_ [(unsigned) idx];
-    }
+//    ValueType& operator [] (unsigned idx)
+//    {
+//        return ptr_ [idx];
+//    }
+//    ValueType& operator [] (int idx)
+//    {
+//        return ptr_ [(unsigned) idx];
+//    }
+//    ValueType operator [] (unsigned idx) const
+//    {
+//        return ptr_ [idx];
+//    }
+//    ValueType operator [] (int idx) const
+//    {
+//        return ptr_ [(unsigned) idx];
+//    }
     operator ValueType* ()
     {
         return ptr_;

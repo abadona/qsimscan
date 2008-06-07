@@ -22,10 +22,39 @@
 #ifndef __SCIMINMAX_H__
 #define __SCIMINMAX_H__
 
-#include <algorithm>
+#ifndef _MSC_VER
 
-#define max_(a,b) std::max (a, b)
-#define min_(a,b) std::min (a, b)
+	#include <algorithm>
+	#define max_(a,b) std::max (a, b)
+	#define min_(a,b) std::min (a, b)
+
+#else
+
+	#ifndef max_
+		template <typename T>
+		inline const T&
+		max_ (const T& a, const T& b)
+		{
+			if (a < b)
+				return b;
+			else
+				return a;
+		}
+	#endif
+
+	#ifndef min_
+		template <typename T>
+		inline const T&
+		min_ (const T& a, const T& b)
+		{
+			if (a < b)
+				return a;
+			else
+				return b;
+		}
+	#endif
+
+#endif
 
 #if 0
 

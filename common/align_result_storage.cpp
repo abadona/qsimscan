@@ -65,6 +65,26 @@ bool AlignResultStorage :: add_result (longlong query_id, longlong search_id, bo
     return true;
 }
 
+bool AlignResultStorage :: add_result (longlong query_id, AlignResult& r)
+{
+    // if this is a first result for given y, expand the queue to desired size
+    ResultQueue* q;
+
+    ResultSet::iterator itr = heads_.find (query_id);
+    if (itr == heads_.end ())
+    {
+        q = &(heads_ [query_id]);
+        q->setCapacity (max_per_query_);
+    }
+    else
+        q = &(itr->second);
+
+    // add to heap. This will call default assignment operator that will transfer batches array ownership to the object in queue.
+    if (q->push (r))
+        total_stored_ ++;
+    return true;
+}
+
 unsigned AlignResultStorage :: resPerQuery (longlong query_id)
 {
     ResultSet::iterator itr = heads_.find (query_id);
@@ -118,3 +138,4 @@ bool AlignResultStorage :: reset ()
     total_stored_ = 0;
     return true;
 }
+

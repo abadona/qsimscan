@@ -30,8 +30,9 @@
 #include <kt_srch_gx.h>
 #include <i64out.h>
 #include <iomanip>
+#include <sim_merger.h>
 
-const char* VERSION = "0.9 (May 2008)";
+const char* VERSION = "0.93 (June 2008)";
 
 Process* process_factory ()
 {
@@ -167,7 +168,8 @@ bool Nsimscan::prepare_searcher ()
     wm_ = new WMatrix (int (p_->sim_level () * 100), p_->gip (), p_->gep ());
 
     // do we need score threshold here?
-    results_ = new BlastResultsBatch (p_->res_per_query (), p_->rep_len (), int (p_->rep_percent ()));
+    sim_merger_ = new SimMerger (true, p_->merge_repeats (), p_->merge_domains (), *wm_, p_->gip (), p_->gep (), p_->gap_cap ()*p_->gip (), p_->max_dom_ovl (), p_->max_rep_orp ());
+    results_ = new BlastResultsBatch (p_->res_per_query (), p_->rep_len (), int (p_->rep_percent ()), false, *sim_merger_);
 
     // create the searcher
     int total_queries_count = query_set_length_ * (p_->search_reverse () ? 2 : 1);
@@ -272,12 +274,16 @@ bool Nsimscan::search_next ()
 
 bool Nsimscan::write_results ()
 {
-    total (1);
-    current (0);
+    results_->flush ();
+    if (resno_ != results_->totalStored ())
+        res_no (resno_ = results_->totalStored ());
 
     out_file_.open (p_->output_name ());
     if (!out_file_.is_open ())
         ers << "Unable to open output file " << p_->output_name () << Throw;
+
+    total (1);
+    current (resno_);
 
     switch (p_->out_mode ())
     {

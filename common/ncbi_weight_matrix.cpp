@@ -26,7 +26,9 @@
 #include "ncbi_weight_matrix.h"
 
 const char* ERR_BadMatrix = "Bad weight matrix format";
+#ifndef _MSC_VER
 const int STD_PROT_MATRIX_SIZE = 24;
+#endif
 
 const unsigned BUFSZ = 2048;
 

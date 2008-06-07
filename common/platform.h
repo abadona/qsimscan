@@ -44,7 +44,11 @@ typedef unsigned char BYTE;
 typedef char SBYTE;
 typedef unsigned short WORD;
 typedef short SWORD;
+#ifndef _MSC_VER
 typedef unsigned int DWORD;
+#else
+typedef unsigned long DWORD;
+#endif
 typedef int SDWORD;
 typedef ulonglong QWORD;
 typedef longlong SQWORD;

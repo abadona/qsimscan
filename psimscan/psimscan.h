@@ -29,6 +29,7 @@
 #include <search_helper_files.h>
 #include <weights.h>
 #include "psimscan_params.h"
+#include <sim_merger_base.h>
 
 #define MAX_SEARCH_NUM 64
 
@@ -63,6 +64,7 @@ class Psimscan : public Process
     ulonglong searched_aas_;
 
     ObjWrapper <WMatrix> wm_;
+    ObjWrapper <SimMergerBase> sim_merger_;
     ObjWrapper <PblastResults> results_;
     ObjWrapper <PKTSCAN> searcher_;
 

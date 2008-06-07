@@ -29,6 +29,8 @@
 #include <search_helper_files.h>
 #include <weights.h>
 #include "nsimscan_params.h"
+#include <sim_merger_base.h>
+
 
 #define MAX_SEARCH_NUM 64
 
@@ -67,6 +69,7 @@ class Nsimscan : public Process
     MemWrapper <int> k_distr_;
 
     ObjWrapper <WMatrix> wm_;
+    ObjWrapper <SimMergerBase> sim_merger_;
     ObjWrapper <BlastResultsBatch> results_;
     ObjWrapper <KT_SEARCH> searcher_;
 

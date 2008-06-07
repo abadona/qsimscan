@@ -139,6 +139,15 @@ const char* NUCL_GC_ASSOC_NAME = "tax_nuclear_gencode";
 const char* MITO_GC_ASSOC_NAME = "tax_mitochondrial_gencode";
 const char* CHLO_GC_ASSOC_NAME = "tax_chloroplast_gencode";
 
+const char* SYSTEM_TYPE_CLASSIF_NAME = "System_Type";
+const char* SYSTEM_TYPE_CLASSIF_DESC = "Classification for global constant object classes";
+
+const char* NUCL_GC_CLASS_NAME = NUCL_GC_ASSOC_NAME;
+const char* MITO_GC_CLASS_NAME = MITO_GC_ASSOC_NAME;
+const char* CHLO_GC_CLASS_NAME = CHLO_GC_ASSOC_NAME;
+
+const char* SEQ_SIM_CLUSTERING_NAME = "SEQ_SIM_CLUSTERING";
+const char* SEQ_MAP_CLUSTERING_NAME = "SEQ_HITMAP_CLUSTERING";
 
 #include <string.h>
 #include <portability.h>
