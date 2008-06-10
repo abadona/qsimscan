@@ -35,9 +35,9 @@
 #define MAX_TUPLE_SIZE 5 // 7,962,624 tuples
 #define DEFAULT_DIVERSITY 0.82
 #define DEFAULT_TUPLE_WEIGHT 100
-#define MAX_HITS  100000 // maximum number of hits per target sequence
+#define MAX_HITS  400000 // maximum number of hits per target sequence
 #define MAX_BATCH 10000
-#define MAX_BAND 500000
+#define MAX_BAND 1000000
 //#define MAX_MAX_SHIFT 100 // maximum diagonal deviation supported
 
 #define DEFAULT_MAX_SHIFT 4     // gap size accounted for in intial scan
