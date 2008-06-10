@@ -132,8 +132,11 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
     // replace batches and adjust batch_no for head sim (last iterated)
     // adjust scores
 
+    int iniidx = idx;
+
     // optimization for singlet - no need to merge
-    if (trace [idx].idx_ == -1 || processed [trace [idx].idx_])
+    // if (trace [idx].idx_ == -1 || processed [trace [idx].idx_])
+    if (trace [iniidx].idx_ == -1 || processed [trace [iniidx].idx_])
         return;
 
     // merge all batches from merged sims;
@@ -157,7 +160,9 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
             while ((nbp->xpos >= fb.xpos) ||
                     (nbp->ypos >= fb.ypos))
                 nbp --; // no check for getting below batch array start - relying upon prior compatibility check
-            assert (nbp >= sims [idx].batches_); // just in case prior compatibility is not working ...
+            if (nbp < sims [idx].batches_)
+                ERR (ERR_Internal);
+            // assert (nbp >= sims [idx].batches_); // just in case prior compatibility is not working ...
             int xd = max_ (0, (int) (nbp->xpos + nbp->len) - (int) fb.xpos);
             int yd = max_ (0, (int) (nbp->ypos + nbp->len) - (int) fb.ypos);
             int adj = max_ (xd, yd);

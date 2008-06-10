@@ -132,16 +132,23 @@ inline bool AlignResult::overlaps (const AlignResult& other, unsigned max_orphan
 
 inline bool AlignResult::can_continue (const AlignResult& other, unsigned max_ovl, bool& runoff) const
 {
+    const BATCH& fb1 = other.batches_ [0];
     const BATCH& lb1 = other.batches_ [other.batch_no_ - 1];
     const BATCH& fb2 = batches_ [0];
+
+    // check if 1 can preceed 2
     if (lb1.xpos > fb2.xpos + max_ovl)
     {
         runoff = true;
         return false;
     }
     else runoff = false;
+    if (fb1.xpos >= fb2.xpos) // 1 starts after 2 - cannot preceed
+        return false;
     if (lb1.xpos + lb1.len > fb2.xpos + max_ovl)
         return false; // prev ends too far by X (x overlap too long)
+    if (fb1.ypos >= fb2.ypos) // 1 starts after 2 - cannot preceed
+        return false;
     if (lb1.ypos + lb1.len > fb2.ypos + max_ovl)
         return false; // prev ends too far by Y (y overlap too long)
     return true;
