@@ -49,7 +49,7 @@ public:
         int vv = b1.xpos - b2.xpos;
         if (vv < 0) return true;
         if (vv > 0) return false;
-        return b1.ypos - b2.ypos;
+        return b1.ypos < b2.ypos;
     }
 };
 
