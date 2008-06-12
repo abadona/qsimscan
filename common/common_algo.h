@@ -32,17 +32,17 @@ void remove_positions (std::vector < Element > & target, OrderedPosItr beg, Orde
     int orig_pos = 0, new_pos = 0, tot = target.size ();
     while (orig_pos != tot)
     {
-        // advance orig_pos to next not-removed position
-        while ((beg != end) && (orig_pos == *beg))
-            orig_pos++, beg++;
-        if (orig_pos == tot)
-            break;
-        // if orig_pos has passed new_pos, copy
-        if (new_pos != orig_pos)
-            target [new_pos] = target [orig_pos];
-        // advance both new and orig pos
+        if ((beg != end) && (orig_pos == *beg))
+            // if matches item from removal indexes, skip
+            beg ++;
+        else
+        {
+            // otherwise, copy (if positions differ)
+            if (new_pos != orig_pos)
+                target [new_pos] = target [orig_pos];
+            new_pos ++;
+        }
         orig_pos ++;
-        new_pos ++;
     }
     // shrink container if needed
     if (new_pos != orig_pos)
@@ -57,17 +57,13 @@ void remove_mask (std::vector < Element > & target, BoolVect& mask)
     int orig_pos = 0, new_pos = 0, tot = target.size ();
     while (orig_pos != tot)
     {
-        // advance orig_pos to next not-removed position
-        while (mask [orig_pos])
-            orig_pos++;
-        if (orig_pos == tot)
-            break;
-        // if orig_pos has passed new_pos, copy
-        if (new_pos != orig_pos)
-            target [new_pos] = target [orig_pos];
-        // advance both new and orig pos
+        if (!mask [orig_pos])
+        {
+            if (new_pos != orig_pos)
+                target [new_pos] = target [orig_pos];
+            new_pos ++;
+        }
         orig_pos ++;
-        new_pos ++;
     }
     // shrink container if needed
     if (new_pos != orig_pos)
