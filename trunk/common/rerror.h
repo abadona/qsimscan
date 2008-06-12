@@ -42,10 +42,10 @@ friend class ErrorStream;
 class Throw__
 {
 public:
-    char* fname_;
+    const char* fname_;
     int lno_;
     Rerror exception_;
-    Throw__ (Rerror exception, char* fname = NULL, int lno = 0)
+    Throw__ (Rerror exception, const char* fname = NULL, int lno = 0)
     :
     exception_ (exception),
     fname_ (fname),
