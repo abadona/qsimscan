@@ -22,6 +22,8 @@
 #include "p_kt_scan.h"
 #include <rerror.h>
 #include <sciminmax.h>
+#include <transitive_closure.h>
+#include <common_algo.h>
 
 #include <assert.h>
 
@@ -44,90 +46,59 @@ void skip__ (const char* fmt, ...)
 
 #define check_consistency(x) if (!(x)) ers << "Internal:" << ERRINFO << Throw;
 
-
 void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx)
 {
     DIAGONAL_ENTRY *cd;
     int didx;
 
-    if (toMerge->leftmost_ < leftmost_)
-    {
-        for (didx = toMerge->leftmost_; didx < leftmost_; didx ++)
-        {
-            cd = diags + didx;
-            if (cd->band_ != -1 && cd->band_ != band_idx)
-            {
-                cd->score_ = 0;
-                cd->band_ = band_idx;
-            }
-        }
+    leftmost_ = min_ (leftmost_, toMerge->leftmost_);
+    rightmost_ = max_ (rightmost_, toMerge->rightmost_);
+    min_off_ = min_ (min_off_, toMerge->min_off_);
+    max_off_ = max_ (max_off_, toMerge->max_off_);
 
-        min_off_ = min_ (toMerge->min_off_, min_off_ + (leftmost_ - toMerge->leftmost_) / 2);
-        leftmost_ = toMerge->leftmost_;
-    }
-    else
+    for (didx = toMerge->leftmost_; didx < leftmost_; didx ++)
     {
-        min_off_ = min_ (min_off_, toMerge->min_off_ + (toMerge->leftmost_ - leftmost_) / 2);
+        cd = diags + didx;
+        if (cd->band_ != -1 && cd->band_ != band_idx)
+            cd->band_ = band_idx;
     }
 
-    if (toMerge->rightmost_ < rightmost_)
+    for (didx = rightmost_ + 1; didx <= toMerge->rightmost_; didx ++)
     {
-        max_off_ = max_ (max_off_, toMerge->max_off_ - (rightmost_ - toMerge->rightmost_ + 1) / 2);
-    }
-    else
-    {
-        for (didx = rightmost_ + 1; didx <= toMerge->rightmost_; didx ++)
-        {
-            cd = diags + didx;
-            if (cd->band_ != -1 && cd->band_ != band_idx)
-            {
-                cd->score_ = 0;
-                cd->band_ = band_idx;
-            }
-        }
-
-        max_off_ = max_ (toMerge->max_off_, max_off_ - (toMerge->rightmost_ - rightmost_ + 1) / 2);
-        rightmost_ = toMerge->rightmost_;
+        cd = diags + didx;
+        if (cd->band_ != -1 && cd->band_ != band_idx)
+            cd->band_ = band_idx;
     }
 
-    //if (max_off_ + (rightmost_ - leftmost_) <= min_off_)
-    //    __asm nop;
-
-    toMerge->skip_ = 1;
+    toMerge->skip_ = true;
 }
 
 void BAND::add (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx)
 {
-    DIAGONAL_ENTRY* cd;
     if (leftmost_ > diag_idx)
     {
-        min_off_ = min_ (offset - diag_idx, min_off_ + (leftmost_ - diag_idx) / 2);
         leftmost_ = diag_idx;
-        cd = diags + diag_idx;
-        // cd->score_ = 0;
-        cd->band_ = band_idx;
+        (diags + diag_idx)->band_ = band_idx;
     }
-    else
-    {
-        min_off_ = min_ (min_off_, offset - diag_idx + (diag_idx - leftmost_) / 2);
-    }
+    min_off_ = min_ (min_off_, offset - diag_idx);
 
     if (rightmost_ < diag_idx)
     {
-        max_off_ = max_ (offset - diag_idx + tuple_size, max_off_ - (diag_idx - rightmost_ + 1) / 2);
         rightmost_ = diag_idx;
-        cd = diags + diag_idx;
-        // cd->score_ = 0;
-        cd->band_ = band_idx;
+        (diags + diag_idx)->band_ = band_idx;
     }
-    else
-    {
-        max_off_ = max_ (max_off_, offset - diag_idx + tuple_size - (rightmost_ - diag_idx + 1) / 2);
-    }
-    //if (max_off_ + (rightmost_ - leftmost_) <= min_off_)
-    //    __asm nop;
+    max_off_ = max_ (max_off_, offset - diag_idx + tuple_size);
 }
 
+bool BAND::overlaps (BAND* other, int widen, int extend)
+{
+    // non_ovl: e1 < b2 || e2 < b1
+    if (rightmost_ + widen < other->leftmost_ || other->rightmost_ + widen < leftmost_)
+        return false;
+    if (max_off_ - rightmost_ + extend < other->min_off_ - other->rightmost_ || other->max_off_ - other->rightmost_ + extend < min_off_ - leftmost_)
+        return false;
+    return true;
+}
 
 int calc_tuple_index (char* tuple, int tuple_size, int alphabet_size = ALPHABET_SIZE)
 {
@@ -168,14 +139,17 @@ void calc_tuple_auto_scores (short* scores, int tuple_idx, int tuple_size, WMatr
 }
 
 
-PKTSCAN::PKTSCAN (WMatrix* w, ResultReciever_pblast* res, int tuple_size, int max_queries, int max_tot_queries_len, int max_target_len)
+PKTSCAN::PKTSCAN (WMatrix* w, ResultReciever_pblast* res, int tuple_size, int max_queries, int max_tot_queries_len, int max_target_len, int max_band, int max_hit, int max_batch)
 :
 weight_matrix_ (w),
 results_ (res),
 tuple_size_ (tuple_size),
 max_queries_ (max_queries),
 max_tot_queries_len_ (max_tot_queries_len),
-max_target_len_ (max_target_len)
+max_target_len_ (max_target_len),
+max_band_ (max_band),
+max_hit_ (max_hit),
+max_batch_ (max_batch)
 {
     // init allocatable ptrs
     diags_ = NULL;
@@ -243,15 +217,15 @@ void PKTSCAN::init_vars ()
     memset (diags_, 0xff, sizeof (DIAGONAL_ENTRY) * (max_target_len_ + max_tot_queries_len_));
 
     // init batches array
-    batches_ = new BATCH [MAX_BATCH];
+    batches_ = new BATCH [max_batch_];
     if (!batches_) ers << "unable to allocate batches array" << Throw;
 
     // init bands array
-    bands_ = new BAND [MAX_BAND];
+    bands_ = new BAND [max_band_];
     if (!bands_) ers << "unable to allocate bands array" << Throw;
 
     // init hits array
-    hits_ = new int  [MAX_HITS];
+    hits_ = new int  [max_hit_];
     if (!hits_) ers <<  "unable to allocate hits array" << Throw;
 
     aligner_ = NULL;
@@ -618,6 +592,8 @@ void PKTSCAN::init_search ()
 
     target_ord_ = 0;
 
+    extension_ = max_ (0, int ((diag_threshold_/ave_self_match_)*extend_factor_));
+
 #ifdef DEBUG_NEG_START
     std::cerr << "init_search" << std::endl;
     std::cerr << "    tupe_size: " << tuple_size_ << std::endl;
@@ -724,6 +700,7 @@ void PKTSCAN::diag_scanner ()
     DIAGONAL_ENTRY* best_adj_diag;
     double adj_diag_score;
     double best_adj_diag_score;
+    double new_score;
     //DIAGONAL_ENTRY* all_adj_diags [MAX_MAX_SHIFT*2];
     //int adj_diags_count;
 
@@ -756,10 +733,12 @@ void PKTSCAN::diag_scanner ()
     // reset hits
     hits_count_ = 0;
 
+    // the flag indicating that pre-allocated resource reached the limit; causes skip of further processing
+    bool over_limit = false;
 
     // for every position from 0 to (target_len_ - tuple_size_)
     int last_pos = target_len_ - tuple_size_;
-    for (int target_pos = 0; target_pos < last_pos; target_pos ++, target_seq ++)
+    for (int target_pos = 0; (target_pos < last_pos) && !over_limit; target_pos ++, target_seq ++)
     {
         // make the tuple index
         cur_tuple_idx = calc_tuple_index (target_seq, tuple_size_);
@@ -778,38 +757,28 @@ void PKTSCAN::diag_scanner ()
             diag_idx = offset - target_pos;
             cur_diag = diags + diag_idx;
             cur_match_score = *cur_entry->scores_;
+            score = cur_match_score;
 
             // find the band
-            cur_band = NULL, need_new_band = true;
+            cur_band = NULL;
 
-            // if diag belongs to band for current sequence pair - make those band current
+            // if diag belongs to band for current sequence pair
             cur_band_idx = cur_diag->band_;
             if (cur_band_idx != -1  && (cur_diag->target_idx_ == target_ord) && ((bands + cur_band_idx)->query_idx_ == query_idx))
-                cur_band = bands_ + cur_band_idx, need_new_band = false;
-
-            // calc current score on diagonal
-            if (!need_new_band)
             {
-                dist = offset - tuple_size - cur_diag->offset_; // distance from prev hit on this diagonal
+                dist = offset - cur_diag->offset_; // distance from prev hit on this diagonal
 
                 if (dist < 0) // if overlaps with prev k-tuple match - add suffix score
+                {
                     score = cur_diag->score_ + cur_entry->scores_ [-dist];
+                    cur_band = bands + cur_band_idx;
+                }
                 else // if does not overlap with prev k-tuple match - penalize offset (by average mismatch score). Can not go lower then current match score.
                 {
-                    score = double (cur_match_score + cur_diag->score_) + ave_mismatch * dist * distance_factor;
-                    if (score < cur_match_score) // start new band
-                        need_new_band = true; // keep cur_band here - not null cur_band means continuity on the diagonal lost
+                    new_score = double (cur_match_score + cur_diag->score_) + ave_mismatch * dist * distance_factor;
+                    if (new_score >= cur_match_score) // start new band
+                        score = new_score, cur_band = bands + cur_band_idx;
                 }
-            }
-
-            if (need_new_band)
-            {
-                // re-init diagonal
-                cur_diag->init ();
-                cur_diag->target_idx_ = target_ord;
-                // score might change
-                score = max_ (0, cur_match_score);
-                // band will be determined after adjacent diags check
             }
 
             //look at previous matches on adjacent diagonals, pick the best score
@@ -831,7 +800,7 @@ void PKTSCAN::diag_scanner ()
 
                         if ((test_band->query_idx_ == query_idx) && (adj_diag->target_idx_ == target_ord))
                         {
-                            dist = offset - adj_diag->offset_ - tuple_size;
+                            dist = offset - adj_diag->offset_;
                             if (dist <= -tuple_size)
                                 adj_diag_score = adj_diag->score_ - penalty;
                             else if (dist < 0)
@@ -860,7 +829,7 @@ void PKTSCAN::diag_scanner ()
 
                         if ((test_band->query_idx_ == query_idx) && (adj_diag->target_idx_ == target_ord))
                         {
-                            dist = offset - shift - adj_diag->offset_ - tuple_size;
+                            dist = offset - shift - adj_diag->offset_;
                             if (dist <= -tuple_size)
                                 adj_diag_score = adj_diag->score_ - penalty;
                             else if (dist < 0)
@@ -877,45 +846,45 @@ void PKTSCAN::diag_scanner ()
                     }
                 }
             }
+
             if (best_adj_diag)
             {
                 adj_band = bands_ + best_adj_diag->band_;
-                if (cur_band && !need_new_band && best_adj_diag->band_ != cur_band_idx)
-                {
+                if (cur_band && best_adj_diag->band_ != cur_band_idx)
                     // merge bands if there is continuity on diag (see above)
                     adj_band->merge (cur_band, diags, best_adj_diag->band_);
-                }
 
                 cur_band = adj_band;
-                cur_diag->score_ = score;
                 score = best_adj_diag_score;
-                need_new_band = false;
             }
-            else
-                cur_diag->score_ = score;
 
-            cur_diag->offset_ = offset;
+            cur_diag->target_idx_ = target_ord;
+            cur_diag->score_ = score;
+            cur_diag->offset_ = offset + tuple_size;
 
-            if (need_new_band)
+            if (!cur_band)
             {
                 // allocate new band; init it
-                if (bands_count == MAX_BAND)
-                    ers << "too many bands per target" << Throw;
-                cur_band = bands + bands_count;
+                if (bands_count == max_band_)
+                {
+                    std::cerr << "WARNING: Too many bands detected per target. Extra bands will be ignored. You may want to increase MAX_BAND." << ERRINFO << std::endl;
+                    over_limit = true;
+                    break;
+                    // ers << "too many bands per target" << Throw;
+                }
+                else
+                {
+                    cur_diag->band_ = bands_count;
+                    cur_band = bands + bands_count ++;
 
-                // cur_band->start_diag_ = diag_idx;
-                cur_band->skip_ = 0;
-
-                cur_band->min_off_ = offset - diag_idx;
-                cur_band->query_idx_ = query_idx;
-                cur_band->rightmost_ = diag_idx;
-                cur_band->leftmost_ = diag_idx;
-                cur_band->max_off_ = cur_band->min_off_ + tuple_size;
-                cur_band->best_score_ = 0;
-
-                cur_diag->band_ = bands_count;
-
-                bands_count ++;
+                    cur_band->query_idx_ = query_idx;
+                    cur_band->rightmost_ = diag_idx;
+                    cur_band->leftmost_ = diag_idx;
+                    cur_band->min_off_ = offset - diag_idx;
+                    cur_band->max_off_ = cur_band->min_off_ + tuple_size;
+                    cur_band->best_score_ = 0;
+                    cur_band->skip_ = false;
+                }
             }
             else
             {
@@ -925,23 +894,67 @@ void PKTSCAN::diag_scanner ()
 
             if (cur_band->best_score_ < diag_threshold && score >= diag_threshold)
             {
-                if (hits_count_ > MAX_HITS)
-                    ers << "Too many hits per target" << Throw;
-
-                hits_ [hits_count_ ++] = cur_band - bands_;
+                if (hits_count_ == max_hit_)
+                {
+                    // ers << "Too many hits per target" << Throw;
+                    std::cerr << "WARNING: Too many hits detected per target. Extra hits will be ignored. You may want to increase MAX_HIT." << ERRINFO << std::endl;
+                    over_limit = true;
+                    break;
+                }
+                else
+                    hits_ [hits_count_ ++] = cur_band - bands_;
             }
-            cur_band->best_score_ = max_ (score, cur_band->best_score_);
+            cur_band->best_score_ = max_ (cur_band->best_score_, score);
         }
     }
 
-    // if (hits_count_) printf ("target %d, %d hits found\n", target_ord, hits_count_);
-    // collect bands belonging to same queries
+    if (!hits_count_)
+        return;
 
-    // now walk the good_diags and flush them;
+    int real_hits_count = 0;
     for (int hit_idx = 0; hit_idx < hits_count_; hit_idx ++)
     {
         cur_band = bands_ + hits_ [hit_idx];
-        if (cur_band->skip_ == 0)
+        if (!cur_band->skip_)
+            real_hits_count ++;
+    }
+
+    if (real_hits_count > 1)
+    {
+        // make transitive closure
+
+        Closure closure (hits_count_);
+        // add all pairs that could be merged
+        for (unsigned i1 = 0; i1 < hits_count_; i1 ++)
+        {
+            BAND* band1 = bands + *(hits_ + i1);
+            if (band1->skip_) continue;
+            for (unsigned i2 = 0; i2 < i1; i2 ++)
+            {
+                BAND* band2 = bands + *(hits_ + i2);
+                if (band2->skip_)
+                    continue;
+                if (compatible (band1, band2))
+                    closure.add (i2, i1);
+            }
+        }
+        closure.finalize ();
+        Clusters clusters;
+        closure.fillClusters (clusters, true);
+        // now merge content of each cluster into first member, marking other members as 'skipped'
+        for (Clusters::iterator clitr = clusters.begin (); clitr != clusters.end (); clitr ++)
+        {
+            if (bands_ [clitr->front ()].skip_)
+                continue;
+            merge_cluster (*clitr);
+        }
+    }
+
+    // now walk the hits and flush good ones them;
+    for (int hit_idx = 0; hit_idx < hits_count_; hit_idx ++)
+    {
+        cur_band = bands_ + hits_ [hit_idx];
+        if (!cur_band->skip_)
             batch_assembler (cur_band);
     }
 }
@@ -1003,9 +1016,8 @@ void PKTSCAN::batch_assembler (BAND* band)
     width += widen_factor_;
 
     // extend start by average undetectible length
-    int extension = max_ (0, int ((diag_threshold_/ave_self_match_)*extend_factor_));
     // clip by seq start
-    int ext_down = min_ (extension, query_pos);
+    int ext_down = min_ (extension_, query_pos);
     ext_down = min_ (ext_down, target_pos);
 
     // extend
@@ -1013,7 +1025,7 @@ void PKTSCAN::batch_assembler (BAND* band)
     target_pos -= ext_down;
 
     // extend to the end by tuple_size and clip len if needed
-    len += 2*extension + tuple_size_;
+    len += 2*extension_ + tuple_size_;
 
     // clip by sequence boundary
     if (query_pos + len > query_seq->len) len = query_seq->len - query_pos;
@@ -1027,7 +1039,7 @@ void PKTSCAN::batch_assembler (BAND* band)
 
     int score_a = aligner_->align_band (*query_seq, *target_, query_pos, target_pos, len, width);
 
-    int batch_no = aligner_->backtrace (batches_, MAX_BATCH);
+    int batch_no = aligner_->backtrace (batches_, max_batch_);
 
     check_consistency (batch_no > 0);
     check_consistency (batches_->xpos >= 0);
@@ -1042,9 +1054,68 @@ void PKTSCAN::batch_assembler (BAND* band)
     check_consistency (query->len_ >= lastb->xpos + lastb->len);
     check_consistency (target_->len >= lastb->ypos + lastb->len);
 
-    double recalc_score = p_score (query_seq->seq, target_->seq, batches_, batch_no, weight_matrix_, &query_auto, &target_auto);
+    p_score (query_seq->seq, target_->seq, batches_, batch_no, weight_matrix_, &query_auto, &target_auto);
 
     results_->match_found (*query_seq, *target_, batches_, batch_no, score_a, query_auto, target_auto);
 
+}
+
+bool PKTSCAN::compatible (BAND* band1, BAND* band2)
+{
+    // checks if close enough:
+    if (band1->query_idx_ != band2->query_idx_)
+        return false;
+
+    if (band1->overlaps (band2, widen_factor_, extension_))
+        return true;
+    // gap cost for distance between bands should be less then any band score
+    // make sure ban2 is after band1 diagonal-wise
+    if (band2->rightmost_ < band1->leftmost_)
+        { BAND* t = band2; band2 = band1; band1 = t; }
+    int hd = 0, vd = 0;
+    if (band1->max_off_ < band2->min_off_)
+    {
+        hd = band2->min_off_ - band1->max_off_;
+        vd = max_ (0, hd - (band1->rightmost_ - band2->leftmost_));
+    }
+    else if (band1->min_off_ > band2->max_off_)
+    {
+        hd = band1->min_off_ - band2->max_off_;
+        vd = max_ (0, hd + band1->rightmost_ - band2->leftmost_);
+    }
+    else // overlap
+    {
+        vd = max_ (0, band1->rightmost_ - band2->leftmost_); // actually 0-bonding is not needed if these are non overlapping bands
+    }
+    double cost;
+    if (hd)
+        cost += weight_matrix_->gip + weight_matrix_->gep * hd;
+    if (vd)
+        cost += weight_matrix_->gip + weight_matrix_->gep * vd;
+
+    return cost <= min_ (band1->best_score_, band2->best_score_);
+}
+
+void PKTSCAN::merge_cluster (UIntVect& cluster)
+{
+    // merges content of each cluster into first member, marking other members as 'skipped'
+    UIntVect::iterator itr = cluster.begin ();
+    BAND* band = bands_ + *(hits_ + *itr);
+    int& rightmost = band->rightmost_;
+    int& leftmost = band->leftmost_;
+    int& min_off = band->min_off_;
+    int& max_off = band->max_off_;
+    double& score = band->best_score_;
+    itr ++;
+    for (; itr != cluster.end (); itr ++)
+    {
+        band = bands_ + *(hits_ + *itr);;
+        rightmost = max_ (band->rightmost_, rightmost);
+        leftmost = min_ (band->leftmost_, leftmost);
+        min_off = min_ (band->min_off_, min_off);
+        max_off = max_ (band->max_off_, max_off);
+        score += band->best_score_;
+        band->skip_ = true;
+    }
 }
 
