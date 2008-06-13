@@ -58,7 +58,7 @@ void Closure::add (unsigned idx1, unsigned idx2)
     if (stage_ != FILL)
         ERR("Internal - adding links to finalized closure");
     if (idx1 >= sz_ || idx2 >= sz_)
-        ERR("Internal - out-of bounds clusure access");
+        ERR("Internal - out-of bounds closure access");
 
     // walk the link chains starting from idx1 down to the end
     while (idx1 != closure_ [idx1])

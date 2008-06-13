@@ -26,6 +26,7 @@
 #include "biosequence.h"
 #include "align.h"
 #include "result_reciever_pblast.h"
+#include "common_typedefs.h"
 
 #define MAX_QUERIES_DEFAULT 5000
 #define MAX_TOTAL_QUERIES_LEN_DEFAULT 1000000 // 200 aa/seq
@@ -35,14 +36,14 @@
 #define MAX_TUPLE_SIZE 5 // 7,962,624 tuples
 #define DEFAULT_DIVERSITY 0.82
 #define DEFAULT_TUPLE_WEIGHT 100
-#define MAX_HITS  400000 // maximum number of hits per target sequence
-#define MAX_BATCH 10000
-#define MAX_BAND 1000000
+#define MAX_BAND_DEFAULT 2000000 // 2 mln bands == 64 Mb space.
+#define MAX_BATCH_DEFAULT 10000
+#define MAX_HIT_DEFAULT  400000 // maximum number of hits per target sequence
 //#define MAX_MAX_SHIFT 100 // maximum diagonal deviation supported
 
 #define DEFAULT_MAX_SHIFT 4     // gap size accounted for in intial scan
 #define DEFAULT_K_THRESH 20.0   // in self-correlation averages on the query sequence
-#define DEFAULT_EXTEND_FACTOR 2.0 // number of times to extend the band by average undetectible gap size
+#define DEFAULT_EXTEND_FACTOR 2.0 // number of tismes to extend the band by average undetectible gap size
 #define DEFAULT_WIDEN_FACTOR 3  // number of diagonals to widen the band before calling banded alignment
 #define DEFAULT_DIST_FACT 1.0 // multiplier for diagonal distance penalty
 
@@ -96,23 +97,20 @@ struct BAND
     // int start_diag_;    // the diagonal number where the band has started
 
     // flags
-    char skip_;         // this band has been joined to another; do not report it separate
-    char pad0;
-    char pad1;
-    char pad2;
-    int  pad3;
+    bool skip_;         // this band has been joined to another; do not report it separate
 
     int query_idx_;     // the query index for this band
 
-    int rightmost_;     // the rightnost hit in this band
-    int leftmost_;      // the leftmost hit in this band
-    int min_off_;
-    int max_off_;
+    int rightmost_;     // the righttmost diagonal of a hit in this band
+    int leftmost_;      // the leftmost diagonal of a hit in this band
+    int min_off_;       // minimal offset (along query axis) of a hit in a band in similarity matrix
+    int max_off_;       // maximal offset (along query axis) of a hit in a band in similarity matrix
 
     double best_score_;  // the maximal score achieved by this band
 
     void merge  (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx);
     void add    (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx);
+    bool overlaps (BAND* other, int widen, int extend);
 };
 
 struct SEQUENCE_INFO
@@ -127,8 +125,6 @@ struct SEQUENCE_INFO
 };
 
 #pragma pack (pop)
-
-typedef WEIGHTS <int, 24> WMatrix;
 
 // The prototype for the protein blast
 class PKTSCAN
@@ -177,17 +173,21 @@ class PKTSCAN
 
     double extend_factor_;
     unsigned int  widen_factor_;
+    int extension_;
 
     int target_ord_; // the ordinal number of currently processed target in this job
 
     SEQ* target_;
 
     BAND* bands_; // storage for bands
+    int max_band_;
     int* hits_;   // indexes of bands_ with scores over the threshold
+    int max_hit_;
     int hits_count_;
 
     // batch_assembler data
     BATCH* batches_;
+    int max_batch_;
     ALIGN* aligner_;
     ResultReciever_pblast* results_;
 
@@ -200,9 +200,19 @@ class PKTSCAN
 
     void diag_scanner ();
     void batch_assembler (BAND* band);
+    bool compatible (BAND* band1, BAND* band2);
+    void merge_cluster (UIntVect& cluster);
+
 
 public:
-    PKTSCAN (WMatrix* w, ResultReciever_pblast* res, int tuple_size = TUPLE_SIZE_DEFAULT, int max_queries = MAX_QUERIES_DEFAULT, int max_total_queries_len = MAX_TOTAL_QUERIES_LEN_DEFAULT, int max_target_len = MAX_TARGET_LEN_DEFAULT);
+    PKTSCAN (WMatrix* w, ResultReciever_pblast* res,
+            int tuple_size = TUPLE_SIZE_DEFAULT,
+            int max_queries = MAX_QUERIES_DEFAULT,
+            int max_total_queries_len = MAX_TOTAL_QUERIES_LEN_DEFAULT,
+            int max_target_len = MAX_TARGET_LEN_DEFAULT,
+            int max_bands = MAX_BAND_DEFAULT,
+            int max_hits = MAX_HIT_DEFAULT,
+            int max_batch = MAX_BATCH_DEFAULT);
     virtual ~PKTSCAN ();
 
     // void set_tuple_weights (int* tuple_weights = NULL);
