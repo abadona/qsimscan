@@ -682,16 +682,17 @@ bool Search_helper_files::output_results_m8_aa (AlignResultStorage& resrec, unsi
 
                 o <<  Query_id << TAB_STR <<
                       Subject_id << TAB_STR <<
-                      std::setprecision (2) << std::fixed << p_identity << TAB_STR <<
+                      std::setprecision (2) << std::fixed << std::noshowpoint << p_identity << TAB_STR <<
                       alignment_length << TAB_STR <<
                       mismatches << TAB_STR <<
                       gap_openings << TAB_STR <<
                       q_start+1 << TAB_STR <<
                       q_end << TAB_STR <<
                       s_start+1 << TAB_STR <<
-                      s_end << TAB_STR <<
-                      std::setprecision (2) << e_value << TAB_STR <<
-                      std::setprecision (2) << bit_score << std::endl;
+                      s_end << TAB_STR;
+                o.unsetf (std::ios::fixed | std::ios::scientific);
+                o <<  std::noshowpoint << std::setprecision (2) << e_value << TAB_STR <<
+                      std::setprecision (2) << std::fixed << std::noshowpoint << bit_score << std::endl;
             }
         }
     }
@@ -778,16 +779,17 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
 
                 o <<  Query_id << TAB_STR <<
                       Subject_id << TAB_STR <<
-                      std::setprecision (2) << std::fixed << p_identity << TAB_STR <<
+                      std::setprecision (2) << std::fixed << std::noshowpoint << p_identity << TAB_STR <<
                       alignment_length << TAB_STR <<
                       mismatches << TAB_STR <<
                       gap_openings << TAB_STR <<
                       q_start+1 << TAB_STR <<
                       q_end << TAB_STR <<
                       s_start+1 << TAB_STR <<
-                      s_end << TAB_STR <<
-                      std::setprecision (2) << e_value << TAB_STR <<
-                      std::setprecision (2) << bit_score << std::endl;
+                      s_end << TAB_STR;
+                o.unsetf (std::ios::fixed | std::ios::scientific);
+                o <<  std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
+                      std::setprecision (2) << std::fixed << std::noshowpoint << bit_score << std::endl;
             }
         }
     }
@@ -865,7 +867,7 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                 o <<
                     Query_id << TAB_STR <<
                     Subject_id << TAB_STR <<
-                    std::setprecision (2) << std::fixed << p_identity << TAB_STR <<
+                    std::setprecision (2) << std::fixed << std::noshowpoint << p_identity << TAB_STR <<
                     alignment_length << TAB_STR <<
                     mismatches << TAB_STR <<
                     gap_openings << TAB_STR <<
@@ -875,9 +877,10 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                     cur_query.len << TAB_STR <<
                     s_start << TAB_STR <<
                     s_end << TAB_STR <<
-                    cur_search.len << TAB_STR <<
-                    std::setprecision (2) << e_value << TAB_STR <<
-                    std::setprecision (2) << sw_score << TAB_STR <<
+                    cur_search.len << TAB_STR;
+                o.unsetf (std::ios::fixed | std::ios::scientific);
+                o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
+                    std::setprecision (2) << std::noshowpoint << std::fixed << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
                     cur_res->t_auto_score_ << std::endl;
             }
@@ -960,7 +963,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 o <<
                     Query_id << TAB_STR <<
                     Subject_id << TAB_STR <<
-                    std::setprecision (2) << std::fixed << p_identity << TAB_STR <<
+                    std::setprecision (2) << std::fixed << std::noshowpoint << p_identity << TAB_STR <<
                     alignment_length << TAB_STR <<
                     mismatches << TAB_STR <<
                     gap_openings << TAB_STR <<
@@ -970,9 +973,10 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                     fwd_qry.len << TAB_STR <<
                     s_start << TAB_STR <<
                     s_end << TAB_STR <<
-                    cur_search.len << TAB_STR <<
-                    std::setprecision (2) << e_value << TAB_STR <<
-                    std::setprecision (2) << sw_score << TAB_STR <<
+                    cur_search.len << TAB_STR;
+                o.unsetf (std::ios::fixed | std::ios::scientific);
+                o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
+                    std::setprecision (2) << std::fixed << std::noshowpoint << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
                     cur_res->t_auto_score_ << std::endl;
             }
