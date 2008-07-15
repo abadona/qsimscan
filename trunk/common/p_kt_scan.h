@@ -108,7 +108,7 @@ struct BAND
 
     double best_score_;  // the maximal score achieved by this band
 
-    void merge  (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx);
+    void merge  (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx);
     void add    (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx);
     bool overlaps (BAND* other, int widen, int extend);
 };
