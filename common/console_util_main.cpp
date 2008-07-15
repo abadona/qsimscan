@@ -128,9 +128,10 @@ int console_main (int argc, char* argv [])
 
 int main (int argc, char *argv[])
 {
+    int rv = -1;
     try
     {
-        return console_main (argc, argv);
+        rv = console_main (argc, argv);
     }
     catch (std::exception& e)
     {
@@ -146,5 +147,5 @@ int main (int argc, char *argv[])
         std::cerr << "Unhandled exception caught" << std::endl << std::flush;
     }
 #endif
-    return -1;
+    return rv;
 }

@@ -653,6 +653,8 @@ void ALIGN::align_y_loop (register ALIGN_VECT* ap_1, int* wp, int gip, int gep, 
 
 #ifdef DEBUG_TRACE
     std::cout << std::endl;
+    if (y > 0)
+        std::cout << std::setw (4 * y) << std::left << " ";
 #endif
 
     y += len - 1;
@@ -981,9 +983,9 @@ int ALIGN::align_band (SEQ& xseq, SEQ& yseq, int xpos, int ypos, int len, int wi
 
     //check if enough memory allocated for band alignment
     //and if batch variables are sane
-    if (yseq.len > max_ylen || (max_size > 0 && xseq.len * yseq.len > max_size))
+    if (yseq.len > max_ylen || (max_size > 0 && len * width > max_size))
     {
-        std::clog << std::endl << "align error: attempting to align sequences longer than declared, xlen = " << xseq.len << ", ylen = "  << yseq.len << std::endl << std::flush;
+        std::clog << std::endl << "align error: attempting to batch-align sequences longer than declared, ylen = " << yseq.len << ", len = "  << len << ", width = " << width << std::endl << std::flush;
         return 0;
     }
 
@@ -996,37 +998,40 @@ int ALIGN::align_band (SEQ& xseq, SEQ& yseq, int xpos, int ypos, int len, int wi
 
     //initialize left boundary
     //unpack Y sequence for faster processing
-    for (int i = 0; i < len; i++)
+    int ylast = min_ (yseq.len, yref + len + bstep);
+    for (int i = max_ (0, yref - width); i < ylast; i++)
     {
         ap_1[i].w = 0;
         // ap_1[i].h = - (int) (w->gip + w->gep);
         ap_1[i].h = 0;
-        ap_1[i].r = yseq.get_code (yref + i);
+        ap_1[i].r = yseq.get_code (i);
     }
 
     //find best local alignment, save backtrace pointers
-    max_w = 0, max_bp = btrmx, ypos = -width;
+    max_w = 0, max_bp = btrmx, ypos -= width;
 
     int y_start, y_end, y_len; //, y;
     int *mx_row;
     char *bp_start;
 
-
     while (len-- > 0)
     {
         //clip Y vector versus batch boundaries
         y_start = max_ (0, ypos);
-        y_end = min_ (inilen, ypos + bstep);
-        y_len = y_end - y_start;
+        y_end = min_ (yseq.len, ypos + bstep);
+        // y_end = min_ (y_end, yseq.len);
+        if (y_end > y_start)
+        {
+            y_len = y_end - y_start;
 
-        bp_start = bp + y_start - ypos;
-        mx_row = w->mx[xseq.get_code (xpos)];
+            bp_start = bp + y_start - ypos;
+            mx_row = w->mx[xseq.get_code (xpos)];
 
-        if (max_size)
-            align_y_loop (ap_1 + y_start, mx_row, gip, gep, bp_start, xpos, y_start + yref, y_len);
-        else
-            max_w = align_y_loop_so (ap_1 + y_start, mx_row, gip, gep, max_w, y_len);
-
+            if (max_size)
+                align_y_loop (ap_1 + y_start, mx_row, gip, gep, bp_start, xpos, y_start /* + yref*/, y_len);
+            else
+                max_w = align_y_loop_so (ap_1 + y_start, mx_row, gip, gep, max_w, y_len);
+        }
         xpos++, ypos++, bp += bstep;
     }
 
@@ -1049,7 +1054,7 @@ int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
     BATCH* b_start = b_ptr;
 
     //backtrace from highest score
-    while (x >= xref + xstep && y > yref)
+    while (x >= xref + xstep && y > yref && y > 0)
     {
         switch (state)
         {

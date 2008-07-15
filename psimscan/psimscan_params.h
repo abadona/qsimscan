@@ -121,6 +121,8 @@ public:
     virtual const char* min_len_default () const;
 
     virtual const char* max_seq_len_default () const; // overwrites Search_params one
+    virtual const char* min_seq_len_default () const; // overwrites Search_params one
+    virtual const char* max_qry_len_default () const; // overwrites Search_params one
 
     // helpers
 
@@ -143,8 +145,6 @@ public:
     virtual const char* eval_eval_help () const;
     virtual const char* min_score_help () const;
     virtual const char* min_len_help () const;
-
-    virtual const char* max_seq_len_help () const; // overwrites Search_params one
 
     virtual const char* query_name_help () const;
     virtual const char* search_name_help () const;
