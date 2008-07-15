@@ -46,7 +46,7 @@ void skip__ (const char* fmt, ...)
 
 #define check_consistency(x) if (!(x)) ers << "Internal:" << ERRINFO << Throw;
 
-void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx)
+void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx)
 {
     DIAGONAL_ENTRY *cd;
     int didx;
@@ -56,38 +56,24 @@ void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx)
     min_off_ = min_ (min_off_, toMerge->min_off_);
     max_off_ = max_ (max_off_, toMerge->max_off_);
 
-    for (didx = toMerge->leftmost_; didx < leftmost_; didx ++)
+    for (didx = leftmost_; didx <= rightmost_; didx ++)
     {
         cd = diags + didx;
-        if (cd->band_ != -1 && cd->band_ != band_idx)
+        if (cd->band_ == toMerge_idx)
             cd->band_ = band_idx;
     }
-
-    for (didx = rightmost_ + 1; didx <= toMerge->rightmost_; didx ++)
-    {
-        cd = diags + didx;
-        if (cd->band_ != -1 && cd->band_ != band_idx)
-            cd->band_ = band_idx;
-    }
-
+    if (toMerge->best_score_ > best_score_)
+        best_score_ = toMerge->best_score_;
     toMerge->skip_ = true;
 }
 
 void BAND::add (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx)
 {
-    if (leftmost_ > diag_idx)
-    {
-        leftmost_ = diag_idx;
-        (diags + diag_idx)->band_ = band_idx;
-    }
-    min_off_ = min_ (min_off_, offset - diag_idx);
-
-    if (rightmost_ < diag_idx)
-    {
-        rightmost_ = diag_idx;
-        (diags + diag_idx)->band_ = band_idx;
-    }
-    max_off_ = max_ (max_off_, offset - diag_idx + tuple_size);
+    leftmost_  = min_ (leftmost_, diag_idx);
+    rightmost_ = max_( rightmost_, diag_idx);
+    min_off_   = min_ (min_off_, offset);
+    max_off_   = max_ (max_off_, offset + tuple_size);
+    (diags + diag_idx)->band_ = band_idx;
 }
 
 bool BAND::overlaps (BAND* other, int widen, int extend)
@@ -95,7 +81,7 @@ bool BAND::overlaps (BAND* other, int widen, int extend)
     // non_ovl: e1 < b2 || e2 < b1
     if (rightmost_ + widen < other->leftmost_ || other->rightmost_ + widen < leftmost_)
         return false;
-    if (max_off_ - rightmost_ + extend < other->min_off_ - other->rightmost_ || other->max_off_ - other->rightmost_ + extend < min_off_ - leftmost_)
+    if (max_off_ + extend < other->min_off_ || other->max_off_ + extend < min_off_)
         return false;
     return true;
 }
@@ -851,8 +837,11 @@ void PKTSCAN::diag_scanner ()
             {
                 adj_band = bands_ + best_adj_diag->band_;
                 if (cur_band && best_adj_diag->band_ != cur_band_idx)
+                {
                     // merge bands if there is continuity on diag (see above)
-                    adj_band->merge (cur_band, diags, best_adj_diag->band_);
+                    // check_consistency (cur_band->best_score_ < diag_threshold || adj_band->best_score_ >= diag_threshold);
+                    adj_band->merge (cur_band, diags, best_adj_diag->band_, cur_band_idx);
+                }
 
                 cur_band = adj_band;
                 score = best_adj_diag_score;
@@ -880,8 +869,8 @@ void PKTSCAN::diag_scanner ()
                     cur_band->query_idx_ = query_idx;
                     cur_band->rightmost_ = diag_idx;
                     cur_band->leftmost_ = diag_idx;
-                    cur_band->min_off_ = offset - diag_idx;
-                    cur_band->max_off_ = cur_band->min_off_ + tuple_size;
+                    cur_band->min_off_ = offset;
+                    cur_band->max_off_ = offset + tuple_size;
                     cur_band->best_score_ = 0;
                     cur_band->skip_ = false;
                 }
@@ -889,6 +878,7 @@ void PKTSCAN::diag_scanner ()
             else
             {
                 // update band with the new match
+                check_consistency (!cur_band->skip_);
                 cur_band->add (diag_idx, offset, tuple_size, diags, cur_band - bands);
             }
 
@@ -1009,31 +999,27 @@ void PKTSCAN::batch_assembler (BAND* band)
     SEQ* query_seq = query->ref_;
 
     int half_width = (band->rightmost_ - band->leftmost_ + 1) / 2;
-    int query_pos = band->min_off_ + (band->leftmost_ - (query->start_ + max_target_len_));
-    int target_pos = band->min_off_ - half_width;
-    int len  = band->max_off_ + (band->rightmost_ - band->leftmost_) - band->min_off_;
+    // int query_pos = band->min_off_ + (band->leftmost_ - (query->start_ + max_target_len_));
+    int query_pos = band->min_off_ - (query->start_ + max_target_len_);
+    // int target_pos = band->min_off_ - half_width;
+    int target_pos = band->min_off_ - band->rightmost_ + half_width;
+    int len  = band->max_off_ - band->min_off_;
     int width = max_ (1, half_width);
     width += widen_factor_;
 
     // extend start by average undetectible length
     // clip by seq start
-    int ext_down = min_ (extension_, query_pos);
-    ext_down = min_ (ext_down, target_pos);
+    int down_ext = min_ (extension_, query_pos);
 
-    // extend
-    query_pos -= ext_down;
-    target_pos -= ext_down;
+    query_pos -= down_ext;
+    target_pos -= down_ext;
 
     // extend to the end by tuple_size and clip len if needed
     len += 2*extension_ + tuple_size_;
 
     // clip by sequence boundary
     if (query_pos + len > query_seq->len) len = query_seq->len - query_pos;
-    if (target_pos + len > target_->len) len = target_->len - target_pos;
-
-    if (query_pos < 0) len += query_pos, query_pos = 0;
-    if (target_pos < 0) len += target_pos, target_pos = 0;
-
+    // if (target_pos + len > target_->len) len = target_->len - target_pos;
 
     // int score_a = aligner_->align (*query_seq, *target_);
 
@@ -1052,7 +1038,7 @@ void PKTSCAN::batch_assembler (BAND* band)
     BATCH* lastb = batches_ + (batch_no-1);
 
     check_consistency (query->len_ >= lastb->xpos + lastb->len);
-    check_consistency (target_->len >= lastb->ypos + lastb->len);
+    //check_consistency (target_->len >= lastb->ypos + lastb->len);
 
     p_score (query_seq->seq, target_->seq, batches_, batch_no, weight_matrix_, &query_auto, &target_auto);
 

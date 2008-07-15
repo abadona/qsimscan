@@ -267,7 +267,7 @@ bool Nsimscan::search_next ()
     if (p_->t_end () == -1)
         current (sh_.current ());
     else
-        current (targets_searched_);
+        current (targets_searched_ + skipped_);
 
     return true;
 }

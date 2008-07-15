@@ -27,22 +27,25 @@ static const char* HEADER = "Tool for searching similarities in protein database
 
 // defaults
 
-static const char MAX_QUERIES_NUMBER_DEFAULT [] = "5000";
-static const char MAX_TOTAL_QUERIES_LEN_DEFAULT [] = "5000000";
-static const char MAX_TARGET_LEN_DEFAULT [] = "10000";
+static const char* MIN_SEQ_LEN_DEFAULT = "10";    // 10 aa.
+static const char* MAX_SEQ_LEN_DEFAULT = "50000"; // 50 Kaa.
+static const char* MAX_QRY_LEN_DEFAULT = "50000"; // 50 Kaa.
+
+static const char MAX_QUERIES_NUMBER_DEFAULT [] = "6000";
+static const char MAX_TOTAL_QUERIES_LEN_DEFAULT [] = "6000000";
 
 static const char K_SIZE_DEFAULT [] = "5";        // tuple size
-static const char APPROX_DEFAULT [] = "0.90";     // maximal diversification score - fraction of self-score
-static const char K_THRESH_DEFAULT [] = "30.0";   // initial hit threshold (in self-correlation averages)
-static const char MAX_SHIFT_DEFAULT [] = "4";     // maximum detectible gap size
+static const char APPROX_DEFAULT [] = "0.84";     // maximal diversification score - fraction of self-score
+static const char K_THRESH_DEFAULT [] = "18.0";   // initial hit threshold (in self-correlation averages)
+static const char MAX_SHIFT_DEFAULT [] = "3";     // maximum detectible gap size
 static const char KDISTR_NAME_DEFAULT [] = "";    // name for the object containing ktuple distribution. Unused for now
 static const char EXTEND_BAND_DEFAULT [] = "1.5"; // the multiplier for max. undetectible gap size for calculating band extension
 static const char WIDEN_BAND_DEFAULT [] = "3";    // the number of diagonals to the sides to leftmost and rightmost hits to check in band alignment
-static const char DIST_FACT_DEFAULT [] = "0.5";  // multiplier for inter-match distance cost
+static const char DIST_FACT_DEFAULT [] = "0.05";  // multiplier for inter-match distance cost
 
 static const char MATRIX_NAME_DEFAULT [] = "BLOSUM62";
-static const char GEP_DEFAULT [] = "0.2";         // in matrix averages
-static const char GIP_DEFAULT [] = "3.0";         // in matrix averages
+static const char GEP_DEFAULT [] = "0.3";         // in matrix averages
+static const char GIP_DEFAULT [] = "2.5";         // in matrix averages
 
 static const char RES_PER_QUERY_DEFAULT [] = "5000";
 static const char PRINT_ALIGNS_DEFAULT [] = "50";
@@ -58,7 +61,6 @@ static const char MIN_LEN_DEFAULT [] = "0";      // aminoacids
 
 static const char MAX_QUERIES_NUMBER_HELP [] = "Maximum expected number of queries in single search";
 static const char MAX_TOTAL_QUERIES_LEN_HELP [] = "Maximum expected sum of query sequence lengths";
-static const char MAX_TARGET_LEN_HELP [] = "Maximum expected lenght of the target sequence";
 
 static const char K_SIZE_HELP [] = "tuple size";
 static const char APPROX_HELP [] = "Maximum diversification (fraction of self-score)";
@@ -374,8 +376,6 @@ const char* Psimscan_params::min_len_help () const
     return MIN_LEN_HELP;
 }
 
-
-
 const char* Psimscan_params::query_name_help () const
 {
     return QUERY_NAME_HELP;
@@ -391,13 +391,18 @@ const char* Psimscan_params::output_name_help () const
     return OUTPUT_NAME_HELP;
 }
 
-const char* Psimscan_params::max_seq_len_default () const
+const char* Psimscan_params::min_seq_len_default () const
 {
-    return MAX_TARGET_LEN_DEFAULT;
+    return MIN_SEQ_LEN_DEFAULT;
 }
 
-const char* Psimscan_params::max_seq_len_help () const
+const char* Psimscan_params::max_seq_len_default () const
 {
-    return MAX_TARGET_LEN_HELP;
+    return MAX_SEQ_LEN_DEFAULT;
+}
+
+const char* Psimscan_params::max_qry_len_default () const
+{
+    return MAX_QRY_LEN_DEFAULT;
 }
 
