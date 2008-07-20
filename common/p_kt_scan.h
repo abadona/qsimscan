@@ -94,10 +94,11 @@ struct DIAGONAL_ENTRY
 
 struct BAND
 {
-    // int start_diag_;    // the diagonal number where the band has started
+    // int start_diag_; // the diagonal number where the band has started
 
     // flags
-    bool skip_;         // this band has been joined to another; do not report it separate
+    bool skip_ : 1;     // this band has been joined to another; do not report it separate
+    int  hit_idx_ : 31;  // if this band was recorded as a hit, the hit number - to keep track while merging
 
     int query_idx_;     // the query index for this band
 
@@ -108,7 +109,7 @@ struct BAND
 
     double best_score_;  // the maximal score achieved by this band
 
-    void merge  (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx);
+    void merge  (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx, int* hits);
     void add    (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx);
     bool overlaps (BAND* other, int widen, int extend);
 };

@@ -46,7 +46,7 @@ void skip__ (const char* fmt, ...)
 
 #define check_consistency(x) if (!(x)) ers << "Internal:" << ERRINFO << Throw;
 
-void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx)
+void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerge_idx, int* hits)
 {
     DIAGONAL_ENTRY *cd;
     int didx;
@@ -64,7 +64,14 @@ void BAND::merge (BAND* toMerge, DIAGONAL_ENTRY* diags, int band_idx, int toMerg
     }
     if (toMerge->best_score_ > best_score_)
         best_score_ = toMerge->best_score_;
-    toMerge->skip_ = true;
+    if (toMerge->hit_idx_ != -1 && hit_idx_ == -1)
+    {
+        hit_idx_ = toMerge->hit_idx_;
+        toMerge->hit_idx_ = -1;
+        hits [hit_idx_] = band_idx;
+    }
+    else
+        toMerge->skip_ = true;
 }
 
 void BAND::add (int diag_idx, int offset, int tuple_size, DIAGONAL_ENTRY* diags, int band_idx)
@@ -840,7 +847,7 @@ void PKTSCAN::diag_scanner ()
                 {
                     // merge bands if there is continuity on diag (see above)
                     // check_consistency (cur_band->best_score_ < diag_threshold || adj_band->best_score_ >= diag_threshold);
-                    adj_band->merge (cur_band, diags, best_adj_diag->band_, cur_band_idx);
+                    adj_band->merge (cur_band, diags, best_adj_diag->band_, cur_band_idx, hits_);
                 }
 
                 cur_band = adj_band;
@@ -873,6 +880,7 @@ void PKTSCAN::diag_scanner ()
                     cur_band->max_off_ = offset + tuple_size;
                     cur_band->best_score_ = 0;
                     cur_band->skip_ = false;
+                    cur_band->hit_idx_ = -1;
                 }
             }
             else
@@ -892,7 +900,10 @@ void PKTSCAN::diag_scanner ()
                     break;
                 }
                 else
+                {
+                    cur_band->hit_idx_ = hits_count_;
                     hits_ [hits_count_ ++] = cur_band - bands_;
+                }
             }
             cur_band->best_score_ = max_ (cur_band->best_score_, score);
         }
