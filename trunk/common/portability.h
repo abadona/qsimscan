@@ -43,6 +43,16 @@
 	#define sci_close close
 	#define sci_lseek lseek
 	#define sci_tell tell
+#elif defined (__MACOSX__)
+    #include <unistd.h>
+	#define sci_stat stat
+	#define sci_stat_struc stat
+	#define sci_open open
+	#define sci_read read
+	#define sci_write write
+	#define sci_close close
+	#define sci_lseek lseek
+	#define sci_tell tell
 #else // plain unix :)
     #include <unistd.h>
 	#define sci_stat stat64
