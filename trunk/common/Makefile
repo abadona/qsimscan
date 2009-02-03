@@ -25,7 +25,7 @@ CC=$(CCPATH)g++
 PIC := $(if $(filter $(shell uname -i),x86_64),-fPIC,)
 OPTLEVEL := $(if $(OPTLEVEL),$(OPTLEVEL),-O0)
 DEBUGLEVEL := $(if $(DEBUGLEVEL),$(DEBUGLEVEL),-g2)
-CPPFLAGS=$(PIC) $(DEBUGLEVEL) $(OPTLEVEL) -D__x86__
+CPPFLAGS=$(PIC) $(DEBUGLEVEL) $(OPTLEVEL) $(CFL) -D__x86__
 AR=ar
 ARFLAGS=rc
 
