@@ -26,6 +26,7 @@
 #include "cmdline_s.h"
 #include "rerror.h"
 #include "sciminmax.h"
+#include <string.h>
 
 KeyFormat::KeyFormat (const char* shortopts, const char** longopts, const char* name, const char* section, const char* parameter, bool optional, bool has_arg, const char* arg_type, const char* def_value, const char* description)
 :
@@ -432,7 +433,7 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
     if (strict && ok_ && arguments_.size () < min_arg_number)
     {
         // add the note to error_report
-        error_report_ += "Too few command-line arguments\n";
+        error_report_ += "Too few command-line arguments. Please use -h for help.\n";
         ok_ = false;
     }
 }

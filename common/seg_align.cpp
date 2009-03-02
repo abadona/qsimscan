@@ -26,6 +26,9 @@
 #include <deque>
 #include <assert.h>
 
+#include <iostream>
+#include <iomanip>
+
 SegAlign::SegAlign (WMatrix& wm, float gip, float gep, float gcap, int max_ovl)
 :
 wm_ (wm),

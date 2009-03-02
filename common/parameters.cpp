@@ -28,6 +28,7 @@
 #include <fstream>
 #include <ios>
 #include <string.h>
+#include <stdlib.h>
 #include "portability.h"
 
 static const int bufsz = 1024;

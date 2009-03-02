@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <set>
+#include <string>
 
 typedef std::vector <bool> BoolVect;
 typedef std::vector <int> IntVect;

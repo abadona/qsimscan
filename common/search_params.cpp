@@ -21,11 +21,12 @@
 
 #include "search_params.h"
 #include <acc_str.h>
+#include <string.h>
 
 #define __SEARCH_PARAMS_CPP__
 
 extern const char* volatile_section_name;
-static const char* MIN_SEQ_LEN_DEFAULT = "50"; // 50 bases. Could require overwriting for protein and SW searches
+static const char* MIN_SEQ_LEN_DEFAULT = "40"; // 40 bases. Could require overwriting for protein and SW searches
 static const char* MAX_SEQ_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
 static const char* MAX_QRY_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
 static const char* MERGE_DOMAINS_DEFAULT = FALSE_STR;
@@ -46,8 +47,8 @@ static const char* SEARCH_NAME_DEFAULT = EMPTY_STR;
 static const char* OUTPUT_NAME_DEFAULT = EMPTY_STR;
 
 static const char* MIN_SEQ_LEN_HELP = "Minimal length of input sequence (skip shorter ones)";
-static const char* MAX_SEQ_LEN_HELP = "Maximal length of input sequence (skip longer ones)";
-static const char* MAX_QRY_LEN_HELP = "Maximal length of input sequence (skip longer ones)";
+static const char* MAX_SEQ_LEN_HELP = "Maximal length of target sequence (skip longer ones)";
+static const char* MAX_QRY_LEN_HELP = "Maximal length of query sequence (skip longer ones)";
 static const char* MERGE_DOMAINS_HELP = "Merge distant non-overlapping similarities for a sequence pair";
 static const char* MERGE_REPEATS_HELP = "Select only one best representative per group of repeatitive similarities";
 static const char* MAX_DOM_OVL_HELP = "Maximum overlap of merged domains";
