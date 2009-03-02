@@ -22,12 +22,13 @@
 #ifndef __weights_h__
 #define __weights_h__
 
-#include <float.h>
 #include <sciminmax.h>
 #include <rerror.h>
 #include <string.h>
 #include "resource.h"
 #include "ncbi_weight_matrix.h"
+#include <float.h>
+#include <limits.h>
 
 #define DESCR_SZ 512
 
