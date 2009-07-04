@@ -68,6 +68,7 @@ public:
 	void close ();
 };
 
+#undef putc
 #define WRITE_BUF_SZ 1024*1024*4 // 4Mb
 class BufferedWriter
 {

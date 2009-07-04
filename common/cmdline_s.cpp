@@ -53,7 +53,7 @@ void par_check (const char* par, const char* optdef, bool& reg, bool& hasarg, ch
 	//printf ("Check par %s: ", par);
     if ((strlen (par) == 2) && (par [0] == '-') && (par [1] != ':'))
 	{
-        char* fc = strchr (optdef, par [1]);
+        char* fc = (char*) strchr (optdef, par [1]);
         if (fc
 			&& ((fc - optdef) + 1 < strlen (optdef))
 			&& (optdef [(fc - optdef) + 1] == ':'))
