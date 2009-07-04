@@ -32,6 +32,7 @@
 #include "portability.h"
 
 static const char file_not_open [] = "INTERNAL ERROR: Operating on unopen fasta file";
+static const int INIT_SEQ_LEN = 1000000; // 1M
 
 void FastaFile::reset ()
 {
@@ -91,8 +92,20 @@ void FastaFile::add_seq ()
     {
         if (!isspace (*p))
         {
-            if (seqlen_ == MAX_SEQ_LEN-1)
-                return;
+            if (seqlen_ == seq_buf_sz_)
+            {
+                // reallocate seqbuf_: increment space twice
+                unsigned new_sz = seq_buf_sz_ * 2;
+                char* newbuf = new char [new_sz + 1];
+                if (!newbuf)
+                {
+                    ers << "ERROR: Not enough memory to hold the sequence" << namebuf_ << Throw;
+                }
+                memcpy (newbuf, seqbuf_, seq_buf_sz_);
+                delete [] seqbuf_;
+                seqbuf_ = newbuf;
+                seq_buf_sz_ = new_sz;
+            }
             seqbuf_ [seqlen_] = *p;
             seqlen_ ++;
         }
@@ -104,8 +117,9 @@ FastaFile::FastaFile ()
 :
 f_ (NULL)
 {
-    seqbuf_ = new char [MAX_SEQ_LEN+1];
+    seqbuf_ = new char [INIT_SEQ_LEN+1];
     if (!seqbuf_) ers << "Memory error" << Throw;
+    seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
 }
 
@@ -113,8 +127,9 @@ FastaFile::FastaFile (const char* name)
 :
 f_ (NULL)
 {
-    seqbuf_ = new char [MAX_SEQ_LEN+1];
+    seqbuf_ = new char [INIT_SEQ_LEN+1];
     if (!seqbuf_) ers << "Memory error" << Throw;
+    seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
     if (!open (name))
     {
@@ -126,6 +141,7 @@ FastaFile::~FastaFile ()
 {
     close ();
     delete [] seqbuf_;
+    seq_buf_sz_ = 0;
 }
 
 bool FastaFile::open (const char* name)

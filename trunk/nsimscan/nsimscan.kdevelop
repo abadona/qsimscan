@@ -8,10 +8,25 @@
     <primarylanguage>C++</primarylanguage>
     <ignoreparts/>
     <projectname>nsimscan</projectname>
+    <projectdirectory>.</projectdirectory>
+    <absoluteprojectpath>false</absoluteprojectpath>
+    <description/>
+    <defaultencoding/>
   </general>
   <kdevcustomproject>
     <run>
       <directoryradio>executable</directoryradio>
+      <mainprogram>/home/denis/code/googlecode/qsimscan/nsimscan/nsimscan</mainprogram>
+      <programargs/>
+      <globaldebugarguments>--ov -v exsam.fa /mnt/data/data/genomics/genomes/ftp.ncbi.nih.gov/genomes/Bacteria/Escherichia_coli_K_12_substr__DH10B/NC_010473.fna ouou
+</globaldebugarguments>
+      <globalcwd>/home/denis/work/test_simscan/</globalcwd>
+      <useglobalprogram>false</useglobalprogram>
+      <terminal>true</terminal>
+      <autocompile>false</autocompile>
+      <autoinstall>false</autoinstall>
+      <autokdesu>false</autokdesu>
+      <envvars/>
     </run>
     <filetypes>
       <filetype>*.java</filetype>
@@ -30,11 +45,51 @@
       <filetype>CMakeLists.txt</filetype>
     </filetypes>
     <blacklist/>
+    <build>
+      <buildtool>make</buildtool>
+      <builddir/>
+    </build>
+    <other>
+      <prio>0</prio>
+      <otherbin/>
+      <defaulttarget/>
+      <otheroptions/>
+      <selectedenvironment>default</selectedenvironment>
+      <environments>
+        <default/>
+      </environments>
+    </other>
+    <make>
+      <abortonerror>false</abortonerror>
+      <numberofjobs>0</numberofjobs>
+      <prio>0</prio>
+      <dontact>false</dontact>
+      <makebin/>
+      <defaulttarget/>
+      <makeoptions/>
+      <selectedenvironment>default</selectedenvironment>
+      <environments>
+        <default/>
+      </environments>
+    </make>
   </kdevcustomproject>
   <kdevdebugger>
     <general>
       <dbgshell/>
+      <gdbpath/>
+      <configGdbScript/>
+      <runShellScript/>
+      <runGdbScript/>
+      <breakonloadinglibs>true</breakonloadinglibs>
+      <separatetty>true</separatetty>
+      <floatingtoolbar>true</floatingtoolbar>
+      <raiseGDBOnStart>false</raiseGDBOnStart>
     </general>
+    <display>
+      <staticmembers>true</staticmembers>
+      <demanglenames>true</demanglenames>
+      <outputradix>10</outputradix>
+    </display>
   </kdevdebugger>
   <kdevdoctreeview>
     <ignoretocs>
@@ -125,6 +180,19 @@
       <alwaysIncludeNamespaces>false</alwaysIncludeNamespaces>
       <includePaths>.;</includePaths>
     </codecompletion>
+    <creategettersetter>
+      <prefixGet/>
+      <prefixSet>set</prefixSet>
+      <prefixVariable>m_,_</prefixVariable>
+      <parameterName>theValue</parameterName>
+      <inlineGet>true</inlineGet>
+      <inlineSet>true</inlineSet>
+    </creategettersetter>
+    <splitheadersource>
+      <enabled>false</enabled>
+      <synchronize>true</synchronize>
+      <orientation>Vertical</orientation>
+    </splitheadersource>
   </kdevcppsupport>
   <kdevfileview>
     <groups>
@@ -136,4 +204,10 @@
       <hidenonprojectfiles>false</hidenonprojectfiles>
     </tree>
   </kdevfileview>
+  <cppsupportpart>
+    <filetemplates>
+      <interfacesuffix>.h</interfacesuffix>
+      <implementationsuffix>.cpp</implementationsuffix>
+    </filetemplates>
+  </cppsupportpart>
 </kdevelop>

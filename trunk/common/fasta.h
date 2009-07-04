@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include "platform.h"
 
-#define MAX_SEQ_LEN 100000000 // 100M
 #define MAX_HDR_LEN 8000
 #define MAX_NAME_LEN 80
 #define MAX_LINE_LEN 10000
@@ -40,6 +39,7 @@ class FastaFile
     unsigned cur_reclen_;
     unsigned seq_no_;
     char *seqbuf_;
+    unsigned seq_buf_sz_;
     unsigned seqlen_;
     char hdrbuf_  [MAX_HDR_LEN+1];
     char namebuf_ [MAX_NAME_LEN+1];

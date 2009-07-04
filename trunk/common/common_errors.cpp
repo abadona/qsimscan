@@ -30,6 +30,7 @@ const char* ERR_OutOfBounds = "Out of bounds error";
 
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
 #include "rerror.h"
 // Note that "common_errors.h" is nt included - rerror.h includes it at the end
 
