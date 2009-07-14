@@ -68,7 +68,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         mov		edi,	ap
 
         align 16
-loop_1:
+loop___1:
         mov		ebx,	wp            // ebx <- weights for current X symbol
         mov		edx,	[esi].r       // edx <- current 'residue'
         // add		eax,	[ebx+edx*8]   // eax += weight for current y | x pair
@@ -84,9 +84,9 @@ loop_1:
         cmovl	ebx,	eax
 
         cmp		ebx,	max_w
-        jle		no_upd
+        jle		no___upd
         mov		max_w, ebx
-no_upd:
+no___upd:
         mov		eax,	[edi]ap.w
         mov		[edi]ap.w, ebx
 
@@ -117,9 +117,9 @@ no_upd:
         cmovl	ebx,	eax
 
         cmp		ebx,	max_w
-        jle		no_upd_1
+        jle		no___upd_1
         mov		max_w, ebx
-no_upd_1:
+no___upd_1:
         mov		eax,	[edi]ap.w
         mov		[edi]ap.w, ebx
 
@@ -150,9 +150,9 @@ no_upd_1:
         cmovl	ebx,	eax
 
         cmp		ebx,	max_w
-        jle		no_upd_2
+        jle		no___upd_2
         mov		max_w, ebx
-no_upd_2:
+no___upd_2:
         mov		eax,	[edi]ap.w
         mov		[edi]ap.w, ebx
 
@@ -183,9 +183,9 @@ no_upd_2:
         cmovl	ebx,	eax
 
         cmp		ebx,	max_w
-        jle		no_upd_3
+        jle		no___upd_3
         mov		max_w, ebx
-no_upd_3:
+no___upd_3:
         mov		eax,	[edi]ap.w
         mov		[edi]ap.w, ebx
 
@@ -204,7 +204,7 @@ no_upd_3:
         add		edi,	12
 
         cmp		esi,	sent
-        jl		loop_1
+        jl		loop___1
     }
     return max_w;
 }
@@ -220,7 +220,7 @@ no_upd_3:
 // r : +8
 //int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len);
 
-int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len)
+int __attribute__((noinline))  align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len)
 {
     // int v = - (gip + gep);
     int v = 0;
@@ -237,7 +237,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         //"movl       %1, %%edi\n\t"
         "movq		%1, %%rdi\n\t"
         ".align 16\n\t"
-    "loop_1:\n\t"
+    "loop___1:\n\t"
         //"movl		%2, %%ebx\n\t"
         "movq       %2, %%rbx\n\t"
         //"movl		0x8(%%esi), %%edx\n\t"
@@ -257,9 +257,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmpl		%%eax, %%ebx\n\t"
         "cmovll		%%eax, %%ebx\n\t"
         "cmpl		%3,	%%ebx\n\t"
-        "jle		no_upd\n\t"
+        "jle		no___upd\n\t"
         "movl		%%ebx, %3\n\t"
-    "no_upd:\n\t"
+    "no___upd:\n\t"
         //"movl		(%%edi), %%eax\n\t"
         "movl       (%%rdi), %%eax\n\t"
         //"movl		%%ebx, (%%edi)\n\t"
@@ -300,9 +300,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll		%%eax, %%ebx\n\t"
 
         "cmpl		%3, %%ebx\n\t"
-        "jle		no_upd_1\n\t"
+        "jle		no___upd_1\n\t"
         "movl		%%ebx, %3\n\t"
-    "no_upd_1:\n\t"
+    "no___upd_1:\n\t"
         //"movl		(%%edi), %%eax\n\t"
         "movl       (%%rdi), %%eax\n\t"
         //"movl		%%ebx, (%%edi)\n\t"
@@ -344,9 +344,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll		%%eax, %%ebx\n\t"
 
         "cmpl		%3, %%ebx\n\t"
-        "jle		no_upd_2\n\t"
+        "jle		no___upd_2\n\t"
         "movl		%%ebx, %3\n\t"
-    "no_upd_2:\n\t"
+    "no___upd_2:\n\t"
         //"movl		(%%edi), %%eax\n\t"
         "movl       (%%rdi), %%eax\n\t"
         //"movl		%%ebx, (%%edi)\n\t"
@@ -387,9 +387,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll		%%eax, %%ebx\n\t"
 
         "cmpl		%3, %%ebx\n\t"
-        "jle		no_upd_3\n\t"
+        "jle		no___upd_3\n\t"
         "movl		%%ebx, %3\n\t"
-    "no_upd_3:\n\t"
+    "no___upd_3:\n\t"
         //"movl		(%%edi), %%eax\n\t"
         "movl       (%%rdi), %%eax\n\t"
         //"movl		%%ebx, (%%edi)\n\t"
@@ -414,7 +414,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
 
         //"cmp		%6, %%esi\n\t"
         "cmp        %6, %%rsi\n\t"
-        "jl		loop_1\n\t"
+        "jl		loop___1\n\t"
 
         :   //"=m" (max_w)
         :	"m" (v), "m" (ap), "m" (wp), "m" (max_w), "m" (gip), "m" (gep), "m" (sent)
@@ -432,7 +432,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
 // r : +8
 //int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len);
 
-int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len)
+int __attribute__((noinline)) align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int len)
 {
     ALIGN_VECT* sent = ap + len - 3;
     // int v = - (gip + gep);
@@ -445,7 +445,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "movl       %1, %%esi\n\t"
         "movl       %1, %%edi\n\t"
         ".align 16\n\t"
-    "loop_1:\n\t"
+    "loop___1:\n\t"
         "movl     %2, %%ebx\n\t"
         "movl     0x8(%%esi), %%edx\n\t"
         //"addl     (%%ebx,%%edx,0x8), %%eax\n\t"
@@ -460,9 +460,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmpl       %%eax, %%ebx\n\t"
         "cmovll     %%eax, %%ebx\n\t"
         "cmpl       %3, %%ebx\n\t"
-        "jle        no_upd\n\t"
+        "jle        no___upd\n\t"
         "movl       %%ebx, %3\n\t"
-    "no_upd:\n\t"
+    "no___upd:\n\t"
         "movl     (%%edi), %%eax\n\t"
         "movl     %%ebx, (%%edi)\n\t"
 
@@ -493,9 +493,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll     %%eax, %%ebx\n\t"
 
         "cmpl       %3, %%ebx\n\t"
-        "jle        no_upd_1\n\t"
+        "jle        no___upd_1\n\t"
         "movl       %%ebx, %3\n\t"
-    "no_upd_1:\n\t"
+    "no___upd_1:\n\t"
         "movl     (%%edi), %%eax\n\t"
         "movl     %%ebx, (%%edi)\n\t"
 
@@ -527,9 +527,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll     %%eax, %%ebx\n\t"
 
         "cmpl       %3, %%ebx\n\t"
-        "jle        no_upd_2\n\t"
+        "jle        no___upd_2\n\t"
         "movl       %%ebx, %3\n\t"
-    "no_upd_2:\n\t"
+    "no___upd_2:\n\t"
         "movl     (%%edi), %%eax\n\t"
         "movl     %%ebx, (%%edi)\n\t"
 
@@ -560,9 +560,9 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "cmovll     %%eax, %%ebx\n\t"
 
         "cmpl       %3, %%ebx\n\t"
-        "jle        no_upd_3\n\t"
+        "jle        no___upd_3\n\t"
         "movl       %%ebx, %3\n\t"
-    "no_upd_3:\n\t"
+    "no___upd_3:\n\t"
         "movl     (%%edi), %%eax\n\t"
         "movl     %%ebx, (%%edi)\n\t"
 
@@ -581,7 +581,7 @@ int align_y_loop_so (ALIGN_VECT* ap, int *wp, int gip, int gep, int max_w, int l
         "addl     $12, %%edi\n\t"
 
         "cmp      %6, %%esi\n\t"
-        "jl     loop_1\n\t"
+        "jl     loop___1\n\t"
 
         :   //"=m" (max_w)
         :   "m" (v), "m" (ap), "m" (wp), "m" (max_w), "m" (gip), "m" (gep), "m" (sent)
