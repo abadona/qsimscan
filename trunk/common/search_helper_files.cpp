@@ -505,9 +505,9 @@ bool Search_helper_files::output_results_na (AlignResultStorage& resrec, unsigne
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
         NA_SEQ& fwd_qry = f_qry [query_no];
-        NA_SEQ& rev_qry = r_qry [query_no];
+        NA_SEQ* rev_qry_p = r_qry.size () ? &(r_qry [query_no]) : NULL;
         // sanity check
-        if (rev_qry.uid != fwd_qry.uid) ERR(ERR_Internal);
+        if (rev_qry_p && rev_qry_p->uid != fwd_qry.uid) ERR(ERR_Internal);
 
         unsigned sim_found = resrec.resPerQuery (fwd_qry.uid);
 
@@ -564,7 +564,8 @@ bool Search_helper_files::output_results_na (AlignResultStorage& resrec, unsigne
                 {
                     a_ascii2binary (bin_buf, max_x_len, target_.cur_seq (), 0, cur_search.len);
                     cur_search.seq = bin_buf;
-                    print_batches (((cur_res->reverse_) ? rev_qry : fwd_qry), cur_search, cur_res->batches_, cur_res->batch_no_, w, out_file);
+                    if (cur_res->reverse_ && !rev_qry_p) ERR (ERR_Internal);
+                    print_batches (((cur_res->reverse_) ? *rev_qry_p : fwd_qry), cur_search, cur_res->batches_, cur_res->batch_no_, w, out_file);
                 }
                 out_file << std::endl;
             }
@@ -718,9 +719,9 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
         NN_SEQ& fwd_qry = f_qry [query_no];
-        NN_SEQ& rev_qry = r_qry [query_no];
+        NN_SEQ* rev_qry_p = r_qry.size () ? &(r_qry [query_no]) : NULL;
         // sanity check
-        if (rev_qry.uid != fwd_qry.uid) ERR(ERR_Internal);
+        if (rev_qry_p && rev_qry_p->uid != fwd_qry.uid) ERR(ERR_Internal);
 
         unsigned sim_found = resrec.resPerQuery (fwd_qry.uid);
 
@@ -767,7 +768,8 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 BATCH* batches = cur_res->batches_;
                 unsigned batch_no = cur_res->batch_no_;
 
-                eval_align (cur_res->reverse_ ? rev_qry : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
+                if (cur_res->reverse_ && !rev_qry_p) ERR (ERR_Internal);
+                eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
                 q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
@@ -911,9 +913,9 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
         NN_SEQ& fwd_qry = f_qry [query_no];
-        NN_SEQ& rev_qry = r_qry [query_no];
+        NN_SEQ* rev_qry_p = r_qry.size () ? &(r_qry [query_no]) : NULL;
         // sanity check
-        if (rev_qry.uid != fwd_qry.uid) ERR(ERR_Internal);
+        if (rev_qry_p && rev_qry_p->uid != fwd_qry.uid) ERR(ERR_Internal);
 
         unsigned sim_found = resrec.resPerQuery (fwd_qry.uid);
 
@@ -948,7 +950,8 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 BATCH* batches = cur_res->batches_;
                 unsigned batch_no = cur_res->batch_no_;
 
-                eval_align (cur_res->reverse_ ? rev_qry : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
+                if (cur_res->reverse_ && !rev_qry_p) ERR (ERR_Internal);
+                eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
                 q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
