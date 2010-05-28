@@ -772,8 +772,14 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
-                q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                
+                q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [0].xpos + 1;
+                q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                
+                // following is wrong direction reverse chain
+                // q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
+                // q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                
                 s_start = batches [0].ypos + 1;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
@@ -954,8 +960,8 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
-                q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [0].xpos + 1;
+                q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [batch_no-1].xpos + batches [batch_no-1].len;
                 s_start = batches [0].ypos + 1;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
