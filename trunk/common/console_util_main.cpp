@@ -133,6 +133,10 @@ int main (int argc, char *argv[])
     {
         rv = console_main (argc, argv);
     }
+    catch (std::bad_alloc& e)
+    {
+        std::cerr << "Insufficient memory: " << e.what () << std::endl;
+    }
     catch (std::exception& e)
     {
         std::cerr << "Error : Standatd Library Exception:" << e.what () << std::endl;
