@@ -25,6 +25,7 @@
 #include <sciminmax.h>
 #include <rerror.h>
 #include "weights.h"
+#include <cassert>
 
 using namespace std;
 
@@ -316,3 +317,67 @@ void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIG
     stream << flush;
 }
 
+unsigned decout (unsigned num, char* dest, unsigned destlen) // returns 0 on failure, number of chars on success
+{
+    unsigned pp = num;
+    unsigned decposno = 1;
+    while ((pp /= 10)) decposno ++;
+    unsigned rval = decposno;
+    if (decposno >= destlen) return 0;
+    do
+    {
+        dest [--decposno] = char ('0' + num % 10);
+    }
+    while ((num /= 10));
+    return rval;
+}
+
+int print_batches_cigar (const BATCH *b_ptr, int b_cnt, char* dest, unsigned destlen)
+{
+    unsigned dpos = 0, pl;
+    int curb = 0;
+    const BATCH *pb = NULL;
+    assert (destlen > 1);
+    while (curb <= b_cnt)
+    {
+        if (pb)
+        {
+            pl = decout (pb->len, dest + dpos, destlen - dpos);
+            if (!pl)
+                break;
+            dpos += pl;
+            if (dpos == destlen - 1)
+                break;
+            dest [dpos++] = 'M';
+            if (curb < b_cnt)
+            {
+                if (pb->xpos + pb->len < b_ptr->xpos) // skip on x (subject) == gap on y (query)
+                {
+                    pl = decout (b_ptr->xpos - (pb->xpos + pb->len), dest + dpos, destlen - dpos);
+                    if (!pl)
+                        break;
+                    dpos += pl;
+                    if (dpos == destlen - 1)
+                        break;
+                    //dest [dpos++] = b_ptr->neutral_gap ? 'N' : 'I';
+                    dest [dpos++] = 'I';
+                }
+                if (pb->ypos + pb->len < b_ptr->ypos) // skip on y (query) == gap on x (subject)
+                {
+                    pl = decout (b_ptr->ypos - (pb->ypos + pb->len), dest + dpos, destlen - dpos);
+                    if (!pl)
+                        break;
+                    dpos += pl;
+                    if (dpos == destlen - 1)
+                        break;
+                    dest [dpos++] = 'D';
+                }
+            }
+        }
+        pb = b_ptr;
+        b_ptr ++;
+        curb ++;
+    }
+    dest [dpos] = 0;
+    return dpos;
+}

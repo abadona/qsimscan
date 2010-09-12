@@ -772,14 +772,14 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                
+
                 q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [0].xpos + 1;
                 q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [batch_no-1].xpos + batches [batch_no-1].len;
-                
+
                 // following is wrong direction reverse chain
                 // q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
                 // q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
-                
+
                 s_start = batches [0].ypos + 1;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
@@ -806,7 +806,6 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
 
 bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, unsigned res_per_query, unsigned alignments_no, std::vector<AA_SEQ>& qry, WMatrix* w, std::ostream& o, bool hdr)
 {
-
     if (hdr) o << "#Q_id\tS_id\tp_inden\tal_len\tmism\tgaps\tgap_len\tqry_beg\tqry_end\tqry_len\ttrg_beg\ttrg_end\ttrg_len\tevalue\tsw_score\tqry_auto\ttrg_auto" << std::endl;
 
     const char* Query_id = "";
@@ -822,6 +821,8 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
     unsigned s_end = 0;
     double e_value = 0;
     double sw_score = 0;
+    const unsigned CIGAR_BUF_SZ = 1024;
+    char cigar_buf [CIGAR_BUF_SZ];
 
     for (unsigned query_no = 0; query_no < qry.size (); query_no ++)
     {
@@ -854,7 +855,6 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                 // inplace conversion
                 a_ascii2binary (cur_search.seq, cur_search.len, cur_search.seq, 0, cur_search.len);
 
-                // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
                 Subject_id = target_.cur_name ();
 
                 BATCH* batches = cur_res->batches_;
@@ -870,7 +870,9 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                 e_value = cur_res->evalue_;
                 sw_score = cur_res->al_score_;
 
-                // QueryId SubjectId P_indentity AlignmentLength Mismatches GapOpenings GapLength QueryStart QueryEnd QueryLen TargetStart TargetEnd TargetLen EValue SW_score AutoQuery AutoTarget
+                print_batches_cigar (batches, batch_no, cigar_buf, CIGAR_BUF_SZ);
+
+                // QueryId SubjectId P_indentity AlignmentLength Mismatches GapOpenings GapLength QueryStart QueryEnd QueryLen TargetStart TargetEnd TargetLen EValue SW_score AutoQuery AutoTarget CIGARstring
 
                 o <<
                     Query_id << TAB_STR <<
@@ -890,7 +892,8 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                 o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
                     std::setprecision (2) << std::noshowpoint << std::fixed << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
-                    cur_res->t_auto_score_ << std::endl;
+                    cur_res->t_auto_score_ << TAB_STR << 
+                    cigar_buf << std::endl;
             }
         }
     }
@@ -915,6 +918,8 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
     unsigned s_end = 0;
     double e_value = 0;
     double sw_score = 0;
+    const unsigned CIGAR_BUF_SZ = 1024;
+    char cigar_buf [CIGAR_BUF_SZ];
 
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
@@ -967,6 +972,8 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 e_value = cur_res->chi2_;
                 sw_score = cur_res->al_score_;
 
+                print_batches_cigar (batches, batch_no, cigar_buf, CIGAR_BUF_SZ);
+
                 // QueryId SubjectId P_indentity AlignmentLength Mismatches GapOpenings GapLength QueryStart QueryEnd QueryLen TargetStart TargetEnd TargetLen EValue SW_score AutoQuery AutoTarget
 
                 o <<
@@ -987,7 +994,8 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
                     std::setprecision (2) << std::fixed << std::noshowpoint << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
-                    cur_res->t_auto_score_ << std::endl;
+                    cur_res->t_auto_score_ << TAB_STR <<
+                    cigar_buf << std::endl;
             }
         }
     }
