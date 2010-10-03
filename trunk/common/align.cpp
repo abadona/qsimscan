@@ -1054,6 +1054,72 @@ int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
     BATCH* b_start = b_ptr;
 
     //backtrace from highest score
+    bool done = false;
+    do
+    {
+        // if (semiglobal && !to_first && (*bp & ALIGN_ZERO))
+        //    break;
+
+        switch (state)
+        {
+            //follow v-trace down until ALIGN_VSKIP flag set
+            case ALIGN_DOWN:
+                y--;
+                if (y >= yref)
+                {
+                    bp--;
+                    if (*bp & ALIGN_VSKIP)
+                        state = *bp & 3;
+                }
+                break;
+            //follow h-trace left until ALIGN_HSKIP flag set
+            case ALIGN_LEFT:
+                x--;
+                if (x >= xref)
+                {
+                    bp -= bstep;
+                    if (*bp & ALIGN_HSKIP)
+                        state = *bp & 3;
+                }
+                break;
+            //follow diagonal until best score is achieved from v-trace or h-trace
+            case ALIGN_DIAG:
+                bp -= bstep + 1;
+                if (state != (*bp & 3))
+                {
+                    state = *bp & 3;
+                    if (b_cnt == max_cnt)
+                        ers << "Not enough space to store all batches (>" << b_cnt-1 << ") of the alignment" << Throw;
+                    b_cnt ++;
+                    b_ptr->xpos = x;
+                    b_ptr->ypos = y;
+                    b_ptr->len = b_len;
+                    b_ptr ++;
+                    b_len = 0;
+                }
+                b_len ++;
+                x --, y --;
+                break;
+            //end of alignment (w[x][y] was set to 0)
+            case ALIGN_STOP:
+                done = true;
+                break;
+        }
+    }
+    while (!done && x >= xref && y >= yref);
+    //if alignment ends at the edge of the matrix we get here
+    if (state == ALIGN_DIAG)
+    {
+        if (b_cnt == max_cnt)
+            ers << "Not enough space to store all batches (>" << b_cnt-1 << ") of the alignment" << Throw;
+        b_cnt++;
+        b_ptr->xpos = x+1;
+        b_ptr->ypos = y+1;
+        b_ptr->len = b_len-1;
+        b_ptr ++;
+    }
+
+#if 0
     while (x >= xref + xstep && y > yref && y > 0)
     {
         switch (state)
@@ -1113,6 +1179,7 @@ int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
         b_ptr->len = b_len;
         b_cnt++;
     }
+#endif
     reverse<BATCH> (b_start, b_cnt);
     return b_cnt;
 }
