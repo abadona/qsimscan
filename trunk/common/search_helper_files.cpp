@@ -687,9 +687,9 @@ bool Search_helper_files::output_results_m8_aa (AlignResultStorage& resrec, unsi
                       alignment_length << TAB_STR <<
                       mismatches << TAB_STR <<
                       gap_openings << TAB_STR <<
-                      q_start+1 << TAB_STR <<
+                      q_start << TAB_STR <<
                       q_end << TAB_STR <<
-                      s_start+1 << TAB_STR <<
+                      s_start << TAB_STR <<
                       s_end << TAB_STR;
                 o.unsetf (std::ios::fixed | std::ios::scientific);
                 o <<  std::noshowpoint << std::setprecision (2) << e_value << TAB_STR <<
@@ -774,7 +774,7 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 // here query IS x!
 
                 q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [0].xpos + 1;
-                q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) + 1 : batches [batch_no-1].xpos + batches [batch_no-1].len;
 
                 // following is wrong direction reverse chain
                 // q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
@@ -791,9 +791,9 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                       alignment_length << TAB_STR <<
                       mismatches << TAB_STR <<
                       gap_openings << TAB_STR <<
-                      q_start+1 << TAB_STR <<
+                      q_start << TAB_STR <<
                       q_end << TAB_STR <<
-                      s_start+1 << TAB_STR <<
+                      s_start << TAB_STR <<
                       s_end << TAB_STR;
                 o.unsetf (std::ios::fixed | std::ios::scientific);
                 o <<  std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
@@ -903,7 +903,7 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
 bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, unsigned res_per_query, unsigned alignments_no, std::vector<NN_SEQ>& f_qry, std::vector<NN_SEQ>& r_qry, WMatrix* w, std::ostream& o, bool hdr)
 {
 
-    if (hdr) o << "#Q_id\tS_id\tp_inden\tal_len\tmism\tgaps\tgap_len\tqry_beg\tqry_end\tqry_len\ttrg_beg\ttrg_end\ttrg_len\tevalue\tsw_score\tqry_auto\ttrg_auto\nCIGAR" << std::endl;
+    if (hdr) o << "#Q_id\tS_id\tp_inden\tal_len\tmism\tgaps\tgap_len\tqry_beg\tqry_end\tqry_len\ttrg_beg\ttrg_end\ttrg_len\tevalue\tsw_score\tqry_auto\ttrg_auto\tCIGAR" << std::endl;
 
     const char* Query_id = "";
     const char* Subject_id = "";
@@ -965,9 +965,9 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 eval_align (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [0].xpos + 1;
+                q_start = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos: batches [0].xpos;
                 q_end = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [batch_no-1].xpos + batches [batch_no-1].len;
-                s_start = batches [0].ypos + 1;
+                s_start = batches [0].ypos;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
                 sw_score = cur_res->al_score_;
@@ -995,7 +995,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                     std::setprecision (2) << std::fixed << std::noshowpoint << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
                     cur_res->t_auto_score_ << TAB_STR <<
-                    cigar_buf << std::endl;
+                    cigar_buf  << std::endl;
             }
         }
     }
