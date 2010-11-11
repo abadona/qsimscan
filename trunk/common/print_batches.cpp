@@ -359,8 +359,7 @@ int print_batches_cigar (const BATCH *b_ptr, int b_cnt, char* dest, unsigned des
                     dpos += pl;
                     if (dpos == destlen - 1)
                         break;
-                    //dest [dpos++] = b_ptr->neutral_gap ? 'N' : 'I';
-                    dest [dpos++] = 'I';
+                    dest [dpos++] = 'D';
                 }
                 if (pb->ypos + pb->len < b_ptr->ypos) // skip on y (query) == gap on x (subject)
                 {
@@ -370,7 +369,7 @@ int print_batches_cigar (const BATCH *b_ptr, int b_cnt, char* dest, unsigned des
                     dpos += pl;
                     if (dpos == destlen - 1)
                         break;
-                    dest [dpos++] = 'D';
+                    dest [dpos++] = 'I';
                 }
             }
         }

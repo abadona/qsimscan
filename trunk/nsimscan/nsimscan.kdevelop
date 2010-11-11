@@ -12,6 +12,19 @@
   <kdevcustomproject>
     <run>
       <directoryradio>executable</directoryradio>
+<<<<<<< .mine
+      <mainprogram>/home/denis/code/SCIDM/qsimscan/nsimscan/nsimscan</mainprogram>
+      <programargs/>
+      <globaldebugarguments>--ov -v -n 8 --il 16 --it 80 --om M8 --minslen 15 --norev /home/denis/work/ec/palin.txt /home/denis/work/ec/NC_000913.fna /home/denis/work/ec/output.table</globaldebugarguments>
+      <globalcwd>/home/denis/work/ec</globalcwd>
+      <useglobalprogram>false</useglobalprogram>
+      <terminal>true</terminal>
+      <autocompile>false</autocompile>
+      <autoinstall>false</autoinstall>
+      <autokdesu>false</autokdesu>
+      <envvars/>
+=======
+>>>>>>> .r31
     </run>
     <filetypes>
       <filetype>*.java</filetype>
