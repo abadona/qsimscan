@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include "platform.h"
 
+#include <map>
+
 #define MAX_HDR_LEN 8000
 #define MAX_NAME_LEN 80
 #define MAX_LINE_LEN 10000
@@ -41,19 +43,36 @@ class FastaFile
     char *seqbuf_;
     unsigned seq_buf_sz_;
     unsigned seqlen_;
-    char hdrbuf_  [MAX_HDR_LEN+1];
     char namebuf_ [MAX_NAME_LEN+1];
+    char *nameptr_;
+    unsigned namelen_;
+    char hdrbuf_ [MAX_HDR_LEN+1];
+    char *hdrptr_;
+    unsigned hdrlen_;
     char linebuf_ [MAX_LINE_LEN];
     char* l_;
 
     void reset ();
     void parse_hdr ();
     void add_seq ();
+    
+// quick fix for nsimscan repeated reading: sequence caching
+    struct Seq
+    {
+        char* name;
+        char* hdr;
+        char* seq;
+        unsigned seqlen;
+        unsigned reclen;
+    };
+    typedef std::map <ulonglong, Seq> SeqCache;
+    SeqCache seq_cache_;
 
 public:
     FastaFile ();
     FastaFile (const char* name);
     ~FastaFile ();
+    
 
     bool       open (const char* name);
     bool       close ();

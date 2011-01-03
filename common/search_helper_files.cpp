@@ -29,6 +29,7 @@
 
 Search_helper_files::Search_helper_files ()
 :
+reserved_seqspace_ (0),
 iter_init_ (false),
 iter_done_ (false),
 skipped_ (0)
@@ -187,7 +188,7 @@ void Search_helper_files::init_nn_search (const char* fname, unsigned beg, unsig
     iter_init_ = true;
 }
 
-NN_SEQ*      Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_len)
+NN_SEQ* Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_len)
 {
     if (!iter_init_ || iter_done_)
         return false;
@@ -198,8 +199,15 @@ NN_SEQ*      Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_le
         {
             if (target_.cur_seq_len () >= min_len && target_.cur_seq_len () <= max_len)
             {
+                if (!n_xseq_.seq || target_.cur_seq_len () > reserved_seqspace_)
+                {
+                    if (n_xseq_.seq)
+                        delete [] n_xseq_.seq; 
+                    reserved_seqspace_ = (target_.cur_seq_len () + 3) >> 1; // reserve two times as much as needed ((len + 3)/ 4) * 2) = (len + 3) / 2
+                    n_xseq_.seq = new char [reserved_seqspace_];
+                }
+                        
                 n_xseq_.len = target_.cur_seq_len ();
-                n_xseq_.seq = new char [(n_xseq_.len + 3) >> 2];
                 n_ascii2binary (n_xseq_.seq, int ((n_xseq_.len + 3) >> 2), target_.cur_seq (), 0, n_xseq_.len);
                 n_xseq_.rev = 0;
                 n_xseq_.uid = target_.cur_recstart ();
@@ -219,6 +227,7 @@ void Search_helper_files::init_aa_search (const char* fname, unsigned beg, unsig
 {
     init_nn_search (fname, beg, end);
 }
+
 AA_SEQ* Search_helper_files::next_aa_seq (unsigned min_len, unsigned max_len)
 {
     if (!iter_init_ || iter_done_)
