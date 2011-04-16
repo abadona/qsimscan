@@ -50,6 +50,9 @@ bool n_binary2ascii (char* dest, int destlen, const char* source, int start, int
 
     for (int i = start; i < start + len; i ++)
         dest [i - start] = base2char (get_base (source, i));
+    // only zero-terminate if there is enough space in dest
+    if (destlen > len)
+        dest [len] = 0;
 
     return true;
 }
