@@ -40,7 +40,6 @@ protected:
     NN_SEQ n_xseq_;
     AA_SEQ p_xseq_;
     NA_SEQ na_xseq_;
-    unsigned reserved_seqspace_;
     unsigned skipped_;
     unsigned target_no_;
     unsigned beg_;

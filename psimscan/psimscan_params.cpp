@@ -23,7 +23,7 @@
 #include <acc_str.h>
 
 extern const char* VERSION;
-static const char* HEADER = "Tool for searching similarities in protein databases.\nBased on YABLAST algorithm by SciDM";
+static const char* HEADER = "Tool for searching similarities in protein databases.\nBased on QSIMSCAN algorithm by SciDM";
 
 // defaults
 

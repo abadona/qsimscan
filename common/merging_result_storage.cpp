@@ -30,14 +30,14 @@ accum_no_ (0)
 {
 }
 
-bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches)
+bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj, QWORD subjid)
 {
     if (cur_sid_ != sid)
     {
         flush ();
         cur_sid_ = sid;
     }
-    AlignResult r (sid, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches);
+    AlignResult r (sid, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches, binsubj, subjid);
     accum_ [qid].push_back (r);
     accum_no_ ++;
 }

@@ -52,7 +52,14 @@ ke (NULL)
     max_y_len = max_total_ylen;
     kt_size = kt_sz;
 
-    init_vars (max_ynum, wts);
+    try
+    {
+        init_vars (max_ynum, wts);
+    }
+    catch (std::bad_alloc& exc)
+    {
+        ERR ("Insufficient memory for hash-based searcher");
+    }
 }
 
 KT_SEARCH::KT_SEARCH (int kt_sz, int *wts, int max_ynum, int max_total_ylen, int max_xlen, ResultReciever_blast_batch* res_rec)
@@ -163,9 +170,16 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
     xseq = xseq + 4;
 
     //allocate diag info array
-    di = new DIAG_ENTRY [max_y_len + max_x_len + 1];
-    if (!di)
-        ERR("unable to allocate diagonal info array");
+    try
+    {
+        di = new DIAG_ENTRY [max_y_len + max_x_len + 1];
+        if (!di)
+            ERR("unable to allocate diagonal info array");
+    }
+    catch (std::bad_alloc)
+    {
+        ers << "Insufficient memory for diagonal info array, requested " << max_y_len + max_x_len + 1 << " (" << max_x_len << " max_subj_len + " << max_y_len << " max_qry_len + 1) DIAG_ENTRY structures (" << sizeof (DIAG_ENTRY) << " bytes each, " << (max_y_len + max_x_len + 1)*sizeof (DIAG_ENTRY) / (1024*1024) <<  " Mbytes total)" << Throw;
+    }
 
 
     _ktups_found = 0;
@@ -435,9 +449,6 @@ void KT_SEARCH::scan_l1 ()
 
     for (xpos = 0; xpos < xend; s++)
     {
-        if (xpos % 1000000 == 0)
-            std::clog << "\r" << "xpos " << xpos << " (" << xend << ")";
-        
         seqw = GET32_U (s);
         maxx = __min(xpos + 4, xend);
           //run up to 4 times (byte level loop)

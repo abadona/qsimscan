@@ -196,7 +196,7 @@ bool PblastResults::match_found  (SEQ& query_seq, SEQ& target_seq, BATCH* batche
     float p_identity = (float (al_length) - float (mismatches)) * (float) 100.0 / float (al_length);
 
 
-    return add_result (query_seq.uid, target_seq.uid, false, score, (int) score, p_identity, pvalue, bitscore, (int) q_auto_score, (int) t_auto_score, batch_no, batches);
+    return add_result (query_seq.uid, target_seq.uid, false, score, (int) score, p_identity, pvalue, bitscore, (int) q_auto_score, (int) t_auto_score, batch_no, batches, NULL, 0);
 }
 
 int PblastResults::totalFound ()

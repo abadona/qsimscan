@@ -23,8 +23,9 @@
 #include "sequtil.h"
 #include <rerror.h>
 #include <algorithm>
+#include <cstring>
 
-AlignResult::AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches)
+AlignResult::AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, const BATCH* batches, const char* binsubj, QWORD subjid)
 :
 uid_ (uid),
 reverse_ (reverse),
@@ -35,12 +36,20 @@ evalue_ (evalue),
 bitscore_ (bitscore),
 q_auto_score_ (q_auto_score),
 t_auto_score_ (t_auto_score),
-batch_no_ (batch_no)
+batch_no_ (batch_no),
+subjid_ (subjid)
 {
     if (batch_no_)
-        if (!(batches_ = new BATCH [batch_no_]))
-            Error (MemoryRerror);
-    std::copy (batches, batches + batch_no, (BATCH*) batches_);
+    {
+        batches_ = new BATCH [batch_no_];
+        std::copy (batches, batches + batch_no, (BATCH*) batches_);
+        if (binsubj)
+        {
+            unsigned subj_len = (batches + batch_no - 1)->ypos + (batches + batch_no - 1)->len - batches->ypos;
+            subject_ = new char [subj_len + 1];
+            n_binary2ascii (subject_, subj_len + 1, binsubj, batches->ypos, subj_len);
+        }
+    }
 }
 
 

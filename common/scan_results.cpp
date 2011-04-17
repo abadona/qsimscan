@@ -95,7 +95,7 @@ void ScanResults :: process_match_nn (NN_SEQ* query_seq,  NN_SEQ* search_seq, in
     _passed_repeats ++;
 
     // save the result
-    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, chi2score, 0, 0, tot_blen, tot_blen, batch_no, _batches);
+    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, chi2score, 0, 0, tot_blen, tot_blen, batch_no, _batches, search_seq->seq);
 }
 
 
@@ -117,7 +117,7 @@ void ScanResults :: process_match_aa (AA_SEQ* query_seq, AA_SEQ* search_seq, int
     _passed_repeats ++;
 
     // save the result
-    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches);
+    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches, NULL);
 }
 
 void ScanResults :: process_match_an (AA_SEQ* query_seq, NA_SEQ* search_seq, int score)
@@ -140,7 +140,7 @@ void ScanResults :: process_match_an (AA_SEQ* query_seq, NA_SEQ* search_seq, int
     // printf ("AN: bno = %d, al_score = %d, sc = %d, q_score = %d\n", batch_no, al_score, sc, q_score);
 
     // save the result
-    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches);
+    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches, NULL);
 }
 void ScanResults :: process_match_na (NA_SEQ* query_seq, AA_SEQ* search_seq, int score)
 {
@@ -162,7 +162,7 @@ void ScanResults :: process_match_na (NA_SEQ* query_seq, AA_SEQ* search_seq, int
     // printf ("AN: bno = %d, al_score = %d, sc = %d, q_score = %d\n", batch_no, al_score, sc, q_score);
 
     // save the result
-    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, q_score, 0, 0, 0, batch_no, _batches);
+    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, q_score, 0, 0, 0, batch_no, _batches, NULL);
 }
 
 void ScanResults :: process_match_na_rev (AA_SEQ* search_seq, NA_SEQ* query_seq, int score)
@@ -185,7 +185,7 @@ void ScanResults :: process_match_na_rev (AA_SEQ* search_seq, NA_SEQ* query_seq,
     // printf ("\nAN: bno = %d, al_score = %d, sc = %d, q_score = %d", batch_no, al_score, sc, q_score);
 
     // save the result
-    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches);
+    add_result (query_seq->uid, search_seq->uid, query_seq->rev?true:false, al_score, score, al_score, 0, 0, q_score, 0, batch_no, _batches, NULL);
 }
 
 

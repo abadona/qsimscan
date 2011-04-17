@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "0.93 (June 2008)";
+const char* VERSION = "0.98 (April 2011)";
 
 Process* process_factory ()
 {
@@ -168,7 +168,7 @@ bool Nsimscan::prepare_searcher ()
     wm_ = new WMatrix (int (p_->sim_level () * 100), p_->gip (), p_->gep ());
 
     // do we need score threshold here?
-    sim_merger_ = new SimMerger (true, p_->merge_repeats (), p_->merge_domains (), *wm_, p_->gip (), p_->gep (), p_->gap_cap ()*p_->gip (), p_->max_dom_ovl (), p_->max_rep_orp ());
+    sim_merger_ = new SimMerger (!p_->nomerge_threads (), p_->merge_repeats (), p_->merge_domains (), *wm_, p_->gip (), p_->gep (), p_->gap_cap ()*p_->gip (), p_->max_dom_ovl (), p_->max_rep_orp ());
     results_ = new BlastResultsBatch (p_->res_per_query (), p_->rep_len (), int (p_->rep_percent ()), false, *sim_merger_);
 
     // create the searcher
