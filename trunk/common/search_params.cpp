@@ -29,7 +29,7 @@ extern const char* volatile_section_name;
 static const char* MIN_SEQ_LEN_DEFAULT = "40"; // 40 bases. Could require overwriting for protein and SW searches
 static const char* MAX_SEQ_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
 static const char* MAX_QRY_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
-static const char* NOMERGE_THREADS_DEFAULT = TRUE_STR;
+static const char* NOMERGE_THREADS_DEFAULT = FALSE_STR;
 static const char* MERGE_DOMAINS_DEFAULT = FALSE_STR;
 static const char* MERGE_REPEATS_DEFAULT = FALSE_STR;
 static const char* MAX_DOM_OVL_DEFAULT = "20";
