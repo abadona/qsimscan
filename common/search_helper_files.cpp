@@ -605,6 +605,40 @@ bool Search_helper_files::output_results_na (AlignResultStorage& resrec, unsigne
 }
 
 
+void eval_align_loc (SEQ& xseq, const char* yseq, WMatrix* w, BATCH* batches, unsigned batch_no, double* p_identity, unsigned* mismatches, unsigned* al_length, unsigned* gap_openings, unsigned* gap_length)
+{
+
+    *p_identity = 0, *mismatches = 0, *al_length = 0, *gap_openings = 0;
+    unsigned xp, yp;
+    char yc, xc;
+    const char* yptr;
+    int y0 = batches [0].ypos;
+
+    for (unsigned i = 0; i < batch_no; i ++)
+    {
+        if (i)
+        {
+            (*gap_openings) ++;
+            (*gap_length) += (batches [i].xpos - xp) + (batches [i].ypos - yp);
+        }
+
+        xp = batches [i].xpos;
+        yp = batches [i].ypos;
+        yptr = yseq + (yp - y0);
+        for (unsigned p = 0; p < batches [i].len; p ++)
+        {
+            xc = xseq.get_code (xp);
+            if (xc != *yptr)
+                (*mismatches) ++;
+            xp ++;
+            yp ++;
+            yptr ++;
+        }
+        (*al_length) += batches [i].len;
+    }
+    *p_identity = (double (*al_length) - double (*mismatches)) * 100.0 / double (*al_length);
+}
+
 void eval_align (SEQ& xseq, SEQ& yseq, WMatrix* w, BATCH* batches, unsigned batch_no, double* p_identity, unsigned* mismatches, unsigned* al_length, unsigned* gap_openings, unsigned* gap_length)
 {
 
@@ -746,6 +780,9 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
     double e_value = 0;
     double bit_score = 0;
 
+    SeqNameCache names;
+    Nameent newent;
+
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
         NN_SEQ& fwd_qry = f_qry [query_no];
@@ -780,25 +817,34 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
             ResultQueue::ElemVec& query_results = *resrec.getQueryResults (fwd_qry.uid);
             for (ResultQueue::ElemVec::iterator cur_res = query_results.begin (); cur_res != query_results.end (); cur_res ++, resno ++)
             {
-                NN_SEQ cur_search;
-                cur_search.uid = cur_res->uid_;
+                // NN_SEQ cur_search;
+                // cur_search.uid = cur_res->uid_;
 
-                target_.seek (cur_search.uid);
-                if (!target_.next ())
-                    ers << "Unable to read target sequence at offset " << cur_search.uid << Throw;
-                cur_search.len = strlen (target_.cur_seq ());
-                cur_search.rev = 0;
-                cur_search.seq = const_cast <char*> (target_.cur_seq ());
+                // target_.seek (cur_search.uid);
+                // if (!target_.next ())
+                //    ers << "Unable to read target sequence at offset " << cur_search.uid << Throw;
+                // cur_search.len = strlen (target_.cur_seq ());
+                // cur_search.rev = 0;
+                // cur_search.seq = const_cast <char*> (target_.cur_seq ());
                 // inplace conversion
-                n_ascii2binary (cur_search.seq, cur_search.len, cur_search.seq, 0, cur_search.len);
+                // n_ascii2binary (cur_search.seq, cur_search.len, cur_search.seq, 0, cur_search.len);
+                
+                CacheInsertRes res = names.insert (SeqNameCache::value_type (cur_res->uid_, newent));
+                SeqNameCache::iterator itr = res.first;
+                if (res.second)
+                {
+                    target_.seek (cur_res->uid_);
+                    target_.fetch_hdr ();
+                    (*itr).second.setup (target_.cur_name (), target_.cur_hdr ());
+                }
 
                 // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
-                Subject_id = target_.cur_name ();
+                Subject_id = (*itr).second.namebuf; // target_.cur_name ();
 
                 BATCH* batches = cur_res->batches_;
                 unsigned batch_no = cur_res->batch_no_;
 
-                eval_align (cur_res->reverse_ ? rev_qry : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
+                eval_align_loc (cur_res->reverse_ ? rev_qry : fwd_qry, cur_res->subject_, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
                 q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
@@ -939,6 +985,9 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
     double e_value = 0;
     double sw_score = 0;
 
+    SeqNameCache names;
+    Nameent newent;
+
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
     {
         NN_SEQ& fwd_qry = f_qry [query_no];
@@ -961,7 +1010,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
             ResultQueue::ElemVec& query_results = *resrec.getQueryResults (fwd_qry.uid);
             for (ResultQueue::ElemVec::iterator cur_res = query_results.begin (); cur_res != query_results.end (); cur_res ++, resno ++)
             {
-                NN_SEQ cur_search;
+/*                NN_SEQ cur_search;
                 cur_search.uid = cur_res->uid_;
 
                 target_.seek (cur_search.uid);
@@ -975,11 +1024,25 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
 
                 // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
                 Subject_id = target_.cur_name ();
+*/
+                
+                CacheInsertRes res = names.insert (SeqNameCache::value_type (cur_res->uid_, newent));
+                SeqNameCache::iterator itr = res.first;
+                if (res.second)
+                {
+                    target_.seek (cur_res->uid_);
+                    target_.fetch_hdr ();
+                    (*itr).second.setup (target_.cur_name (), target_.cur_hdr ());
+                }
+
+                // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
+                Subject_id = (*itr).second.namebuf; // target_.cur_name ();
+                
 
                 BATCH* batches = cur_res->batches_;
                 unsigned batch_no = cur_res->batch_no_;
 
-                eval_align (cur_res->reverse_ ? rev_qry : fwd_qry, cur_search, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
+                eval_align_loc (cur_res->reverse_ ? rev_qry : fwd_qry, cur_res->subject_, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
                 q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
@@ -1004,7 +1067,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                     fwd_qry.len << TAB_STR <<
                     s_start << TAB_STR <<
                     s_end << TAB_STR <<
-                    cur_search.len << TAB_STR;
+                    0 << TAB_STR;
                 o.unsetf (std::ios::fixed | std::ios::scientific);
                 o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
                     std::setprecision (2) << std::fixed << std::noshowpoint << sw_score << TAB_STR <<
