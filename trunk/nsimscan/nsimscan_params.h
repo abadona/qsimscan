@@ -26,6 +26,8 @@
 
 class Nsimscan_params : public KTSearch_params
 {
+public:
+     Nsimscan_params ();
 };
 
 #endif // __nsimscan_params_h__

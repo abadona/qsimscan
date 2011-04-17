@@ -21,7 +21,14 @@
 
 #include "nsimscan_params.h"
 
-static const char* HEADER = "Tool for searching for nucleotide sequence similarities (based on YABLAST algorithm by SciDM)";
+static const char* HEADER = "Tool for searching for nucleotide sequence similarities (based on QSIMSCAN algorithm by SciDM)";
+extern const char* VERSION;
+
+Nsimscan_params::Nsimscan_params ()
+:
+KTSearch_params (HEADER, NULL, VERSION)
+{
+}
 
 Process_params* process_params_factory ()
 {

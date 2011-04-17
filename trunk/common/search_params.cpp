@@ -29,6 +29,7 @@ extern const char* volatile_section_name;
 static const char* MIN_SEQ_LEN_DEFAULT = "40"; // 40 bases. Could require overwriting for protein and SW searches
 static const char* MAX_SEQ_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
 static const char* MAX_QRY_LEN_DEFAULT = "10000000"; // 10 Mbases. Could require overwriting for protein and SW searches
+static const char* NOMERGE_THREADS_DEFAULT = TRUE_STR;
 static const char* MERGE_DOMAINS_DEFAULT = FALSE_STR;
 static const char* MERGE_REPEATS_DEFAULT = FALSE_STR;
 static const char* MAX_DOM_OVL_DEFAULT = "20";
@@ -49,6 +50,7 @@ static const char* OUTPUT_NAME_DEFAULT = EMPTY_STR;
 static const char* MIN_SEQ_LEN_HELP = "Minimal length of input sequence (skip shorter ones)";
 static const char* MAX_SEQ_LEN_HELP = "Maximal length of target sequence (skip longer ones)";
 static const char* MAX_QRY_LEN_HELP = "Maximal length of query sequence (skip longer ones)";
+static const char* NOMERGE_THREADS_HELP = "Do not merge close alternative alignments";
 static const char* MERGE_DOMAINS_HELP = "Merge distant non-overlapping similarities for a sequence pair";
 static const char* MERGE_REPEATS_HELP = "Select only one best representative per group of repeatitive similarities";
 static const char* MAX_DOM_OVL_HELP = "Maximum overlap of merged domains";
@@ -88,6 +90,7 @@ static const char* lorespq  []     = {"rpq", "res_per_qry", NULL};
 static const char* lopral   []     = {"apq", "print_align", NULL};
 static const char* looutmode[]     = {"om", "omode", "outmode", NULL};
 static const char* loappend []     = {"ap", "append", NULL};
+static const char* lonmthr   []     = {"nt", "nothr", NULL};
 static const char* lomdom   []     = {"md", "mdom", NULL};
 static const char* lomrep   []     = {"mr", "mrep", NULL};
 static const char* lodovl   []     = {"do", "dovl", NULL};
@@ -142,6 +145,7 @@ void Search_params::add_cmdline_res_filters ()
 }
 void Search_params::add_cmdline_merge ()
 {
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lonmthr, "nomergethr",     SIM_MERGE_SECTNAME,  "NOMERGE_THR",      true, false, BOOLEAN_STR, inverse_bs (nomerge_threads_default ()), nomerge_threads_help ()));
     keys_format_.push_back (KeyFormat (EMPTY_STR, lomdom,  "mergedom",       SIM_MERGE_SECTNAME,  "MERGE_DOM",      true, false, BOOLEAN_STR, inverse_bs (merge_domains_default ()), merge_domains_help ()));
     keys_format_.push_back (KeyFormat (EMPTY_STR, lomrep,  "mergerep",       SIM_MERGE_SECTNAME,  "MERGE_REP",      true, false, BOOLEAN_STR, inverse_bs (merge_repeats_default ()), merge_repeats_help ()));
     keys_format_.push_back (KeyFormat (EMPTY_STR, lodovl,  "domovl",         SIM_MERGE_SECTNAME,  "MAX_DOM_OVL",    true, true,  INTEGER_STR, max_dom_ovl_default (), max_dom_ovl_help ()));
@@ -235,6 +239,7 @@ void Search_params::add_parameters_merge ()
 {
     Parameter_descr SIM_MERGE_SECTION [] =
     {
+        {"NOMERGE_THR", BOOLEAN_STR,  nomerge_threads_default (), nomerge_threads_help ()},
         {"MERGE_DOM",   BOOLEAN_STR,  merge_domains_default (), merge_domains_help ()},
         {"MERGE_REP",   BOOLEAN_STR,  merge_repeats_default (), merge_repeats_help ()},
         {"MAX_DOM_OVL", INTEGER_STR,  max_dom_ovl_default (), max_dom_ovl_help ()},
@@ -280,6 +285,7 @@ bool Search_params::interpreteParameters ()
     q_end (parameters_->getInteger (PRE_FILTERS_SECTNAME, "Q_END"));
     t_beg (parameters_->getInteger (PRE_FILTERS_SECTNAME, "T_BEG"));
     t_end (parameters_->getInteger (PRE_FILTERS_SECTNAME, "T_END"));
+    nomerge_threads  (parameters_->getBoolean (SIM_MERGE_SECTNAME, "NOMERGE_THR"));
     merge_domains  (parameters_->getBoolean (SIM_MERGE_SECTNAME, "MERGE_DOM"));
     merge_repeats  (parameters_->getBoolean (SIM_MERGE_SECTNAME, "MERGE_REP"));
     max_dom_ovl    (parameters_->getInteger (SIM_MERGE_SECTNAME, "MAX_DOM_OVL"));
@@ -341,6 +347,11 @@ const char* Search_params::out_mode_default () const
 const char* Search_params::append_default () const
 {
     return APPEND_DEFAULT;
+}
+
+const char* Search_params::nomerge_threads_default () const
+{
+    return NOMERGE_THREADS_DEFAULT;
 }
 
 const char* Search_params::merge_domains_default () const
@@ -438,6 +449,11 @@ const char* Search_params::out_mode_help () const
 const char* Search_params::append_help () const
 {
     return APPEND_HELP;
+}
+
+const char* Search_params::nomerge_threads_help () const
+{
+    return NOMERGE_THREADS_HELP;
 }
 
 const char* Search_params::merge_domains_help () const

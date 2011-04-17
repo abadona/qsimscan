@@ -39,23 +39,10 @@ void FastaFile::reset ()
     cur_pos_ = 0;
     prev_pos_ = 0;
     *linebuf_ = 0;
-    seqbuf_ = NULL;
-    seq_buf_sz_ = 0;
+    *seqbuf_ = 0;
     *namebuf_ = 0;
-    *hdrbuf_  = 0;
+    *seqbuf_ = 0;
     l_ = linebuf_;
-    nameptr_ = namebuf_;
-    hdrptr_ = hdrbuf_;
-    namelen_ = 0;
-    hdrlen_ = 0;
-    for (SeqCache::iterator ii = seq_cache_.begin (), sent = seq_cache_.end (); ii != sent; ii ++)
-    {
-        Seq& s = (*ii).second;
-        delete [] s.name;
-        delete [] s.hdr;
-        delete [] s.seq;
-    }
-    seq_cache_.clear ();
 }
 
 
@@ -77,7 +64,6 @@ void FastaFile::parse_hdr ()
     // copy name into namebuf
     memcpy (namebuf_, p, p1 - p);
     namebuf_ [p1 - p] = 0;
-    namelen_ = p1 - p;
 
     // skip to non-space
     p = p1;
@@ -94,15 +80,9 @@ void FastaFile::parse_hdr ()
             *p = 0;
             p --;
         }
-        hdrlen_ = p - hdrbuf_;
     }
     else
-    {
         *hdrbuf_ = 0;
-        hdrlen_ = 0;
-    }
-    hdrptr_ = hdrbuf_;
-    nameptr_ = namebuf_;
 }
 
 void FastaFile::add_seq ()
@@ -137,6 +117,9 @@ FastaFile::FastaFile ()
 :
 f_ (NULL)
 {
+    seqbuf_ = new char [INIT_SEQ_LEN+1];
+    if (!seqbuf_) ers << "Memory error" << Throw;
+    seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
 }
 
@@ -144,6 +127,9 @@ FastaFile::FastaFile (const char* name)
 :
 f_ (NULL)
 {
+    seqbuf_ = new char [INIT_SEQ_LEN+1];
+    if (!seqbuf_) ers << "Memory error" << Throw;
+    seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
     if (!open (name))
     {
@@ -154,15 +140,17 @@ f_ (NULL)
 FastaFile::~FastaFile ()
 {
     close ();
+    delete [] seqbuf_;
+    seq_buf_sz_ = 0;
 }
 
 bool FastaFile::open (const char* name)
 {
-    if (f_) 
-        close ();
-    else
-        reset ();
+    if (f_) fclose (f_);
+    reset ();
 
+    l_ = linebuf_;
+    *l_ = 0;
     f_ = fopen (name, "rb");
     if (f_ != NULL)
     {
@@ -200,7 +188,6 @@ bool FastaFile::close ()
     {
         fclose  (f_);
         f_ = NULL;
-        reset ();
         return true;
     }
     else
@@ -211,54 +198,29 @@ bool FastaFile::next ()
 {
     if (cur_pos_ == tot_len_) return false;
     cur_recstart_ = prev_pos_;
-    
-    // lookup if this record is already in cache
-    SeqCache::iterator cur = seq_cache_.find (cur_recstart_);
-    if (cur != seq_cache_.end ())
+    parse_hdr ();
+    seqlen_ = 0;
+    l_ = fgets (linebuf_, MAX_LINE_LEN, f_);
+    if (l_)
     {
-        cur_reclen_ = (*cur).second.reclen;
-        seqbuf_ = (*cur).second.seq;
-        seqlen_ = (*cur).second.seqlen;
-        hdrptr_ = (*cur).second.hdr;
-        nameptr_ = (*cur).second.name;
-        cur_pos_ += prev_pos_ + cur_reclen_;
+        do
+        {
+            prev_pos_ = cur_pos_;
+            cur_pos_ = ftell (f_);
+            if (*l_ == '>')
+                break;
+            add_seq ();
+        }
+        while (l_ = fgets (linebuf_, MAX_LINE_LEN, f_));
+
     }
     else
     {
-        parse_hdr ();
-        seqlen_ = 0;
-        l_ = fgets (linebuf_, MAX_LINE_LEN, f_);
-        if (l_)
-        {
-            do
-            {
-                prev_pos_ = cur_pos_;
-                cur_pos_ = ftell (f_);
-                if (*l_ == '>')
-                    break;
-                add_seq ();
-            }
-            while (l_ = fgets (linebuf_, MAX_LINE_LEN, f_));
-    
-        }
-        else
-        {
-            cur_pos_ = tot_len_;
-        }
-        seq_no_ ++;
-        cur_reclen_ = prev_pos_ - cur_recstart_;
-        seqbuf_ [seqlen_] = 0;
-        
-        // place into cache
-        Seq& newentry = seq_cache_ [cur_recstart_];
-        newentry.reclen = cur_reclen_;
-        newentry.seq = new char [seqlen_ + 1];
-        memcpy (newentry.seq, seqbuf_, seqlen_+1);
-        newentry.hdr = new char [hdrlen_ + 1];
-        memcpy (newentry.hdr, hdrbuf_, hdrlen_+1);
-        newentry.name = new char [namelen_ + 1];
-        memcpy (newentry.name, namebuf_, namelen_+1);
+        cur_pos_ = tot_len_;
     }
+    seq_no_ ++;
+    cur_reclen_ = prev_pos_ - cur_recstart_;
+    seqbuf_ [seqlen_] = 0;
     return true;
 }
 
@@ -266,26 +228,22 @@ bool FastaFile::seek (ulonglong off)
 {
     if (!f_) return false;
     if (off >= tot_len_) return false;
-    SeqCache::iterator cur = seq_cache_.find (off);
+    fseek (f_, off, SEEK_SET);
     prev_pos_ = off;
-    if (cur == seq_cache_.end ())
-    {
-        fseek (f_, off, SEEK_SET);
-        l_ = fgets (linebuf_, MAX_LINE_LEN, f_);
-        if (!l_ || *l_ != '>') ERR ("Invalid offset in fasta file: not at record start");
-        cur_pos_ = ftell (f_);
-    }
+    l_ = fgets (linebuf_, MAX_LINE_LEN, f_);
+    if (!l_ || *l_ != '>') ERR ("Invalid offset in fasta file: not at record start");
+    cur_pos_ = ftell (f_);
     return true;
 }
 
 const char* FastaFile::cur_name ()  const
 {
-    return nameptr_;
+    return namebuf_;
 }
 
 const char* FastaFile::cur_hdr  () const
 {
-    return hdrptr_;
+    return hdrbuf_;
 }
 
 const char* FastaFile::cur_seq  () const

@@ -28,6 +28,7 @@
 
 
 void print_batches   (SEQ& xseq, SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin = 5, int width = 78);
+void print_batches_ascii_subj (SEQ& xseq, const char* asciisubj, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin = 5, int width = 78);
 void print_batches_3 (AA_SEQ& xseq, AA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin = 5, int width = 78);
 void print_batches   (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin = 5, int width = 76);
 void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin = 5, int width = 76);

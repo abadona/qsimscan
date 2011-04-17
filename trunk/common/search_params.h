@@ -44,6 +44,7 @@ public:
     int  t_beg_;
     int  t_end_;
 
+    bool nomerge_threads_;
     bool merge_domains_;
     bool merge_repeats_;
     int  max_dom_ovl_;
@@ -94,6 +95,7 @@ public:
     int  min_seq_len () const {return min_seq_len_;}
     int  max_seq_len () const {return max_seq_len_;}
     int  max_qry_len () const {return max_qry_len_;}
+    bool nomerge_threads () const {return nomerge_threads_;}
     bool merge_domains () const {return merge_domains_;}
     bool merge_repeats () const {return merge_repeats_;}
     int  max_dom_ovl () const {return max_dom_ovl_;}
@@ -114,6 +116,7 @@ public:
     void min_seq_len (int opt) {min_seq_len_ = opt;}
     void max_seq_len (int opt) {max_seq_len_ = opt;}
     void max_qry_len (int opt) {max_qry_len_ = opt;}
+    void nomerge_threads (bool opt) {nomerge_threads_ = opt;}
     void merge_domains (bool opt) {merge_domains_ = opt;}
     void merge_repeats (bool opt) {merge_repeats_ = opt;}
     void max_dom_ovl (int opt) {max_dom_ovl_ = opt;}
@@ -134,6 +137,7 @@ public:
     virtual const char* min_seq_len_default () const;
     virtual const char* max_seq_len_default () const;
     virtual const char* max_qry_len_default () const;
+    virtual const char* nomerge_threads_default () const;
     virtual const char* merge_domains_default () const;
     virtual const char* merge_repeats_default () const;
     virtual const char* max_dom_ovl_default () const;
@@ -154,6 +158,7 @@ public:
     virtual const char* min_seq_len_help () const;
     virtual const char* max_seq_len_help () const;
     virtual const char* max_qry_len_help () const;
+    virtual const char* nomerge_threads_help () const;
     virtual const char* merge_domains_help () const;
     virtual const char* merge_repeats_help () const;
     virtual const char* max_dom_ovl_help () const;

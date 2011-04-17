@@ -42,7 +42,7 @@ class MergingResultStorage : public AlignResultStorage
     void clear_accum ();
 public:
     MergingResultStorage (SimMergerBase& merger, unsigned capacity);
-    bool add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches);
+    bool add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj = NULL, QWORD subjid = 0);
     void flush ();
     bool reset ();
 };

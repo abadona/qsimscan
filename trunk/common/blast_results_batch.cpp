@@ -57,7 +57,7 @@ bool BlastResultsBatch :: match_found  (NN_SEQ& xseq, NN_SEQ& yseq, BATCH* batch
 
     // By stupid but established convention, X IS QUERY while processing the results
     // so we'll swap batch here
-    int tot_blen = swap_batches (batches, batch_no);
+    int tot_blen = swap_batches (batches, batch_no); // now x is query
 
     // recalculate the score
     float nscore = nu_score_b (yseq.seq, xseq.seq, batches, batch_no, &matches);
@@ -73,5 +73,5 @@ bool BlastResultsBatch :: match_found  (NN_SEQ& xseq, NN_SEQ& yseq, BATCH* batch
     passed_repeats_ ++;
 
     // save the result
-    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) matches - (int) (tot_blen - matches), matches, chi2score, 0, nscore, tot_blen, tot_blen, batch_no, batches);
+    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) matches - (int) (tot_blen - matches), matches, chi2score, 0, nscore, tot_blen, tot_blen, batch_no, batches, xseq.seq, xseq.uid);
 }

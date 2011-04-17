@@ -213,6 +213,22 @@ bool SegAlign::merge (ARVect& sims)
 
     // Make list of sim indices ordered by xpos
     UIntVect order;
+
+# if 0
+    range (order, sims.size ());
+    std::cerr << std::endl << "sims size : " << sims.size () << ", order size : " << order.size () << std::endl;
+    for (int ii = 0; ii < sims.size (); ii ++)
+    {
+        std::cerr << std::setw (3) << ii << " : " << std::setw (3) << order [ii] << " : " << std::setw (3) << sims [ii].batch_no_ << " : ";
+        for (int bi = 0; bi < sims [ii].batch_no_; bi ++)
+        {
+            BATCH& b = sims [ii].batches_ [bi];
+            std::cerr << "(" << b.xpos << "," << b.ypos << "," << b.len << ")";
+        }
+        std::cerr << std::endl;
+    }
+    std::sort (order.begin (), order.end (), CompareSimIdxByPos (sims, max_ovl_));
+#endif
     make_pos_ordered_sim_index (sims, max_ovl_, order);
 
     // Allocate array of prev_best control structures  (one per sim)

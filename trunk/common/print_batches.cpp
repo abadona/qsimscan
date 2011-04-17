@@ -140,6 +140,71 @@ void print_batches (SEQ& xseq, SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 
     stream << flush;
 }
 
+void print_batches_ascii_subj (SEQ& xseq, const char* ascy, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, std::ostream& stream, int margin, int width)
+{
+    int slen = 0;
+    int blen = 0;
+    int x = b_ptr->xpos;
+    int y = b_ptr->ypos;
+    int xstart = x;
+    int ystart = y;
+    int y0 = y;
+    char xc, yc;
+    char s[3][256];
+
+    stream << endl << setiosflags (ios::left);
+    while (b_cnt > 0)
+    {
+        xc = xseq.code2char (xseq.get_code (x));
+        yc = ascy [y - y0];
+
+        //special handling may be needed for (x < b_ptr->xpos && y < b_ptr->xpos)
+        //X insert
+        if (x < b_ptr->xpos)
+        {
+            s[0][slen] = xc;
+            s[1][slen] = ' ';
+            s[2][slen] = '-';
+            x++, slen++;
+        }
+        //Y insert
+        else if (y < b_ptr->ypos)
+        {
+            s[0][slen] = '-';
+            s[1][slen] = ' ';
+            s[2][slen] = yc;
+            y++, slen++;
+        }
+        //emit text batch
+        else if (blen < b_ptr->len)
+        {
+            s[0][slen] = xc;
+            s[1][slen] = (xc == yc)? '*' : ' ';
+            s[2][slen] = yc;
+            x++, y++, slen++, blen++;
+        }
+        else
+            blen = 0, b_cnt--, b_ptr++;
+        
+        //print accumulated lines
+        if ((slen > width - 7) || b_cnt <= 0)
+        {
+            //null terminate all strings
+            for (int i = 0; i < 3; i++)
+                s[i][slen] = 0;
+            
+            int xdisp = xseq.rev ? xseq.len - xstart - 1 : xstart;
+            int ydisp = ystart;
+            stream << endl << setw (margin) << "" << setw (6) << xdisp  << setw (0) << s[0];
+            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s[1];
+            stream << endl << setw (margin) << "" << setw (6) << ydisp  << setw (0) << s[2];
+            stream << endl;
+            
+            xstart = x, ystart = y, slen = 0;
+        }
+    }
+        stream << flush;
+}
 
 //create text batch AAxAA
 void print_batches_3 (AA_SEQ& xseq, AA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 24>* w, ostream& stream, int margin, int width)
@@ -359,7 +424,8 @@ int print_batches_cigar (const BATCH *b_ptr, int b_cnt, char* dest, unsigned des
                     dpos += pl;
                     if (dpos == destlen - 1)
                         break;
-                    dest [dpos++] = 'D';
+                    //dest [dpos++] = b_ptr->neutral_gap ? 'N' : 'I';
+                    dest [dpos++] = 'I';
                 }
                 if (pb->ypos + pb->len < b_ptr->ypos) // skip on y (query) == gap on x (subject)
                 {
@@ -369,7 +435,7 @@ int print_batches_cigar (const BATCH *b_ptr, int b_cnt, char* dest, unsigned des
                     dpos += pl;
                     if (dpos == destlen - 1)
                         break;
-                    dest [dpos++] = 'I';
+                    dest [dpos++] = 'D';
                 }
             }
         }
