@@ -19,14 +19,13 @@
 // For any questions please contact SciDM team by email at scidmteam@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
-#pragma warning (disable: 4503)
-
+//#pragma warning (disable: 4503)
 #include "cmdline.h"
 #include "resource.h"
 #include "cmdline_s.h"
 #include "rerror.h"
-#include "sciminmax.h"
-#include <string.h>
+#include <cstring>
+
 
 KeyFormat::KeyFormat (const char* shortopts, const char** longopts, const char* name, const char* section, const char* parameter, bool optional, bool has_arg, const char* arg_type, const char* def_value, const char* description)
 :
@@ -58,10 +57,10 @@ CmdLine :: CmdLine (KeysFormat& keys, ArgsFormat& args, int argc, char* argv [],
 :
 keys_format_ (keys),
 args_format_ (args),
-ok_ (true),
 first_optional_pos_ (-1),
 last_optional_pos_ (-1),
-repeatable_pos_ (-1)
+repeatable_pos_ (-1),
+ok_ (true)
 {
     validate_args_format (strict);
     parse (argc, argv, strict);
@@ -219,11 +218,11 @@ void CmdLine :: printArgs (std::ostream& o)
     {
         o << std::endl << "Arguments:";
         int argno = 0;
-        for (int fmtpos = 0; fmtpos < args_format_.size (); fmtpos ++)
+        for (unsigned fmtpos = 0; fmtpos < args_format_.size (); fmtpos ++)
         {
             int takes_min = args_format_ [fmtpos].optional_ ? 0 : 1;
             int takes_max = arguments_.size () - (args_format_.size () - last_optional_pos_) - fmtpos;
-            if (!args_format_ [fmtpos].repeatable_) takes_max = min_ (takes_max, 1);
+            if (!args_format_ [fmtpos].repeatable_) takes_max = std::min (takes_max, 1);
             o << std::endl << "  " << args_format_ [argno].name_.c_str () << " : ";
             if (takes_max <= 0)
             {
@@ -269,7 +268,7 @@ int CmdLine :: getFmtPos (int argno) const
     int space = arguments_.size () - (tail_sz + head_sz);
     if (space < 0)
         ERR ("Number of non-optional arguments is smaller then argument list size");
-    for (int fmtpos = 0; fmtpos < args_format_.size (); fmtpos ++)
+    for (unsigned fmtpos = 0; fmtpos < args_format_.size (); fmtpos ++)
     {
         advance = 0;
         ArgFormat& cur = args_format_ [fmtpos];
@@ -312,18 +311,25 @@ const char* CmdLine :: getArg (int no)
     return arguments_ [no].c_str ();
 }
 
+const unsigned MAX_LONGOPTS = 64;
+const unsigned MAX_LONGOPT_LEN = 512;
+
 void CmdLine :: parse (int argc, char** argv, bool strict)
 {
     // prepare the parameters and call cmdline_s get_opt
 
     Arglist arglist;
     Optdict optdict;
+    
 
     // allocate storage for long options spec
-    int longopts_no = 0;
+    unsigned longopts_no = 0;
     KeysFormat::iterator kitr;
+    char longopts_spec_buf [MAX_LONGOPTS][MAX_LONGOPT_LEN];
+    char* longopts_spec [MAX_LONGOPTS];
     for (kitr = keys_format_.begin (); kitr != keys_format_.end (); kitr ++) longopts_no += (*kitr).longopts_.size ();
-    char** longopts_spec = new char* [longopts_no + 1];
+    if (longopts_no + 1 >= MAX_LONGOPTS)
+        ers << "Too many command line options" << Throw;
 
     // fill in options specs and make option->spec map
     std::map <std::string, KeyFormat*> opt2spec;
@@ -348,10 +354,13 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
         svec::iterator loi = (*kitr).longopts_.begin ();
         for (; loi != (*kitr).longopts_.end (); loi ++, lidx ++)
         {
-            int lolen = (*loi).length () + 1;
+            unsigned lolen = (*loi).length () + 1;
             if ((*kitr).has_arg_) lolen ++;
-            longopts_spec [lidx] = new char [lolen];
+            if (lolen + 1 >= MAX_LONGOPT_LEN)
+                ers << "Command line option " << *loi << " is too long" << Throw;
+            // longopts_spec [lidx] = new char [lolen];
             const char* optstr = (*loi).c_str ();
+            longopts_spec [lidx] = longopts_spec_buf [lidx];
             strcpy (longopts_spec [lidx], optstr);
             if ((*kitr).has_arg_) strcat (longopts_spec [lidx], "=");
 
@@ -428,7 +437,7 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
         error_report_ += "Too many command-line arguments\n";
         ok_ = false;
     }
-    int min_arg_number = ((first_optional_pos_ != -1) ? first_optional_pos_ : 0)
+    unsigned min_arg_number = ((first_optional_pos_ != -1) ? first_optional_pos_ : 0)
                     + args_format_.size () - ((last_optional_pos_ == -1) ? 0 : last_optional_pos_);
     if (strict && ok_ && arguments_.size () < min_arg_number)
     {
@@ -436,12 +445,13 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
         error_report_ += "Too few command-line arguments. Please use -h for help.\n";
         ok_ = false;
     }
+    
 }
 
 KeyFormat* CmdLine :: keyFormat (const char* name)
 {
     // find a key in keys_format
-    for (int kfi = 0; kfi < keys_format_.size (); kfi ++)
+    for (unsigned kfi = 0; kfi < keys_format_.size (); kfi ++)
     {
         if (keys_format_[kfi].name_ == name)
             return &keys_format_ [kfi];
@@ -449,7 +459,7 @@ KeyFormat* CmdLine :: keyFormat (const char* name)
     return NULL;
 }
 
-ArgFormat* CmdLine :: argFormat (int argno)
+ArgFormat* CmdLine :: argFormat (unsigned argno)
 {
     if (argno >= args_format_.size () || argno < 0)
         return NULL;

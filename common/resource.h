@@ -103,15 +103,22 @@ template <class ValueType> class MemWrapper
     mutable bool controlled_;
 public:
     MemWrapper (unsigned size, bool control = true)
+    :
+    ptr_ (NULL),
+    controlled_ (control)
     {
         if (size)
         {
-            ptr_ = new ValueType [size];
-            if (!ptr_) Error (MemoryRerror);
+            try
+            {
+                ptr_ = new ValueType [size];
+            }
+            catch (std::bad_alloc&)
+            {
+            }
+            if (!ptr_) 
+                Error (MemoryRerror);
         }
-        else
-            ptr_ = NULL;
-        controlled_ = control;
     }
     MemWrapper (ValueType* ptr, bool control = true)
     :
@@ -208,15 +215,22 @@ template <class ValueType> class ConstMemWrapper
     mutable bool controlled_;
 public:
     ConstMemWrapper (unsigned size, bool control = true)
+    :
+    ptr_ (NULL),
+    controlled_ (control)
     {
         if (size)
         {
-            ptr_ = new ValueType [size];
-            if (!ptr_) Error (MemoryRerror);
+            try
+            {
+                ptr_ = new ValueType [size];
+            }
+            catch (std::bad_alloc&)
+            {
+            }
+            if (!ptr_) 
+                Error (MemoryRerror);
         }
-        else
-            ptr_ = NULL;
-        controlled_ = control;
     }
     ConstMemWrapper (const ValueType* ptr, bool control = true)
     :

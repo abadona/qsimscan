@@ -96,7 +96,14 @@ void FastaFile::add_seq ()
             {
                 // reallocate seqbuf_: increment space twice
                 unsigned new_sz = seq_buf_sz_ * 2;
-                char* newbuf = new char [new_sz + 1];
+                char* newbuf = NULL;
+                try
+                {
+                    newbuf = new char [new_sz + 1];
+                }
+                catch (std::bad_alloc&)
+                {
+                }
                 if (!newbuf)
                 {
                     ers << "ERROR: Not enough memory to hold the sequence" << namebuf_ << Throw;
@@ -115,20 +122,37 @@ void FastaFile::add_seq ()
 
 FastaFile::FastaFile ()
 :
-f_ (NULL)
+f_ (NULL),
+seqbuf_ (NULL)
 {
-    seqbuf_ = new char [INIT_SEQ_LEN+1];
-    if (!seqbuf_) ers << "Memory error" << Throw;
+    
+    try
+    {
+        seqbuf_ = new char [INIT_SEQ_LEN+1];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
+    if (!seqbuf_) 
+        Error (MemoryRerror);
     seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
 }
 
 FastaFile::FastaFile (const char* name)
 :
-f_ (NULL)
+f_ (NULL),
+seqbuf_ (NULL)
 {
-    seqbuf_ = new char [INIT_SEQ_LEN+1];
-    if (!seqbuf_) ers << "Memory error" << Throw;
+    try
+    {
+        seqbuf_ = new char [INIT_SEQ_LEN+1];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
+    if (!seqbuf_) 
+        Error (MemoryRerror);
     seq_buf_sz_ = INIT_SEQ_LEN;
     reset ();
     if (!open (name))

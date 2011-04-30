@@ -32,14 +32,22 @@ BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int rep_len, int rep
 MergingResultStorage (merger, keep_per_query),
 rep_percent_ (rep_perc),
 rep_len_ (rep_len),
+rep_buf_ (NULL),
 total_found_ (0),
 passed_repeats_ (0),
 triangle_only_ (triangle_only)
 {
     if (rep_len_)
     {
-        rep_buf_ = new int [rep_len_];
-        if (!rep_buf_) FATAL(NOEMEM);
+        try
+        {
+            rep_buf_ = new int [rep_len_];
+        }
+        catch (std::bad_alloc&)
+        {
+        }
+        if (!rep_buf_) 
+            Error (MemoryRerror);
     }
 }
 

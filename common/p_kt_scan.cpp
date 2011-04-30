@@ -189,7 +189,10 @@ void PKTSCAN::init_vars ()
     entries_ = NULL;
 
     // allocate queries array
-    queries_ = new SEQUENCE_INFO [max_queries_];
+    queries_ = NULL;
+    try {
+        queries_ = new SEQUENCE_INFO [max_queries_];
+    } catch (std::bad_alloc&) {}
     if (!queries_) ers << "unable to allocate queries array" << Throw;
 
     // count number of tuples (assume 24-letter alphabet)
@@ -197,7 +200,10 @@ void PKTSCAN::init_vars ()
     for (int pos = 0; pos < tuple_size_; pos++) total_tuples_ *= ALPHABET_SIZE;
 
     // allocate tuples_
-    tuples_ = new TUPLE_INFO [total_tuples_];
+    tuples_ = NULL;
+    try {
+        tuples_ = new TUPLE_INFO [total_tuples_];
+    } catch (std::bad_alloc&) {}
     if (!tuples_) ers << "unable to allocate tuples array" << Throw;
     memset (tuples_, 0, sizeof (TUPLE_INFO)*total_tuples_);
 
@@ -205,20 +211,31 @@ void PKTSCAN::init_vars ()
     init_tuple_auto_scores ();
 
     // init diagonal info array
-    diags_ = new DIAGONAL_ENTRY [max_target_len_ + max_tot_queries_len_];
+    diags_ = NULL;
+    try {
+        diags_ = new DIAGONAL_ENTRY [max_target_len_ + max_tot_queries_len_];
+    } catch (std::bad_alloc&) {}
     if (!diags_) ers << "unable to allocate diagonal info array" << Throw;
     memset (diags_, 0xff, sizeof (DIAGONAL_ENTRY) * (max_target_len_ + max_tot_queries_len_));
 
     // init batches array
-    batches_ = new BATCH [max_batch_];
+    batches_ = NULL;
+    try {
+        batches_ = new BATCH [max_batch_];
+    } catch (std::bad_alloc&) {}
     if (!batches_) ers << "unable to allocate batches array" << Throw;
 
     // init bands array
-    bands_ = new BAND [max_band_];
+    try {
+        bands_ = new BAND [max_band_];
+    } catch (std::bad_alloc&) {}
     if (!bands_) ers << "unable to allocate bands array" << Throw;
 
     // init hits array
-    hits_ = new int  [max_hit_];
+    hits_ = NULL;
+    try {
+        hits_ = new int  [max_hit_];
+    } catch (std::bad_alloc&) {}
     if (!hits_) ers <<  "unable to allocate hits array" << Throw;
 
     aligner_ = NULL;
