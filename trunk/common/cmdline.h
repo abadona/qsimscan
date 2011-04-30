@@ -22,7 +22,7 @@
 #ifndef __cmdline_h__
 #define __cmdline_h__
 
-#pragma warning (disable:4786)
+//#pragma warning (disable:4786)
 
 #include <string>
 #include <vector>
@@ -35,10 +35,10 @@ typedef std::vector <std::string> svec;
 struct KeyFormat
 {
     svec shortopts_;
-	svec longopts_;
-	std::string name_;
-	std::string section_;
-	std::string parameter_;
+    svec longopts_;
+    std::string name_;
+    std::string section_;
+    std::string parameter_;
     bool        optional_;
     bool        has_arg_;
     std::string arg_type_;
@@ -55,14 +55,14 @@ struct ArgFormat
     std::string type_;
     std::string description_;
     bool repeatable_;
-	bool optional_;
+    bool optional_;
     ArgFormat (const char* name, const char* type, const char* description, bool repeatable = false, bool optional = false)
         :
         name_ (name),
         type_ (type),
         description_ (description),
         repeatable_  (repeatable),
-		optional_ (optional)
+        optional_ (optional)
     {
     }
 };
@@ -74,8 +74,8 @@ class CmdLine
     ArgsFormat& args_format_;
     std::string error_report_;
     int first_optional_pos_;
-	int last_optional_pos_;
-	int repeatable_pos_;
+    int last_optional_pos_;
+    int repeatable_pos_;
     bool ok_;
 
     void validate_args_format (bool strict = true);
@@ -101,7 +101,7 @@ public:
     const char* getArg (int no);
 
     KeyFormat* keyFormat (const char* name);
-    ArgFormat* argFormat (int argno);
+    ArgFormat* argFormat (unsigned argno);
 };
 
 

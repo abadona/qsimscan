@@ -349,7 +349,13 @@ cur_pos_ (-1L)
 {
     fhandle_ = sci_open (fname, O_BINARY|O_RDONLY|O_SEQUENTIAL);
     if (fhandle_ == -1) ers << "Unable to open file " << fname << " for reading." << std::endl << strerror (errno) << Throw;
-    buffer_ = new char [LR_BUF_SIZE+1]; // +1 is needed because there may be a need to zero-terminate the full buffer
+    try
+    {
+        buffer_ = new char [LR_BUF_SIZE+1]; // +1 is needed because there may be a need to zero-terminate the full buffer
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!buffer_) Error (MemoryRerror);
     cur_line_beg_ = 0;
     cur_line_end_ = 0;
@@ -493,8 +499,17 @@ bool BufferedWriter::open (const char* fname, bool append)
     fhandle = ::sci_open (fname, flags, S_IREAD | S_IWRITE);
     if (fhandle == -1)
         return false;
-    buffer = new char [WRITE_BUF_SZ];
-    if (!buffer) Error (MemoryRerror);
+    if (!buffer)
+    {
+        try
+        {
+            buffer = new char [WRITE_BUF_SZ];
+        }
+        catch (std::bad_alloc&)
+        {
+        }
+        if (!buffer) Error (MemoryRerror);
+    }
     return true;
 }
 void BufferedWriter::close ()

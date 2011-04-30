@@ -189,7 +189,11 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
     }
     // put new batches into sim being updated (the one at cur
     AlignResult& upd_sim = sims [upd_sim_idx];
-    upd_sim.batches_ = new BATCH [batches.size ()];
+    try {
+        upd_sim.batches_ = new BATCH [batches.size ()];
+    } catch (std::bad_alloc&) {upd_sim.batches_ = NULL; }
+    if (!upd_sim.batches_) ERR(NOEMEM);
+    
     upd_sim.batch_no_ = batches.size ();
     std::copy (batches.begin (), batches.end (), (BATCH*) upd_sim.batches_);
     // adjust the sw score (NOTE: gaps introduced at zero cost here! Also score is NOT adjusted for removed overlaps!)

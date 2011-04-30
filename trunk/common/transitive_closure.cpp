@@ -44,10 +44,19 @@ void Closure::init (unsigned sz)
     clno_ = sz;
     singlet_no_ = sz;
     stage_ = FILL;
+    closure_ = NULL;
     if (sz_)
-        closure_ = new unsigned [sz];
-    else
-        closure_ = NULL;
+    {
+        try
+        {
+            closure_ = new unsigned [sz];
+        }
+        catch (std::bad_alloc&)
+        {
+        }
+        if (!closure_)
+            Error (MemoryRerror);
+    }
     for (unsigned i = 0; i < sz_; i ++)
         closure_[i] = i;
     stage_ = FILL;
@@ -88,7 +97,16 @@ Clusters* Closure::collect (bool include_singletons)
     if (stage_ != COLLECT)
         finalize (); // finalize if necessary
     // allocate the result (vector of vectors). Wrap it for automatic resource management
-    ObjWrapper <Clusters> result = new Clusters (); // the proper space allocated in fillClusters
+    ObjWrapper <Clusters> result = NULL;
+    try 
+    {
+        result = new Clusters (); // the proper space allocated in fillClusters
+    }
+    catch (std::bad_alloc&)
+    {
+    }
+    if (!result)
+        Error (MemoryRerror);
     // fill resut data
     fillClusters (*result, include_singletons);
     // release wrapper and return result

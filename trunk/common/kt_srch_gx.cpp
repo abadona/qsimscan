@@ -135,7 +135,14 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
 
 
     //allocate Y sequence info array
-    yi = new SEQ_INFO [max_ynum];
+    yi = NULL;
+    try
+    {
+        yi = new SEQ_INFO [max_ynum];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!yi)
         ERR("unable to allocate Y sequence info array");
 
@@ -148,7 +155,14 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
 
 
     //allocate k-tuple info array
-    ki = new KTUP_INFO [ki_len];
+    ki = NULL;
+    try
+    {
+        ki = new KTUP_INFO [ki_len];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!ki)
         ERR("unable to allocate k-tuple info array");
 
@@ -164,22 +178,29 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
     }
 
     //allocate x sequence (padd) buffer
-    xseq = new char [((max_x_len+3)>>2)+8];
+    xseq = NULL;
+    try
+    {
+        xseq = new char [((max_x_len+3)>>2)+8];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!xseq)
         ERR ("unable to allocate x sequence buffer");
     xseq = xseq + 4;
 
     //allocate diag info array
+    di = NULL;
     try
     {
         di = new DIAG_ENTRY [max_y_len + max_x_len + 1];
-        if (!di)
-            ERR("unable to allocate diagonal info array");
     }
     catch (std::bad_alloc)
     {
-        ers << "Insufficient memory for diagonal info array, requested " << max_y_len + max_x_len + 1 << " (" << max_x_len << " max_subj_len + " << max_y_len << " max_qry_len + 1) DIAG_ENTRY structures (" << sizeof (DIAG_ENTRY) << " bytes each, " << (max_y_len + max_x_len + 1)*sizeof (DIAG_ENTRY) / (1024*1024) <<  " Mbytes total)" << Throw;
     }
+    if (!di)
+        ers << "Insufficient memory for diagonal info array, requested " << max_y_len + max_x_len + 1 << " (" << max_x_len << " max_subj_len + " << max_y_len << " max_qry_len + 1) DIAG_ENTRY structures (" << sizeof (DIAG_ENTRY) << " bytes each, " << (max_y_len + max_x_len + 1)*sizeof (DIAG_ENTRY) / (1024*1024) <<  " Mbytes total)" << Throw;
 
 
     _ktups_found = 0;
@@ -200,7 +221,14 @@ int KT_SEARCH::add_yseq (NN_SEQ& yseq)
     yi[y_tnum].rev = yseq.rev;
 
     //word padd sequence data for safe unaligned access
-    ptr = new char [bytes + 8];
+    ptr = NULL;
+    try
+    {
+        ptr = new char [bytes + 8];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!ptr)
         ERR ("unable to allocate Y sequence data");
 
@@ -240,7 +268,14 @@ int KT_SEARCH::init ()
 
     //create k-tuple entry array
     //allocate k-tuple entry array
-    ke = new KTUP_ENTRY [ke_len];
+    ke = NULL;
+    try
+    {
+        ke = new KTUP_ENTRY [ke_len];
+    }
+    catch (std::bad_alloc&)
+    {
+    }
     if (!ke)
         ERR("unable to allocate k-tuple entry array");
 

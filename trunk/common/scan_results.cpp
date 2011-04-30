@@ -36,13 +36,13 @@ _passed_repeats (0),
 _scan_type      (st),
 _wm             (wm)
 {
+    _rep_buf = NULL;
     if (rep_len)
     {
-        _rep_buf = new int [rep_len];
+        try { _rep_buf = new int [rep_len];
+        } catch (std::bad_alloc&) {}
         if (!_rep_buf) ERR(NOEMEM);
     }
-    else
-        _rep_buf = NULL;
 }
 
 ScanResults :: ~ScanResults ()

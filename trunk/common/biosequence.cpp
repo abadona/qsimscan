@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "biosequence.h"
+#include "rerror.h"
 
 const char* const nn2char = "agct";
 
@@ -53,7 +54,16 @@ void reverse_seqs (std::vector <NN_SEQ>& src, std::vector <NN_SEQ>& dest)
         rs.uid = cur_src.uid;
         rs.len = cur_src.len;
         rs.rev = 1;
-        rs.seq = new char [(rs.len+3)>>2];
+        rs.seq = NULL;
+        try
+        {
+            rs.seq = new char [(rs.len+3)>>2];
+        }
+        catch (std::bad_alloc&)
+        {
+        }
+        if (!rs.seq)
+            ERR(NOEMEM);
         n_revert_seq (rs.seq, cur_src.seq, rs.len);
 
         dest.push_back (rs);
@@ -68,7 +78,16 @@ void reverse_seqs (std::vector <NA_SEQ>& src, std::vector <NA_SEQ>& dest)
         rs.uid = src [ii].uid;
         rs.len = src [ii].len;
         rs.rev = 1;
-        rs.seq = new char [(rs.len+3)>>2];
+        rs.seq = NULL;
+        try
+        {
+            rs.seq = new char [(rs.len+3)>>2];
+        }
+        catch (std::bad_alloc&)
+        {
+        }
+        if (!rs.seq)
+            ERR(NOEMEM);
         n_revert_seq (rs.seq, src [ii].seq, rs.len);
 
         dest.push_back (rs);
