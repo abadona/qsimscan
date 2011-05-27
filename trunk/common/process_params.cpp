@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2011.
+// This software module is developed by SCIDM team in 1999-2008.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@
 #include <string.h>
 #include "portability.h"
 
-static const char* COPYRIGHT_NOTE = "Copyleft: Scientific Data Management 2000-2011. All wrongs reserved";
+static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 2000-2007, Encyclopedia Genomica Gmbh. 2006-2007";
 static const char* DEF_VERSION = "0.6.a";
 
 const char *empty_longopt_list [] = {NULL};
