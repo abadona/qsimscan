@@ -47,13 +47,13 @@ class ALIGN;
 class ScanResults : public ResultReciever, public AlignResultStorage
 {
 public:
-	ScanResults (ALIGN* align, int keep_per_query, SEQ_SCAN_TYPE scantype, WEIGHTS<int, 24>* wm, double score_thresh = 0, int rep_len = 0, double rep_perc = 0);
-	virtual ~ScanResults ();
+    ScanResults (ALIGN* align, int keep_per_query, SEQ_SCAN_TYPE scantype, WEIGHTS<int, 24>* wm, double score_thresh = 0, int rep_len = 0, double rep_perc = 0);
+    virtual ~ScanResults ();
 
-	virtual void match_found (SEQ* query_seq,  SEQ* search_seq, int score);
+    virtual void match_found (SEQ* query_seq,  SEQ* search_seq, int score);
 
-	int totalFound    () {return _total_found;   }
-	int passedRepeats () {return _passed_repeats;}
+    int totalFound    () {return _total_found;   }
+    int passedRepeats () {return _passed_repeats;}
 
 private:
 
@@ -65,22 +65,22 @@ private:
 
     SEQ_SCAN_TYPE _scan_type;
 
-	// filters
-	ALIGN* _aligner;
-	#define MAX_BATCHES 200
-	BATCH _batches [MAX_BATCHES];
+    // filters
+    ALIGN* _aligner;
+    #define MAX_BATCHES 200
+    BATCH _batches [MAX_BATCHES];
 
-	WEIGHTS<int, 24>* _wm;
+    WEIGHTS<int, 24>* _wm;
 
     int  _score_thresh;
-	int  _rep_percent;
-	int  _rep_len;
-	int* _rep_buf;
+    int  _rep_percent;
+    int  _rep_len;
+    int* _rep_buf;
 
     longlong _cur_id;
 
-	int _total_found;
-	int _passed_repeats;
+    int _total_found;
+    int _passed_repeats;
 };
 
 

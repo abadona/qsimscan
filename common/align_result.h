@@ -42,9 +42,10 @@ struct AlignResult
     MemWrapper <BATCH> batches_;
 	MemWrapper <char> subject_;
     QWORD       subjid_;
+    DWORD       subjlen_;
 
     AlignResult ();
-    AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, const BATCH* batches, const char* binsubj = NULL, QWORD subjid = 0);
+    AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, const BATCH* batches, const char* binsubj = NULL, QWORD subjid = 0, DWORD subjlen = 0);
     bool operator < (const AlignResult& other) const;
     bool operator == (const AlignResult& other) const;
     bool overlaps (const AlignResult& other, unsigned max_orphan = 0) const;
@@ -67,7 +68,8 @@ bitscore_ (0.0),
 q_auto_score_ (0),
 t_auto_score_ (0),
 batch_no_ (0),
-subjid_ (0)
+subjid_ (0),
+subjlen_ (0)
 {
 }
 

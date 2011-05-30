@@ -46,7 +46,7 @@ public:
     AlignResultStorage (unsigned capacity);
     virtual ~AlignResultStorage ();
 
-    virtual bool add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj = NULL, QWORD subjid = 0);
+    virtual bool add_result (longlong qid, longlong sid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj = NULL, QWORD subjid = 0, DWORD subjlen = 0);
     unsigned totalStored () {return total_stored_;}
     unsigned resPerQuery (longlong id);
     ResultQueue::ElemVec* getQueryResults (longlong id);

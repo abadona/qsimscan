@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <cstring>
 
-AlignResult::AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, const BATCH* batches, const char* binsubj, QWORD subjid)
+AlignResult::AlignResult (longlong uid, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, const BATCH* batches, const char* binsubj, QWORD subjid, DWORD subjlen)
 :
 uid_ (uid),
 reverse_ (reverse),
@@ -37,7 +37,8 @@ bitscore_ (bitscore),
 q_auto_score_ (q_auto_score),
 t_auto_score_ (t_auto_score),
 batch_no_ (batch_no),
-subjid_ (subjid)
+subjid_ (subjid),
+subjlen_ (subjlen)
 {
     if (batch_no_)
     {
