@@ -113,7 +113,7 @@ void FastaFile::add_seq ()
                 seqbuf_ = newbuf;
                 seq_buf_sz_ = new_sz;
             }
-            seqbuf_ [seqlen_] = *p;
+            seqbuf_ [seqlen_] = tolower (*p);
             seqlen_ ++;
         }
         p ++;
