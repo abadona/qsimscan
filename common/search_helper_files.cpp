@@ -676,7 +676,7 @@ void eval_align_loc (SEQ& xseq, const char* yseq, WMatrix* w, BATCH* batches, un
         yptr = yseq + (yp - y0);
         for (unsigned p = 0; p < batches [i].len; p ++)
         {
-            xc = xseq.get_code (xp);
+            xc = base2char (xseq.get_code (xp));
             if (xc != *yptr)
                 (*mismatches) ++;
             xp ++;
