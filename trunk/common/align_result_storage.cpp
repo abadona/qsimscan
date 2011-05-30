@@ -32,7 +32,7 @@ AlignResultStorage :: ~AlignResultStorage ()
 {
 }
 
-bool AlignResultStorage :: add_result (longlong query_id, longlong search_id, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj, QWORD subjid)
+bool AlignResultStorage :: add_result (longlong query_id, longlong search_id, bool reverse, float al_score, int score, float chi2, double evalue, double bitscore, int q_auto_score, int t_auto_score, int batch_no, BATCH* batches, const char* binsubj, QWORD subjid, DWORD subjlen)
 {
     // if this is a first result for given y, expand the queue to desired size
     ResultQueue* q;
@@ -56,7 +56,7 @@ bool AlignResultStorage :: add_result (longlong query_id, longlong search_id, bo
     }
 
     // create the Result object
-    AlignResult r (search_id, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches, binsubj, subjid);
+    AlignResult r (search_id, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches, binsubj, subjid, subjlen);
 
     // add to heap.
     q->push (r);

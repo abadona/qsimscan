@@ -81,5 +81,5 @@ bool BlastResultsBatch :: match_found  (NN_SEQ& xseq, NN_SEQ& yseq, BATCH* batch
     passed_repeats_ ++;
 
     // save the result
-    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) matches - (int) (tot_blen - matches), matches, chi2score, 0, nscore, tot_blen, tot_blen, batch_no, batches, xseq.seq, xseq.uid);
+    return add_result (yseq.uid, xseq.uid, yseq.rev?true:false, (int) matches - (int) (tot_blen - matches), matches, chi2score, 0, nscore, tot_blen, tot_blen, batch_no, batches, xseq.seq, xseq.uid, xseq.len);
 }

@@ -1038,7 +1038,6 @@ void PKTSCAN::batch_assembler (BAND* band)
     // extend start by average undetectible length
     // clip by seq start
     int down_ext = min_ (extension_, query_pos);
-    down_ext = min_ (down_ext, target_pos);
 
     query_pos -= down_ext;
     target_pos -= down_ext;

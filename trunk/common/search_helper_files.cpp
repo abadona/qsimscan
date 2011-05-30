@@ -398,7 +398,7 @@ bool Search_helper_files::output_results_nn (AlignResultStorage& resrec, unsigne
 
                 // print batch parameters
                 out_file << std::endl << "     [Result " << resno+1 << "]";
-                out_file << std::endl << "     " << (*itr).second.namebuf << " : " << (*itr).second.hdrbuf;
+                out_file << std::endl << "     " << (*itr).second.namebuf << " (" << cur_res->subjlen_ << " bp) : " << (*itr).second.hdrbuf;
                 out_file << std::endl << "     " << ((cur_res->reverse_)?("REVERSE") : ("FORWARD")) << ", SCORE " << cur_res->al_score_;
                 if (cur_res->evalue_ != 0)   out_file << ", EVALUE " << cur_res->evalue_;
                 if (cur_res->chi2_ != 0)     out_file << ", CHI-2 " << cur_res->chi2_;
@@ -1124,9 +1124,9 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                     fwd_qry.len << TAB_STR <<
                     s_start << TAB_STR <<
                     s_end << TAB_STR <<
-                    0 << TAB_STR;
-                o.unsetf (std::ios::fixed | std::ios::scientific);
-                o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
+                    cur_res->subjlen_ << TAB_STR;
+                    o.unsetf (std::ios::fixed | std::ios::scientific);
+                    o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
                     std::setprecision (2) << std::fixed << std::noshowpoint << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
                     cur_res->t_auto_score_ << TAB_STR <<
