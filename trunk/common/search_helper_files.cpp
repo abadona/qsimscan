@@ -224,7 +224,6 @@ NN_SEQ*      Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_le
                     if (!n_xseq_.seq)
                         ERR(NOEMEM);
                 }
-                        
                 n_xseq_.len = target_.cur_seq_len ();
                 n_ascii2binary (n_xseq_.seq, int ((n_xseq_.len + 3) >> 2), target_.cur_seq (), 0, n_xseq_.len);
                 n_xseq_.rev = 0;
@@ -358,7 +357,7 @@ bool Search_helper_files::output_results_nn (AlignResultStorage& resrec, unsigne
 {
     SeqNameCache names;
     Nameent newent;
-    
+
     //MemWrapper <char> bin_buf ((max_x_len + 3) >> 2);
     out_file << std::endl;
     for (unsigned query_no = 0; query_no < f_qry.size (); query_no ++)
@@ -877,7 +876,7 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 // cur_search.seq = const_cast <char*> (target_.cur_seq ());
                 // inplace conversion
                 // n_ascii2binary (cur_search.seq, cur_search.len, cur_search.seq, 0, cur_search.len);
-                
+
                 CacheInsertRes res = names.insert (SeqNameCache::value_type (cur_res->uid_, newent));
                 SeqNameCache::iterator itr = res.first;
                 if (res.second)
@@ -1080,7 +1079,6 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
                 Subject_id = target_.cur_name ();
 */
-                
                 CacheInsertRes res = names.insert (SeqNameCache::value_type (cur_res->uid_, newent));
                 SeqNameCache::iterator itr = res.first;
                 if (res.second)
@@ -1092,7 +1090,6 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
 
                 // Fields: Query id, Subject id, % identity, alignment length, mismatches, gap openings, q. start, q. end, s. start, s. end, e-value, bit score
                 Subject_id = (*itr).second.namebuf; // target_.cur_name ();
-                
 
                 BATCH* batches = cur_res->batches_;
                 unsigned batch_no = cur_res->batch_no_;
