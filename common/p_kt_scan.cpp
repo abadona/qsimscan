@@ -34,6 +34,8 @@
 #endif
 
 // DEBUG puropses
+// #define TESTING
+
 #ifdef TESTING
 #include <stdio.h>
 #else
@@ -1038,6 +1040,7 @@ void PKTSCAN::batch_assembler (BAND* band)
     // extend start by average undetectible length
     // clip by seq start
     int down_ext = min_ (extension_, query_pos);
+    down_ext = min_ (down_ext, target_pos);
 
     query_pos -= down_ext;
     target_pos -= down_ext;
@@ -1099,9 +1102,15 @@ bool PKTSCAN::compatible (BAND* band1, BAND* band2)
     }
     else // overlap
     {
-        vd = max_ (0, band1->rightmost_ - band2->leftmost_); // actually 0-bonding is not needed if these are non overlapping bands
+
+        if (band1->rightmost_ < band2->leftmost_)
+            vd = band2->leftmost_ - band1->rightmost_; // actually 0-bonding is not needed if these are non overlapping bands
+        else if (band2->rightmost_ < band1->leftmost_)
+            vd = band1->leftmost_ - band2->rightmost_; // actually 0-bonding is not needed if these are non overlapping bands
+
+        // vd = max_ (0, band1->rightmost_ - band2->leftmost_); // actually 0-bonding is not needed if these are non overlapping bands
     }
-    double cost;
+    double cost = 0;
     if (hd)
         cost += weight_matrix_->gip + weight_matrix_->gep * hd;
     if (vd)

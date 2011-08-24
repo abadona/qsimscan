@@ -1085,7 +1085,7 @@ int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
             //follow diagonal until best score is achieved from v-trace or h-trace
             case ALIGN_DIAG:
                 bp -= bstep + 1;
-                if (state != (*bp & 3))
+                if (x > xref && y > yref && state != (*bp & 3))
                 {
                     state = *bp & 3;
                     if (b_cnt == max_cnt)
