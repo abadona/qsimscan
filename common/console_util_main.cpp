@@ -151,5 +151,5 @@ int main (int argc, char *argv[])
         std::cerr << "Unhandled exception caught" << std::endl << std::flush;
     }
 #endif
-    return rv;
+        return rv;
 }

@@ -95,7 +95,7 @@ public:
     /*
     follows backtrace matrix, fills BATCH array, returns number of batches
     */
-    int  backtrace (BATCH *b_ptr, int max_cnt);
+    int  backtrace (BATCH *b_ptr, int max_cnt, unsigned width = 0);
 
     int get_max_x () const { return max_x; }
     int get_max_y () const { return max_y; }

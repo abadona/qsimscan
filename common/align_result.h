@@ -40,7 +40,7 @@ struct AlignResult
     int         t_auto_score_;
     int         batch_no_;
     MemWrapper <BATCH> batches_;
-	MemWrapper <char> subject_;
+    MemWrapper <char> subject_;
     QWORD       subjid_;
     DWORD       subjlen_;
 
