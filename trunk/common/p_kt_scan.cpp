@@ -1056,12 +1056,11 @@ void PKTSCAN::batch_assembler (BAND* band)
 
     int score_a = aligner_->align_band (*query_seq, *target_, query_pos, target_pos, len, width);
 
-    int batch_no = aligner_->backtrace (batches_, max_batch_);
+    int batch_no = aligner_->backtrace (batches_, max_batch_, width);
 
     check_consistency (batch_no > 0);
     check_consistency (batches_->xpos >= 0);
     check_consistency (batches_->ypos >= 0);
-
 
     double query_auto;
     double target_auto;

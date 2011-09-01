@@ -22,7 +22,7 @@
 #include <sciminmax.h>
 #include "align.h"
 
-//#define DEBUG_TRACE
+// #define DEBUG_TRACE
 
 #ifdef DEBUG_TRACE
     #include <iostream>
@@ -1045,12 +1045,13 @@ int ALIGN::align_band (SEQ& xseq, SEQ& yseq, int xpos, int ypos, int len, int wi
 /*
 follows backtrace matrix, fills BATCH array, returns number of batches
 */
-int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
+int ALIGN::backtrace (BATCH *b_ptr, int max_cnt, unsigned width)
 {
     char *bp = max_bp;
     int state = *bp & 3;
     int x = max_x, y = max_y;
     int b_len = 1, b_cnt = 0;
+    int lowest_y = max_ (0, (int) yref - (int) width);
     BATCH* b_start = b_ptr;
 
     //backtrace from highest score
@@ -1106,7 +1107,7 @@ int ALIGN::backtrace (BATCH *b_ptr, int max_cnt)
                 break;
         }
     }
-    while (!done && x >= xref && y >= yref);
+    while (!done && x >= xref && y >= lowest_y);
     //if alignment ends at the edge of the matrix we get here
     if (state == ALIGN_DIAG)
     {
