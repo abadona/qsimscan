@@ -25,8 +25,8 @@
 #include <string.h>
 #include "portability.h"
 
-static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 2000-2007, Encyclopedia Genomica Gmbh. 2006-2007";
-static const char* DEF_VERSION = "0.6.a";
+static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 2000-2011";
+static const char* DEF_VERSION = "0.6.c";
 
 const char *empty_longopt_list [] = {NULL};
 const char *Process_params::parfname_default_ = "default.cfg";
