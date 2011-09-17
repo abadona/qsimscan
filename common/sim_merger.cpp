@@ -26,21 +26,21 @@
 #include <common_algo.h>
 #include <assert.h>
 
-bool SimMerger :: merge (ARVect& sims)
+bool SimMerger :: merge (ARVect& sims, const char* tseq)
 {
     bool toR = false;
     // rep / threads : select best from overlap groups
     if (merge_rep_ || merge_thr_)
-        if (merge_repeats (sims))
+        if (merge_repeats (sims, tseq))
             toR = true;
     // dom : conenct the connectables in the best way (dynamic progr - defined)
     if (merge_dom_)
-        if (merge_domains (sims))
+        if (merge_domains (sims, tseq))
             toR = true;
     return toR;
 }
 
-bool SimMerger :: merge_repeats (ARVect& sims)
+bool SimMerger :: merge_repeats (ARVect& sims, const char* tseq)
 {
     // transitive closure for any overlapping for more then max_rep_orp_ / intersecting
     unsigned tot = sims.size ();
@@ -118,8 +118,8 @@ public:
 };
 
 
-bool SimMerger :: merge_domains (ARVect& sims)
+bool SimMerger :: merge_domains (ARVect& sims, const char* tseq)
 {
-    return seg_aligner_.merge (sims);
+    return seg_aligner_.merge (sims, tseq);
 }
 

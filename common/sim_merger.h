@@ -42,8 +42,8 @@ class SimMerger : public SimMergerBase
     bool merge_dom_;
     unsigned max_rep_orp_;
 
-    bool merge_repeats (ARVect& sims);
-    bool merge_domains (ARVect& sims);
+    bool merge_repeats (ARVect& sims, const char* tseq);
+    bool merge_domains (ARVect& sims, const char* tseq);
 
     int calc_gap (const AlignResult& sim1, const AlignResult& sim2) const;
     unsigned find_best (const UIntVect& indices, const ARVect& sims) const;
@@ -66,7 +66,7 @@ public:
     seg_aligner_ (wm, gip, gep, gcap, max_dom_ovl)
     {
     }
-    bool merge (ARVect& sims);
+    bool merge (ARVect& sims, const char* tseq);
 };
 
 #endif

@@ -51,7 +51,7 @@ public:
     unsigned resPerQuery (longlong id);
     ResultQueue::ElemVec* getQueryResults (longlong id);
     ResultSet& heads () {return heads_;}
-    virtual void flush () {}
+    virtual void flush (const char* tseq) {}
     virtual bool reset ();
 };
 
