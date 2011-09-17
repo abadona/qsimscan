@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "0.98 (April 2011)";
+const char* VERSION = "0.9 (May 2008)";
 
 Process* process_factory ()
 {
@@ -228,6 +228,7 @@ bool Psimscan::search_next ()
 
     searched_aas_ += xseq_->len;
     searcher_->search (*xseq_);
+    results_->flush (xseq_->seq);
 
     if (skipped_ != sh_.skipped ())
         skipped (skipped_ = sh_.skipped ());
@@ -245,7 +246,7 @@ bool Psimscan::search_next ()
 
 bool Psimscan::write_results ()
 {
-    results_->flush ();
+    // results_->flush ();
     if (resno_ != results_->totalStored ())
         res_no (resno_ = results_->totalStored ());
 

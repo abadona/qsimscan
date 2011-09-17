@@ -75,10 +75,10 @@ class SegAlign
     void fill_trace (ARVect& sims, UIntVect& order, TraceVect& trace);
     unsigned find_continuations (TraceVect& trace, BoolVect& continuations);
     void make_score_order (TraceVect& trace, BoolVect& continuations, unsigned resno, UIntVect& target);
-    void backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove);
+    void backtrace_from (unsigned idx, const char* tseq, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove);
 public:
     SegAlign (WMatrix& wm, float gip, float gep, float gcap, int max_ovl);
-    bool merge (ARVect& sims);
+    bool merge (ARVect& sims, const char* tseq);
 };
 
 #endif

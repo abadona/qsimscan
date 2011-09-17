@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "0.98 (April 2011)";
+const char* VERSION = "0.93 (June 2008)";
 
 Process* process_factory ()
 {
@@ -257,6 +257,7 @@ bool Nsimscan::search_next ()
     searched_bps_ += xseq_->len;
     if (!searcher_->search (*xseq_))
         ERR ("Search engine error");
+    results_->flush (xseq_->seq);
 
     if (skipped_ != sh_.skipped ())
         skipped (skipped_ = sh_.skipped ());
@@ -274,7 +275,7 @@ bool Nsimscan::search_next ()
 
 bool Nsimscan::write_results ()
 {
-    results_->flush ();
+    // results_->flush ();
     if (resno_ != results_->totalStored ())
         res_no (resno_ = results_->totalStored ());
 

@@ -21,6 +21,7 @@
 
 #include "seg_align.h"
 #include "weights.h"
+#include "sequtil.h"
 #include <common_typedefs.h>
 #include <common_algo.h>
 #include <deque>
@@ -125,7 +126,7 @@ void SegAlign::make_score_order (TraceVect& trace, BoolVect& continuations, unsi
     std::sort (target.begin (), target.end (), CompareTraceIdxByScore (trace));
 }
 
-void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove)
+void SegAlign::backtrace_from (unsigned idx, const char* tseq, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove)
 {
     // backtrace:
     // while there is preceeding sim:
@@ -173,7 +174,7 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
         }
         // add adjusted batches to (front of) accumulator
         batches.insert (batches.begin (), (BATCH*) sims [idx].batches_, nbp + 1);
-        al_score += sims [idx].score_; // - GAP cost ?
+        al_score += sims [idx].score_; // - GAP cost ? OR Capped affine cost?
         score += sims [idx].score_;
         bitscore += sims [idx].bitscore_;
         evalue = min_ (evalue, sims [idx].evalue_);
@@ -193,9 +194,20 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
         upd_sim.batches_ = new BATCH [batches.size ()];
     } catch (std::bad_alloc&) {upd_sim.batches_ = NULL; }
     if (!upd_sim.batches_) ERR(NOEMEM);
-    
     upd_sim.batch_no_ = batches.size ();
     std::copy (batches.begin (), batches.end (), (BATCH*) upd_sim.batches_);
+    // reset the upd_sim.subject_
+    if (!!upd_sim.subject_)
+    {
+        // TODO: there may be more efficient way, with lesser reallocations 
+        BATCH& lbatch = *(((BATCH*) upd_sim.batches_) + upd_sim.batch_no_ - 1);
+        BATCH& fbatch = *((BATCH*) upd_sim.batches_);
+        unsigned newsubjlen = lbatch.ypos + lbatch.len - fbatch.ypos;
+        upd_sim.subject_ = new char [newsubjlen];
+        // memcpy ((char*) upd_sim.subject_, tseq + fbatch.ypos, newsubjlen);
+        // TODO: this works for nucleotide sequence only. Presently protein sequences are not passed through subject_ attributes. If they are, discrimination of sequence types + use of memcpy for proteins will be needed 
+        n_binary2ascii ((char*) upd_sim.subject_, newsubjlen, tseq, fbatch.ypos, newsubjlen);
+    }
     // adjust the sw score (NOTE: gaps introduced at zero cost here! Also score is NOT adjusted for removed overlaps!)
     upd_sim.score_ = score;
     upd_sim.al_score_ = al_score;
@@ -210,7 +222,7 @@ void SegAlign::backtrace_from (unsigned idx, TraceVect& trace, ARVect& sims, Boo
 // dynamic programming
 // find best set of connected paths over similarity segments
 
-bool SegAlign::merge (ARVect& sims)
+bool SegAlign::merge (ARVect& sims, const char* tseq)
 {
     if (sims.size () <= 1)
         return false; // nothing to do
@@ -258,7 +270,7 @@ bool SegAlign::merge (ARVect& sims)
 
     // for each similarity without continuation (in score descending order):
     for (UIntVect::iterator titr = score_order.begin (); titr != score_order.end (); titr ++)
-        backtrace_from (*titr, trace, sims, processed, to_remove);
+        backtrace_from (*titr, tseq, trace, sims, processed, to_remove);
 
     // remove sims at remove positions
     remove_mask (sims, to_remove);

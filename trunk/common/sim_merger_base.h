@@ -28,7 +28,7 @@ class SimMergerBase
 {
 public:
     virtual ~SimMergerBase () {}
-    virtual bool merge (ARVect& sims) {}
+    virtual bool merge (ARVect& sims, const char* tseq) {}
 };
 
 #endif

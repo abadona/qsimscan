@@ -34,7 +34,7 @@ bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse,
 {
     if (cur_sid_ != sid)
     {
-        flush ();
+        // flush (binsubj);
         cur_sid_ = sid;
     }
     AlignResult r (sid, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches, binsubj, subjid, subjlen);
@@ -42,14 +42,14 @@ bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse,
     accum_no_ ++;
 }
 
-void MergingResultStorage::flush ()
+void MergingResultStorage::flush (const char* tseq)
 {
     if (!accum_no_)
         return;
     for (QryResults::iterator qi = accum_.begin (); qi != accum_.end (); qi ++)
     {
         ARVect& alignments = (*qi).second;
-        merger_.merge (alignments);
+        merger_.merge (alignments, tseq);
         for (ARVect::iterator ri = alignments.begin (); ri != alignments.end (); ri ++)
             AlignResultStorage::add_result ((*qi).first, *ri);
     }
