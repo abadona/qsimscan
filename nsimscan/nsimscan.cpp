@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "0.93 (June 2008)";
+const char* VERSION = "1.0.40 (May 2011)";
 
 Process* process_factory ()
 {
@@ -326,7 +326,7 @@ bool Nsimscan::report_results_handler ()
 
 // naming convention
 const char* Nsimscan::process_name () {return ::process_name ();}
-const char* Nsimscan::description () {return "Fast nucleotide sequence similarity search, based on YABLAST algorithm";}
+const char* Nsimscan::description () {return "Fast nucleotide sequence similarity search, based on QSimScan algorithm";}
 const char* Nsimscan::version () {return VERSION;}
 const char* Nsimscan::processing_item_name ()
 {
