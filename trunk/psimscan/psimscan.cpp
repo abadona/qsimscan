@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "0.9 (May 2008)";
+const char* VERSION = "1.0.45 (September 2011)";
 
 Process* process_factory ()
 {
@@ -297,7 +297,7 @@ bool Psimscan::report_results_handler ()
 
 // naming convention
 const char* Psimscan::process_name () {return ::process_name ();}
-const char* Psimscan::description () {return "Fast protein similarity search, based on YABLAST algorithm";}
+const char* Psimscan::description () {return "Fast protein similarity search, based on QSimScan algorithm";}
 const char* Psimscan::version () {return VERSION;}
 const char* Psimscan::processing_item_name ()
 {
