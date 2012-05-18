@@ -43,6 +43,7 @@
 
 #define DEFAULT_MAX_SHIFT 4     // gap size accounted for in intial scan
 #define DEFAULT_K_THRESH 20.0   // in self-correlation averages on the query sequence
+#define DEFAULT_STEP 1 // step over subject sequence (shift between adjuscent tuples for lookup)
 #define DEFAULT_EXTEND_FACTOR 2.0 // number of tismes to extend the band by average undetectible gap size
 #define DEFAULT_WIDEN_FACTOR 3  // number of diagonals to widen the band before calling banded alignment
 #define DEFAULT_DIST_FACT 1.0 // multiplier for diagonal distance penalty
@@ -165,6 +166,7 @@ class PKTSCAN
 
     double k_thresh_;
     int max_shift_;
+    unsigned step_;
 
     double ave_self_match_;
     double min_self_match_;
@@ -217,15 +219,16 @@ public:
     virtual ~PKTSCAN ();
 
     // void set_tuple_weights (int* tuple_weights = NULL);
-    bool add_query 	(SEQ& qseq);
+    bool add_query     (SEQ& qseq);
     void compute_lookup_space (double threshold = DEFAULT_DIVERSITY);
     void fill_lookup_table ();
     void init_search ();
-    void search	(SEQ& xseq);
+    void search    (SEQ& xseq);
     void reset_y ();           // prepares for new cycle of search
 
     void k_thresh (double opt) { k_thresh_ = opt; }
     void max_shift (int opt);
+    void step (int opt) { step_ = (unsigned) opt; }
     void extend_factor (double opt) {extend_factor_ = opt;}
     void widen_factor (int opt) {widen_factor_ = (unsigned) opt;}
     void dist_fact (double opt) {distance_factor_ = opt;}

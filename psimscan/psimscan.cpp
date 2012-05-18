@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "1.0.45 (September 2011)";
+const char* VERSION = "0.9";
 
 Process* process_factory ()
 {
@@ -161,6 +161,7 @@ bool Psimscan::prepare_searcher ()
     // set search parameters
     searcher_->k_thresh(p_->k_thresh ());
     searcher_->max_shift (p_->max_shift ());
+    searcher_->step (p_->step ());
     searcher_->extend_factor (p_->extend_band ());
     searcher_->widen_factor (p_->widen_band ());
     searcher_->dist_fact (p_->dist_fact ());
@@ -297,7 +298,7 @@ bool Psimscan::report_results_handler ()
 
 // naming convention
 const char* Psimscan::process_name () {return ::process_name ();}
-const char* Psimscan::description () {return "Fast protein similarity search, based on QSimScan algorithm";}
+const char* Psimscan::description () {return "Fast protein similarity search, based on YABLAST algorithm";}
 const char* Psimscan::version () {return VERSION;}
 const char* Psimscan::processing_item_name ()
 {

@@ -245,6 +245,7 @@ void PKTSCAN::init_vars ()
     // assign default values for search parameters
     k_thresh_   = DEFAULT_K_THRESH;
     max_shift_  = DEFAULT_MAX_SHIFT;
+    step_ = DEFAULT_STEP;
     widen_factor_ = DEFAULT_WIDEN_FACTOR;
     extend_factor_ = DEFAULT_EXTEND_FACTOR;
     distance_factor_ = DEFAULT_DIST_FACT;
@@ -624,7 +625,7 @@ void PKTSCAN::init_search ()
     std::cerr << "    max_target_len: " << max_target_len_ << std::endl;
     std::cerr << "    max_query_len: " << max_query_len << std::endl;
     std::cerr << "    weight_matrix: gip " << weight_matrix_->gip << ", gep " << weight_matrix_->gep << std::endl;
-    std::cerr << "					 minmx " << weight_matrix_->minmx << ", maxmx " << weight_matrix_->maxmx << std::endl;
+    std::cerr << "                     minmx " << weight_matrix_->minmx << ", maxmx " << weight_matrix_->maxmx << std::endl;
     int x1, x2;
     for (x1 = 0; x1 < AANUM; x1 ++)
     {
@@ -750,7 +751,7 @@ void PKTSCAN::diag_scanner ()
 
     // for every position from 0 to (target_len_ - tuple_size_)
     int last_pos = target_len_ - tuple_size_;
-    for (int target_pos = 0; (target_pos < last_pos) && !over_limit; target_pos ++, target_seq ++)
+    for (int target_pos = 0; (target_pos < last_pos) && !over_limit; target_pos += step_, target_seq += step_)
     {
         // make the tuple index
         cur_tuple_idx = calc_tuple_index (target_seq, tuple_size_);
