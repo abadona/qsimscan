@@ -32,6 +32,7 @@ class Psimscan_params : public Search_params
     double approx_;
     int k_size_;
     double k_thresh_;
+    int step_;
     int max_shift_;
     std::string kdistr_name_;
     double extend_band_;
@@ -65,6 +66,7 @@ public:
     int k_size () const {return k_size_;}
     double k_thresh () const {return k_thresh_;}
     int max_shift () const {return max_shift_;}
+    int step () const {return step_;}
     const char* kdistr_name () const {return kdistr_name_.c_str ();}
     double extend_band () const { return extend_band_;}
     int widen_band () const { return widen_band_;}
@@ -86,6 +88,7 @@ public:
     void k_size (int opt) { k_size_ = opt;}
     void k_thresh (double opt) { k_thresh_ = opt;}
     void max_shift (int opt) { max_shift_ = opt;}
+    void step (int opt) { step_ = opt;}
     void kdistr_name (const char* opt) { kdistr_name_ = opt;}
     void extend_band (double opt) { extend_band_ = opt;}
     void widen_band (int opt) { widen_band_ = opt;}
@@ -107,6 +110,7 @@ public:
     virtual const char* k_size_default () const;
     virtual const char* k_thresh_default () const;
     virtual const char* max_shift_default () const;
+    virtual const char* step_default () const;
     virtual const char* kdistr_name_default () const;
     virtual const char* extend_band_default () const;
     virtual const char* widen_band_default () const;
@@ -133,6 +137,7 @@ public:
     virtual const char* k_size_help () const;
     virtual const char* k_thresh_help () const;
     virtual const char* max_shift_help () const;
+    virtual const char* step_help () const;
     virtual const char* kdistr_name_help () const;
     virtual const char* extend_band_help () const;
     virtual const char* widen_band_help () const;

@@ -23,7 +23,7 @@
 #include <acc_str.h>
 
 extern const char* VERSION;
-static const char* HEADER = "Tool for searching similarities in protein databases.\nBased on QSIMSCAN algorithm by SciDM";
+static const char* HEADER = "Tool for searching similarities in protein databases.\nBased on YABLAST algorithm by SciDM";
 
 // defaults
 
@@ -38,6 +38,7 @@ static const char K_SIZE_DEFAULT [] = "5";        // tuple size
 static const char APPROX_DEFAULT [] = "0.84";     // maximal diversification score - fraction of self-score
 static const char K_THRESH_DEFAULT [] = "18.0";   // initial hit threshold (in self-correlation averages)
 static const char MAX_SHIFT_DEFAULT [] = "3";     // maximum detectible gap size
+static const char STEP_DEFAULT [] = "1";          // step size over subject sequences
 static const char KDISTR_NAME_DEFAULT [] = "";    // name for the object containing ktuple distribution. Unused for now
 static const char EXTEND_BAND_DEFAULT [] = "1.5"; // the multiplier for max. undetectible gap size for calculating band extension
 static const char WIDEN_BAND_DEFAULT [] = "3";    // the number of diagonals to the sides to leftmost and rightmost hits to check in band alignment
@@ -66,6 +67,7 @@ static const char K_SIZE_HELP [] = "tuple size";
 static const char APPROX_HELP [] = "Maximum diversification (fraction of self-score)";
 static const char K_THRESH_HELP [] = "initial hit threshold (in self-correlation averages)";
 static const char MAX_SHIFT_HELP [] = "maximum detectible gap size";
+static const char STEP_HELP [] = "size of a step, in aa residues, over subject sequence";
 static const char KDISTR_NAME_HELP [] = "name for the object containing ktuple distribution";
 static const char EXTEND_BAND_HELP [] = "band extension (multiplier for maximal undetectible gap size)";
 static const char WIDEN_BAND_HELP [] = "number of diagonals to the sides to leftmost and rightmost hits to check in band alignment";
@@ -108,6 +110,7 @@ static const char* loapprox []   = {"approx", NULL};
 static const char* loksize []    = {"ksize", NULL};
 static const char* lokthresh []  = {"kthresh", NULL};
 static const char* lomxshift []  = {"mxshift", NULL};
+static const char* lostep []     = {"step", NULL};
 static const char* loext []      = {"ext", NULL};
 static const char* lowiden []    = {"widen", NULL};
 static const char* lodistfact [] = {"distfact", NULL};
@@ -126,18 +129,19 @@ bool Psimscan_params::prepareCmdlineFormat ()
         keys_format_.push_back (KeyFormat ("", lomaxq,    "maxq",    PRE_FILTERS_SECTNAME,  "MAX_QUERIES_NUMBER",  true, true, INTEGER_STR, max_queries_number_default (), max_queries_number_help ()));
         keys_format_.push_back (KeyFormat ("", lototqlen, "totqlen", PRE_FILTERS_SECTNAME,  "MAX_TOTAL_QUERIES_LEN",true,true, INTEGER_STR, max_total_queries_len_default (),  max_total_queries_len_help ()));
 
-        keys_format_.push_back (KeyFormat ("", loapprox,  "approx",  KTSEARCH_SECTNAME,     "APPROX",              true, true, FLOAT_STR,   approx_default (), approx_help ()));
-        keys_format_.push_back (KeyFormat ("", loksize,   "ksize",   KTSEARCH_SECTNAME,     "K_SIZE",              true, true, INTEGER_STR, k_size_default (), k_size_help ()));
-        keys_format_.push_back (KeyFormat ("", lokthresh, "kthresh", KTSEARCH_SECTNAME,     "K_THRESH",            true, true, FLOAT_STR,   k_thresh_default (), k_thresh_help ()));
-        keys_format_.push_back (KeyFormat ("", lomxshift, "mxshift", KTSEARCH_SECTNAME,     "MAX_SHIFT",           true, true, INTEGER_STR, max_shift_default (), max_shift_help ()));
+        keys_format_.push_back (KeyFormat ("", loapprox,  "approx",  KTSEARCH_SECTNAME,     "APPROX",              true, true, FLOAT_STR,   approx_default (),      approx_help ()));
+        keys_format_.push_back (KeyFormat ("", loksize,   "ksize",   KTSEARCH_SECTNAME,     "K_SIZE",              true, true, INTEGER_STR, k_size_default (),      k_size_help ()));
+        keys_format_.push_back (KeyFormat ("", lokthresh, "kthresh", KTSEARCH_SECTNAME,     "K_THRESH",            true, true, FLOAT_STR,   k_thresh_default (),    k_thresh_help ()));
+        keys_format_.push_back (KeyFormat ("", lomxshift, "mxshift", KTSEARCH_SECTNAME,     "MAX_SHIFT",           true, true, INTEGER_STR, max_shift_default (),   max_shift_help ()));
+        keys_format_.push_back (KeyFormat ("s",lostep,    "step",    KTSEARCH_SECTNAME,     "STEP",                true, true, INTEGER_STR, step_default (),        step_help ()));
         keys_format_.push_back (KeyFormat ("", loext,     "ext",     KTSEARCH_SECTNAME,     "EXTEND_BAND",         true, true, FLOAT_STR,   extend_band_default (), extend_band_help ()));
-        keys_format_.push_back (KeyFormat ("", lowiden,   "widen",   KTSEARCH_SECTNAME,     "WIDEN_BAND",          true, true, INTEGER_STR, widen_band_default (), widen_band_help ()));
-        keys_format_.push_back (KeyFormat ("", lodistfact,"distfact",KTSEARCH_SECTNAME,     "DIST_FACT",           true, true, FLOAT_STR,   dist_fact_default (), dist_fact_help ()));
-        keys_format_.push_back (KeyFormat ("", lonoeval,  "noeval",  POST_FILTERS_SECTNAME, "EVAL_EVAL",           true, false,BOOLEAN_STR, eval_eval_default (), eval_eval_help ()));
-        keys_format_.push_back (KeyFormat ("", lominlen,  "minlen",  POST_FILTERS_SECTNAME, "MIN_LEN",             true, true, INTEGER_STR, min_len_default (), min_len_help ()));
-        keys_format_.push_back (KeyFormat ("", lominsc,   "minsc",   POST_FILTERS_SECTNAME, "MIN_SCORE",           true, true, FLOAT_STR,   min_score_default (), min_score_help ()));
-        keys_format_.push_back (KeyFormat ("", logep,     "gep",     SWSEARCH_SECTNAME,     "GEP",                 true, true, FLOAT_STR,   gep_default (), gep_help ()));
-        keys_format_.push_back (KeyFormat ("", logip,     "gip",     SWSEARCH_SECTNAME,     "GIP",                 true, true, FLOAT_STR,   gip_default (), gip_help ()));
+        keys_format_.push_back (KeyFormat ("", lowiden,   "widen",   KTSEARCH_SECTNAME,     "WIDEN_BAND",          true, true, INTEGER_STR, widen_band_default (),  widen_band_help ()));
+        keys_format_.push_back (KeyFormat ("", lodistfact,"distfact",KTSEARCH_SECTNAME,     "DIST_FACT",           true, true, FLOAT_STR,   dist_fact_default (),   dist_fact_help ()));
+        keys_format_.push_back (KeyFormat ("", lonoeval,  "noeval",  POST_FILTERS_SECTNAME, "EVAL_EVAL",           true, false,BOOLEAN_STR, eval_eval_default (),   eval_eval_help ()));
+        keys_format_.push_back (KeyFormat ("", lominlen,  "minlen",  POST_FILTERS_SECTNAME, "MIN_LEN",             true, true, INTEGER_STR, min_len_default (),     min_len_help ()));
+        keys_format_.push_back (KeyFormat ("", lominsc,   "minsc",   POST_FILTERS_SECTNAME, "MIN_SCORE",           true, true, FLOAT_STR,   min_score_default (),   min_score_help ()));
+        keys_format_.push_back (KeyFormat ("", logep,     "gep",     SWSEARCH_SECTNAME,     "GEP",                 true, true, FLOAT_STR,   gep_default (),         gep_help ()));
+        keys_format_.push_back (KeyFormat ("", logip,     "gip",     SWSEARCH_SECTNAME,     "GIP",                 true, true, FLOAT_STR,   gip_default (),         gip_help ()));
         keys_format_.push_back (KeyFormat ("", lomatrix,  "matrix",  SWSEARCH_SECTNAME,     "MATRIX_NAME",         true, true, STRING_STR,  matrix_name_default (), matrix_name_help ()));
     }
     return toR;
@@ -156,6 +160,7 @@ bool Psimscan_params::prepareParameters ()
         {"K_SIZE", INTEGER_STR, k_size_default (), k_size_help ()},
         {"K_THRESH", FLOAT_STR, k_thresh_default (), k_thresh_help ()},
         {"MAX_SHIFT", INTEGER_STR, max_shift_default (), max_shift_help ()},
+        {"STEP", INTEGER_STR, step_default (), step_help ()},
         {"KDISTR_NAME", STRING_STR, kdistr_name_default (), kdistr_name_help ()},
         {"EXTEND_BAND", FLOAT_STR, extend_band_default (), extend_band_help ()},
         {"WIDEN_BAND", INTEGER_STR, widen_band_default (), widen_band_help ()},
@@ -197,6 +202,7 @@ bool Psimscan_params::interpreteParameters ()
         k_size      (parameters_->getInteger   (KTSEARCH_SECTNAME, "K_SIZE"));
         k_thresh    (parameters_->getFloat     (KTSEARCH_SECTNAME, "K_THRESH"));
         max_shift   (parameters_->getInteger   (KTSEARCH_SECTNAME, "MAX_SHIFT"));
+        step        (parameters_->getInteger   (KTSEARCH_SECTNAME, "STEP"));
         kdistr_name (parameters_->getParameter (KTSEARCH_SECTNAME, "KDISTR_NAME"));
         extend_band (parameters_->getFloat     (KTSEARCH_SECTNAME, "EXTEND_BAND"));
         widen_band  (parameters_->getInteger   (KTSEARCH_SECTNAME, "WIDEN_BAND"));
@@ -241,6 +247,11 @@ const char* Psimscan_params::k_thresh_default () const
 const char* Psimscan_params::max_shift_default () const
 {
     return MAX_SHIFT_DEFAULT;
+}
+
+const char* Psimscan_params::step_default () const
+{
+    return STEP_DEFAULT;
 }
 
 const char* Psimscan_params::kdistr_name_default () const
@@ -324,6 +335,11 @@ const char* Psimscan_params::k_thresh_help () const
 const char* Psimscan_params::max_shift_help () const
 {
     return MAX_SHIFT_HELP;
+}
+
+const char* Psimscan_params::step_help () const
+{
+    return STEP_HELP;
 }
 
 const char* Psimscan_params::kdistr_name_help () const
