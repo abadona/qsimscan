@@ -22,6 +22,7 @@
 #define __acc_str_cpp__
 #include "acc_str.h"
 
+#if 0
 const char* TRUE_STR = "TRUE";
 const char* FALSE_STR = "FALSE";
 const char* YES_STR = "YES";
@@ -47,6 +48,7 @@ const char* STRING_STR = "boolean";
 const char* FLOAT_STR = "float_number";
 const char* DOUBLE_STR = "double_prec_number";
 const char* OBJNAME_STR = "object_name";
+#endif
 
 
 const char* FAIL_OPEN_SUBSYSTEM = "Subsystem open failed on Session object";
@@ -134,6 +136,9 @@ const char* NCBI_TAXID_NOMEN_ABBR = "taxid";
 const char* FEATURE_KEYS_CLASSIFICATION_NAME = "FeatureKeys";
 const char* FEATURE_QUALS_CLASSIFICATION_NAME = "FeatureQualifiers";
 const char* NCBI_TAXONOMY_CLASSIFICATION_NAME = "NCBI_taxonomy";
+const char* EBI_TAXONOMY_CLASSIFICATION_NAME = "EBI_taxonomy";
+const char* SEQ_FILE_PATH_CLASSIFICATION_NAME = "SEQ_FILE_PATH";
+const char* SEQ_FILE_PATH_CLASSIFICATION_DESCR = "Location of source sequence data file in the filesystem";
 
 const char* NUCL_GC_ASSOC_NAME = "tax_nuclear_gencode";
 const char* MITO_GC_ASSOC_NAME = "tax_mitochondrial_gencode";
@@ -149,46 +154,3 @@ const char* CHLO_GC_CLASS_NAME = CHLO_GC_ASSOC_NAME;
 const char* SEQ_SIM_CLUSTERING_NAME = "SEQ_SIM_CLUSTERING";
 const char* SEQ_MAP_CLUSTERING_NAME = "SEQ_HITMAP_CLUSTERING";
 
-#include <string.h>
-#include <portability.h>
-
-const char* inverse_bs (const char* bs)
-{
-    if (bs == TRUE_STR || strcasecmp (bs, TRUE_STR) == 0)
-        return FALSE_STR;
-    else if (bs == FALSE_STR || strcasecmp (bs, FALSE_STR) == 0)
-        return TRUE_STR;
-    else
-        return bs;
-}
-
-static const char* true_strs  [] = {TRUE_STR, YES_STR, T_STR, Y_STR};
-static const char* false_strs [] = {FALSE_STR, NO_STR, F_STR, N_STR};
-
-bool bool_eval (const char* bs, bool* value)
-{
-    int idx;
-    for (idx = 0; idx < sizeof (true_strs) / sizeof (const char*); idx ++)
-    {
-        if (strcasecmp (true_strs [idx], bs) == 0)
-        {
-            if (value) *value = true;
-            return true;
-        }
-    }
-    for (idx = 0; idx < sizeof (false_strs) / sizeof (const char*); idx ++)
-    {
-        if (strcasecmp (false_strs [idx], bs) == 0)
-        {
-            if (value) *value = false;
-            return true;
-        }
-    }
-    return false;
-}
-
-const char* bool_str (bool val)
-{
-    if (val) return TRUE_STR;
-    else return FALSE_STR;
-}

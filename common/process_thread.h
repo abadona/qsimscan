@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __process_thread_h__
@@ -46,11 +46,10 @@ public:
     }
     STATE;
 
-//private:
+private:
 
 //    unsigned long processing_thread_;
 
-protected:
 
     // CRITICAL_SECTION critical_section_;
 #ifndef NOTHREADS
@@ -58,11 +57,11 @@ protected:
 #endif
 
     STATE state_;
-    bool interrupt_;     // shared
-    bool save_results_;
-
+    bool interrupt_;     
     bool error_;
+
     std::string error_string_;
+    bool save_results_;
 
     time_t start_time_sec_;
     time_t end_time_sec_;
@@ -74,22 +73,14 @@ protected:
     longlong subphase_start_current_;
     longlong last_current_;
 
-    longlong total_;     // shared
-    longlong current_;   // shared
-    longlong skipped_;   // shared
-    longlong res_no_;    // shared
-    long phase_;         // shared
-    long subphase_;      // shared
+    longlong total_;
+    longlong current_;
+    longlong skipped_;
+    longlong res_no_;
+    long phase_;
+    long subphase_;
 
     time_t report_interval_;
-
-
-    // handles
-    virtual bool init_handler (Process_params* params) = 0;
-    virtual bool next_handler () = 0;
-    virtual bool report_results_handler () = 0;
-    virtual bool close_handler () = 0;
-
 
     // process stages
     virtual bool start ();
@@ -98,19 +89,28 @@ protected:
     virtual bool report_results ();
     virtual bool close ();
 
-    // status control
-    void total   (longlong val);
-    void current (longlong val);
-    void skipped (longlong val);
-    void res_no  (longlong val);
-    void phase   (long phase_no);
-    void subphase (long subphase_no);
-    longlong incrcur ();
-    longlong incrskipped ();
-    longlong incrresno ();
-    long incrphase ();
-    long incrsubphase ();
-    void error   (const char* errstr = NULL);
+protected:
+    // handles: to be defined in the derived class
+    virtual bool init_handler (Process_params* params) = 0;
+    virtual bool next_handler () = 0;
+    virtual bool report_results_handler () = 0;
+    virtual bool close_handler () = 0;
+
+    // status control: functions should be called by derived class to pass information to process engine
+    void total   (longlong val);  // passes total items to process at present stage. This can change between phases/subphases or at any arbitrary moment
+    void current (longlong val);  // passes the ordinal number of item currently being processed
+    void skipped (longlong val);  // passes the number of objects thar were skipped (not processed) due to processes business logic
+    void res_no  (longlong val);  // passes number of results produced
+    void phase   (long phase_no); // passes ordinal number for processing phase
+    void subphase (long subphase_no);      // passes ordinal number for processing sub-phase. The process engine uses two tier hierarchy (phase/subphase) for reporting current status
+    longlong incrcur (longlong i = 1);     // increments the ordinal number for item currently being processed
+    longlong incrskipped (longlong i = 1); // increments the number of skipped items
+    longlong incrresno (longlong i = 1);   // increments the number of results produced
+    long incrphase ();     // increments phase ordinal number
+    long incrsubphase ();  // increments sub-phase ordinal number
+
+    // The following three functions are deprecated. Please use Rerror (exception-based) mechanism for reporting errors
+    void error   (const char* errstr);
     void error   (std::string& errstr);
     void error   (std::ostringstream& errstr);
 
@@ -125,6 +125,9 @@ public:
 
     virtual STATE state ();
     virtual const char* getError ();
+    bool error () const { return error_; }
+    bool interrupt () const { return interrupt_; }
+
 
     // naming convention
     virtual const char* process_name () = 0;
@@ -151,7 +154,7 @@ public:
 
     virtual void report_state (std::ostream& o);
     virtual void report_self (std::ostream& o);
-    virtual void report_header (std::ostream& o);
+    virtual void report_header (std::ostream& o, const char* procname = NULL);
     virtual void report_phase_switch (std::ostream& o);
     virtual void report_final (std::ostream& o);
     double percent_done () ;

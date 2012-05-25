@@ -16,14 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __seg_align_h__
 #define __seg_align_h__
 
-#include "align_result.h"
 #include <common_typedefs.h>
+#include "align_result.h"
 #include "weights.h"
 
 // SegAlign merges local similarity segments between two sequences into best possible arrangement
@@ -39,21 +39,21 @@ class SegAlign
     float gcap_;
     int max_ovl_;
 
-    struct Trace
+    struct BTrace
     {
         int idx_;
         float score_;
         int gap_;
-        Trace () : idx_ (-1), score_ (0), gap_ (0) {}
+        BTrace () : idx_ (-1), score_ (0), gap_ (0) {}
     };
 
-    typedef std::vector <Trace> TraceVect;
+    typedef std::vector <BTrace> BTraceVect;
 
     class CompareTraceIdxByScore
     {
-        TraceVect& trace_;
+        BTraceVect& trace_;
     public:
-        CompareTraceIdxByScore (TraceVect& trace) : trace_ (trace) {}
+        CompareTraceIdxByScore (BTraceVect& trace) : trace_ (trace) {}
         bool operator () (int i1, int i2) const
         {
             float res = trace_ [i1].score_ - trace_ [i2].score_;
@@ -65,17 +65,17 @@ class SegAlign
     class IsContinuation
     {
     public:
-        bool operator () (const Trace& tr) const
+        bool operator () (const BTrace& tr) const
         {
             return (tr.idx_ != -1);
         }
     };
     IsContinuation isContinuation;
 
-    void fill_trace (ARVect& sims, UIntVect& order, TraceVect& trace);
-    unsigned find_continuations (TraceVect& trace, BoolVect& continuations);
-    void make_score_order (TraceVect& trace, BoolVect& continuations, unsigned resno, UIntVect& target);
-    void backtrace_from (unsigned idx, const char* tseq, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove);
+    void fill_trace (ARVect& sims, UIntVect& order, BTraceVect& trace);
+    unsigned find_continuations (BTraceVect& trace, BoolVect& continuations);
+    void make_score_order (BTraceVect& trace, BoolVect& continuations, unsigned resno, UIntVect& target);
+    void backtrace_from (unsigned idx, const char* tseq, BTraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove);
 public:
     SegAlign (WMatrix& wm, float gip, float gep, float gcap, int max_ovl);
     bool merge (ARVect& sims, const char* tseq);

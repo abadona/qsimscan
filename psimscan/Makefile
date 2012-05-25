@@ -1,6 +1,6 @@
 
 ##////////////////////////////////////////////////////////////////////////////
-## This software module is developed by SCIDM team in 2008-2012.
+## This software module is developed by SCIDM team in 1999-2012.
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
 ## along with this program; if not, write to the Free Software
 ## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ##
-## For any questions please contact SciDM team by email at scidmteam@yahoo.com
+## For any questions please contact SciDM team by email at team@scidm.org
 ##////////////////////////////////////////////////////////////////////////////
 
 .PHONY : clean all
@@ -29,9 +29,9 @@ else
 endif
 
 CC=$(CCPATH)g++
-PIC := $(if $(filter $(shell uname -i),x86_64),-fPIC,)
-OPTLEVEL := $(if $(OPTLEVEL),$(OPTLEVEL),-O2)
-DEBUGLEVEL := $(if $(DEBUGLEVEL),$(DEBUGLEVEL),-g0)
+PIC := $(if $(filter $(shell uname -m),x86_64),-fPIC,)
+OPTLEVEL := $(if $(OPTLEVEL),$(OPTLEVEL),-O0)
+DEBUGLEVEL := $(if $(DEBUGLEVEL),$(DEBUGLEVEL),-g2)
 CPPFLAGS=$(PIC) $(DEBUGLEVEL) $(OPTLEVEL) -D__x86__
 
 TARGETNAME=psimscan$(EXESUFFIX)

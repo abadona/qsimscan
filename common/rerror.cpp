@@ -1,4 +1,3 @@
-
 //////////////////////////////////////////////////////////////////////////////
 // This software module is developed by SCIDM team in 1999-2008.
 //
@@ -21,36 +20,8 @@
 
 #define __rerror_cpp__
 #include "rerror.h"
-#include <time.h>
 
 ErrorStream ers;
-
-void ErrorStream:: throw_ (Rerror& exception)
-{
-    if (exception.msg_.length ())
-        exception.msg_ += " : ";
-    exception.msg_ += str ();
-    str ("");
-    throw exception;
-}
-
-static const char TMBUF_SZ = 64;
-
-std::ostream& operator << (std::ostream& e, Throw__ t)
-{
-    time_t rawtime;
-    struct tm* timeinfo;
-    char tmbuffer [TMBUF_SZ];
-
-    time (&rawtime);
-    timeinfo = localtime (&rawtime);
-    strftime (tmbuffer, TMBUF_SZ, "[%x %X %Z]", timeinfo);
-
-    if (t.fname_) e << " (module " << t.fname_ << ", line " << t.lno_ << ")";
-    e << tmbuffer;
-    ((ErrorStream&) e).throw_ (t.exception_);
-    return e;
-}
 
 std::ostream& operator << (std::ostream& o, const Rerror& rerror)
 {

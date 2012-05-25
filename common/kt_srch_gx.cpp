@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2012.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -109,7 +109,8 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
     //init default search parameters
     max_offs = 0;
     rep_del = 0;
-    fast_mode = 0;
+    // fast_mode = 0;
+    xstep = 1;
     apprx_match = 0;
     k_thresh = 150;
     k_gip = 50;
@@ -462,11 +463,12 @@ int KT_SEARCH::search (NN_SEQ& xseq)
     xuid = xseq.uid;
     xrev = xseq.rev;
 
-    if (fast_mode)
+    if (xstep == 4)
         scan_l1_fast ();
-    else
+    else if (xstep == 1)
         scan_l1 ();
-
+    else
+        scan_l1_stepped ();
     return 1;
 }
 
@@ -681,6 +683,120 @@ void KT_SEARCH::scan_l1_fast ()
     }
 }
 
+//alternative pass 1
+//K-tuple match processing
+//trades off sensitivity for increased speed
+//(stepping through subject sequence STEP bits at a time
+void KT_SEARCH::scan_l1_stepped ()
+{
+    int dist, offs, pnl, score, k_wt, k_cnt;
+    int xend = xlen - kt_size;
+    char* s = xseq;
+    unsigned ktup;
+    KTUP_ENTRY* k_ptr;
+    register DIAG_ENTRY* d_ptr;
+    int bytebound = 0;
+    int dword_reminder = 16 - kt_size;
+    int shift = 0;
+    int baseoff = 0;
+    DWORD seqw;
+
+    for (xpos = 0; xpos < xend; xpos += xstep)
+    {
+        // find if last boubdary is still good
+        while (xpos > ((bytebound + shift) << 2) + dword_reminder) 
+            ++shift;
+        if (shift)
+        {
+            bytebound += shift;
+            s += shift;
+            shift = 0;
+            baseoff = xpos - (bytebound << 2);
+            seqw = GET32_U (s);
+            seqw >> (baseoff << 1);
+        }
+        else 
+            seqw >>= 2;
+
+        //get next K-tuple
+        ktup = seqw;
+        ktup &= kt_mask;
+
+        //get K-tuple info
+        k_cnt = ki[ktup].cnt;
+        k_wt  = ki[ktup].wt;
+        k_ptr = ki[ktup].ptr;
+
+        //for all matched K-tuples
+        while (k_cnt--)
+        {
+            ynum = k_ptr->ynum;
+            ypos = k_ptr->ypos;
+            k_ptr++;
+
+            diag = ypos - xpos;
+            d_ptr = di + diag;
+
+            //look at previous match on the same diagonal
+            if ((d_ptr->ynum == ynum) && (d_ptr->xuid == xuid) && (d_ptr->xrev == xrev))
+            {
+                //previous match in same sequence - adjust score
+                dist = xpos - d_ptr->xpos - kt_size;
+                if (dist <= -kt_size)
+                //batch already identified - do not update diag info
+                continue;
+                if (dist < 0)
+                //overlapping k-tuple matches - score increases with distance
+                score = __max (0, d_ptr->score) + (k_wt >> (-dist >> 2));
+                else
+                //non-overlapping k-tuple matches - score decreases with distance
+                score = __max (k_wt, k_wt + d_ptr->score - dist);
+            }
+            else
+            {
+                //previous match in different sequence - reinitialise score
+                d_ptr->ynum = ynum;
+                d_ptr->xuid = xuid;
+                d_ptr->xrev = xrev;
+                d_ptr->b_end = 0;
+                score = k_wt;
+            }
+
+            //look at previous matches on adjacent diagonals, pick the best score
+            //check non-overlapping k-tuple matches only, penalise offset
+            for (offs = 1, pnl = k_gip; offs <= max_offs; offs++, pnl += k_gep)
+            {
+                //go left
+                register DIAG_ENTRY* ad_ptr = d_ptr + offs;
+                if ((ad_ptr->ynum == ynum) && (ad_ptr->xuid == xuid) && (ad_ptr->xrev == xrev) && ((dist = xpos - ad_ptr->xpos - kt_size - offs) >= 0))
+                score = __max (score, k_wt + ad_ptr->score - dist - pnl);
+
+                //go down
+                ad_ptr = d_ptr - offs;
+                if ((ad_ptr->ynum == ynum) && (ad_ptr->xuid == xuid) && (ad_ptr->xrev == xrev) && ((dist = xpos - ad_ptr->xpos - kt_size) >= 0))
+                score = __max (score, k_wt + ad_ptr->score - dist - pnl);
+            }
+
+            d_ptr->xpos = xpos;
+            d_ptr->score = score;
+
+            if (score > k_thresh)
+            {
+                //convert ypos global to ypos local
+                ypos -= yi[ynum].start + max_x_len;
+                yseq = yi[ynum].seq;
+                ylen = yi[ynum].len;
+
+                //delimit / filter batch
+                if (!batches_out)
+                    scan_l2_g ();
+                else
+                    scan_l2_gb_1 ();
+                k_matches++;
+            }
+        }
+    }
+}
 
 //pass 2
 //fast and crude batch delimiter / filter

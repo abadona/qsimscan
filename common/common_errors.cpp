@@ -28,10 +28,11 @@ const char* ERR_FileNotFound = "File not found";
 const char* ERR_OSError = "Operating system error";
 const char* ERR_OutOfBounds = "Out of bounds error";
 
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
+#include <cerrno>
+#include <cstring>
+#include <cstdio>
 #include "rerror.h"
+
 // Note that "common_errors.h" is nt included - rerror.h includes it at the end
 
 const char* OSRerror::get_err_str () const

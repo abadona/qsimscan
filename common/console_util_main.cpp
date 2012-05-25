@@ -23,10 +23,10 @@
 #include "process_params.h"
 #include "resource.h"
 #include "rerror.h"
+#include "tracer.h"
 #include <signal.h>
 #include <iostream>
 #include <time.h>
-
 #include "process_server.h"
 
 static Process* proc = NULL;
@@ -54,6 +54,16 @@ int console_main (int argc, char* argv [])
     if (!params->process ())
         ers << "Error pocessing parameters" << Throw;
 
+    // set the logging level according to verbose / debug parameters
+    Logger::LEVEL level = params->verbose () ? Logger::INFO : Logger::WARNING;
+    if (params->debug () < 0) 
+        params->debug (0);
+    if (params->debug () >= (sizeof (loglevels) / sizeof (*loglevels))) 
+        params->debug ((sizeof (loglevels) / sizeof (*loglevels)) - 1);
+    if (level < loglevels [params->debug ()])
+        level = loglevels [params->debug ()];
+    set_logging_level (level);
+
     ObjWrapper <Process> process = process_factory ();
     if (!process)
         return -1;
@@ -63,7 +73,7 @@ int console_main (int argc, char* argv [])
     signal (SIGINT, terminate);
 
     if (params->verbose ())
-        process->report_header (std::cerr);
+        process->report_header (std::cerr, params->procname ());
     if (process->run (params))
     {
         int timeslice = process->report_interval ();
@@ -151,5 +161,5 @@ int main (int argc, char *argv[])
         std::cerr << "Unhandled exception caught" << std::endl << std::flush;
     }
 #endif
-        return rv;
+    return rv;
 }

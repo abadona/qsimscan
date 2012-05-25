@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __portability_h__
@@ -43,7 +43,7 @@
     #define sci_close close
     #define sci_lseek lseek
     #define sci_tell tell
-#elif defined (__MACOSX__)
+#elif defined (__APPLE__)
     #include <unistd.h>
     #define sci_stat stat
     #define sci_stat_struc stat

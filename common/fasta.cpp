@@ -19,20 +19,19 @@
 // For any questions please contact SciDM team by email at scidmteam@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
+#include <cstring>
 #include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
+#include <cstdlib>
+#include <cerrno>
 
 #include "fasta.h"
-#include "rerror.h"
-#include "fileutils.h"
-#include "portability.h"
+#include <rerror.h>
+#include <tracer.h>
+#include <myassert.h>
+#include <fileutils.h>
+#include <portability.h>
 
 static const char file_not_open [] = "INTERNAL ERROR: Operating on unopen fasta file";
-static const int INIT_SEQ_LEN = 1000000; // 1M
 
 void FastaFile::reset ()
 {
@@ -41,7 +40,6 @@ void FastaFile::reset ()
     *linebuf_ = 0;
     *seqbuf_ = 0;
     *namebuf_ = 0;
-    *seqbuf_ = 0;
     l_ = linebuf_;
 }
 
@@ -49,7 +47,7 @@ void FastaFile::reset ()
 void FastaFile::parse_hdr ()
 {
     if (!*l_) return;
-    assert (*l_ == '>');
+    myassert (*l_ == '>');
 
     char* p = l_ + 1;
 
@@ -94,20 +92,20 @@ void FastaFile::add_seq ()
         {
             if (seqlen_ == seq_buf_sz_)
             {
+                warnlog << "Reallocating FastaReader buffer!" << std::endl;
                 // reallocate seqbuf_: increment space twice
                 unsigned new_sz = seq_buf_sz_ * 2;
-                char* newbuf = NULL;
+                char* newbuf;
                 try
                 {
                     newbuf = new char [new_sz + 1];
                 }
                 catch (std::bad_alloc&)
                 {
+                    newbuf = NULL;
                 }
                 if (!newbuf)
-                {
-                    ers << "ERROR: Not enough memory to hold the sequence" << namebuf_ << Throw;
-                }
+                    ers << "ERROR: Not enough memory to hold the sequence" << namebuf_ << ": error allocating " << new_sz + 1 << " bytes" <<  Throw;
                 memcpy (newbuf, seqbuf_, seq_buf_sz_);
                 delete [] seqbuf_;
                 seqbuf_ = newbuf;
@@ -120,40 +118,41 @@ void FastaFile::add_seq ()
     }
 }
 
-FastaFile::FastaFile ()
+FastaFile::FastaFile (ulonglong init_sz)
 :
-f_ (NULL),
-seqbuf_ (NULL)
+f_ (NULL)
 {
-    
     try
     {
-        seqbuf_ = new char [INIT_SEQ_LEN+1];
+        seqbuf_ = new char [init_sz+1];
     }
     catch (std::bad_alloc&)
     {
+        seqbuf_ = NULL;
     }
-    if (!seqbuf_) 
-        Error (MemoryRerror);
-    seq_buf_sz_ = INIT_SEQ_LEN;
+    if (!seqbuf_)
+        ers << "Memory allocation error: unable to allocate " << init_sz + 1 << " bytes" << Throw;
+
+    seq_buf_sz_ = init_sz;
     reset ();
 }
 
-FastaFile::FastaFile (const char* name)
+FastaFile::FastaFile (const char* name, ulonglong init_sz)
 :
-f_ (NULL),
-seqbuf_ (NULL)
+f_ (NULL)
 {
     try
     {
-        seqbuf_ = new char [INIT_SEQ_LEN+1];
+        seqbuf_ = new char [init_sz+1];
     }
     catch (std::bad_alloc&)
     {
+        seqbuf_ = NULL;
     }
-    if (!seqbuf_) 
-        Error (MemoryRerror);
-    seq_buf_sz_ = INIT_SEQ_LEN;
+    if (!seqbuf_)
+        ers << "Memory allocation error: unable to allocate " << init_sz + 1 << " bytes"  << Throw;
+
+    seq_buf_sz_ = init_sz;
     reset ();
     if (!open (name))
     {
@@ -200,7 +199,7 @@ bool FastaFile::open (const char* name)
             }
             cur_pos_ = ftell (f_);
         }
-        seq_no_ = -1;
+        seq_no_ = unsigned (-1);
         return true;
     }
     return false;
@@ -235,8 +234,7 @@ bool FastaFile::next ()
                 break;
             add_seq ();
         }
-        while (l_ = fgets (linebuf_, MAX_LINE_LEN, f_));
-
+        while ((l_ = fgets (linebuf_, MAX_LINE_LEN, f_)));
     }
     else
     {
@@ -271,6 +269,11 @@ const char* FastaFile::cur_hdr  () const
 }
 
 const char* FastaFile::cur_seq  () const
+{
+    return seqbuf_;
+}
+
+char* FastaFile::cur_seq_buf  ()
 {
     return seqbuf_;
 }

@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __process_params_h__
@@ -25,6 +25,8 @@
 #include "cmdline.h"
 #include "parameters.h"
 #include <ostream>
+
+const char* ibs (const char* bs);
 
 class InvalidParameter
 {
@@ -101,6 +103,7 @@ public:
 
     bool help_mode () const;
     CmdLine* cmdline ();
+    const char* procname () { return procname_.c_str ();}
 
     bool prepareTemplates ();
     bool parseCmdline (int argc, char* argv [], bool strict = true);
@@ -131,5 +134,6 @@ public:
     virtual const char* debug_help () const;
 };
 
+std::ostream& operator << (std::ostream& o, const Process_params& p);
 
 #endif // __process_params_h__

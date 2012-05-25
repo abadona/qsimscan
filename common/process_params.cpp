@@ -24,18 +24,14 @@
 #include <fstream>
 #include <string.h>
 #include "portability.h"
+#include "common_str.h"
 
-static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 2000-2011";
-static const char* DEF_VERSION = "0.6.c";
+static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 1997-2012";
+static const char* DEF_VERSION = "0.9.a";
 
 const char *empty_longopt_list [] = {NULL};
 const char *Process_params::parfname_default_ = "default.cfg";
 
-static const char* FALSE_STR = "FALSE";
-static const char* TRUE_STR = "TRUE";
-static const char* EMPTY_STR = "";
-static const char* ZERO_STR = "0";
-static const char* INTEGER_STR = "integer";
 static const char* OVERWRITE_DEFAULT = FALSE_STR;
 static const char* VERBOSE_DEFAULT = FALSE_STR;
 static const char* DEBUG_DEFAULT = ZERO_STR;
@@ -43,7 +39,7 @@ static const char* VERBOSE_HELP   = "Produce verbose output";
 static const char* OVERWRITE_HELP = "Overwrite existing output objects";
 static const char* DEBUG_HELP   = "Sets the level of debug output";
 
-static const char* ibs (const char* bs)
+const char* ibs (const char* bs)
 {
     if (bs == FALSE_STR || strcasecmp (bs, FALSE_STR) == 0)
         return TRUE_STR;
@@ -56,7 +52,7 @@ static const char* ibs (const char* bs)
 Process_params::Process_params (const char* header, const char* procname, const char* version)
 :
 header_ (header),
-procname_ (procname ? procname : (const char*) ""),
+procname_ (procname ? procname : (const char*) EMPTY_STR),
 version_ (version ? version : DEF_VERSION),
 parameters_ (NULL),
 cmdline_ (NULL),
@@ -82,22 +78,22 @@ Process_params::~Process_params ()
     if (cmdline_) delete cmdline_;
 }
 
-static const char* lohlp [] 		= {"help", NULL};
+static const char* lohlp []         = {"help", NULL};
 static const char* lohlpx []        = {"helpx", NULL};
 static const char* lohlppar []      = {"help_par", NULL};
 static const char* loversion []     = {"version", NULL};
-static const char* loverbose [] 	= {"verb", "verbose", NULL};
+static const char* loverbose []     = {"verb", "verbose", NULL};
 static const char* lodbgout []      = {"debug", NULL};
-static const char* loconfig [] 	    = {"config", NULL};
-static const char* loconfigw [] 	= {"outcfg", NULL};
-static const char* loover [] 		= {"ov", "over", "overwrite", NULL};
+static const char* loconfig []      = {"config", NULL};
+static const char* loconfigw []     = {"outcfg", NULL};
+static const char* loover []        = {"ov", "over", "overwrite", NULL};
 
-static const char* lohlp_help 		= "Prints help on command line usage";
+static const char* lohlp_help       = "Prints help on command line usage";
 static const char* lohlp_xhelp      = "Prints extended help on command line usage";
 static const char* lohlppar_help    = "Prints help on parameters file format";
 static const char* loversion_help   = "Prints version information and exits";
-static const char* loconfig_help 	= "Configuration file to use";
-static const char* loconfigw_help 	= "Save default parameters into the file";
+static const char* loconfig_help    = "Configuration file to use";
+static const char* loconfigw_help   = "Save default parameters into the file";
 
 
 void Process_params::add_cmdline_srv ()
@@ -293,7 +289,7 @@ bool Process_params::interpreteCmdline ()
         int fmtpos = cmdline_->getFmtPos (argno);
         ArgFormat* afmt = cmdline_->argFormat (fmtpos);
         if (!afmt)
-			ers << "Format spec not found for argument " << argno << ", format_pos " << fmtpos <<Throw;
+            ers << "Format spec not found for argument " << argno << ", format_pos " << fmtpos <<Throw;
         const char* name = afmt->name_.c_str ();
 
         if (afmt->repeatable_)
@@ -307,7 +303,7 @@ bool Process_params::interpreteCmdline ()
             if (repv.length ())
             {
                 parameters_->setParameter (volatile_section_name, reppname.c_str (), repv.c_str ());
-                repv = "";
+                repv = EMPTY_STR;
             }
             parameters_->setParameter (volatile_section_name, name, cmdline_->arguments_ [argno].c_str ());
         }
@@ -374,4 +370,13 @@ const char* Process_params::overwrite_help () const
 const char* Process_params::debug_help () const
 {
     return DEBUG_HELP;
+}
+
+std::ostream& operator << (std::ostream& o, const Process_params& p)
+{
+    o << "Process parameters:" << std::endl;
+    o << SP2_STR << "Verbose:" << bool_str (p.verbose ()) << std::endl;
+    o << SP2_STR << "Overwrite:" << bool_str (p.overwrite ()) << std::endl;
+    o << SP2_STR << "Debug level:" << (int) p.debug () << std::endl;
+    return o;
 }

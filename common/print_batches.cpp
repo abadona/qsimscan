@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <sciminmax.h>
 #include <rerror.h>
+#include <common_str.h>
 #include "weights.h"
 #include <cassert>
 
@@ -38,7 +39,7 @@ LysLys--LysLys
 ...:::  ...|||
 LysLys--LysLys
 agtgtgattccgta
-^f1		^f2
+^f1        ^f2
 
 NA 3x insert:
 
@@ -46,7 +47,7 @@ LysLys---LysLys
 ...:::   ...|||
 LysLysLysLysLys
 agtgtgatctccgta
-^f1		^f2
+^f1        ^f2
 
 AA 1x insert:
 
@@ -54,7 +55,7 @@ LysLysLysLysLys
 ...:::   ...|||
 LysLys---LysLys
 agtgtg---attccg
-^f1		 ^f1
+^f1         ^f1
 
 compact format -
 
@@ -68,9 +69,9 @@ ASD-FGHJKL
 .: |..:|
 ASD-FGHJKL
 aagttatgta
-ctc	gcgctt
-tga	gtacag
-1	2
+ctc    gcgctt
+tga    gtacag
+1    2
 */
 
 
@@ -129,9 +130,9 @@ void print_batches (SEQ& xseq, SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGHTS<int, 
 
             int xdisp = xseq.rev ? xseq.len - xstart - 1 : xstart;
             int ydisp = yseq.rev ? yseq.len - ystart - 1 : ystart;
-            stream << endl << setw (margin) << "" << setw (6) << xdisp  << setw (0) << s[0];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s[1];
-            stream << endl << setw (margin) << "" << setw (6) << ydisp  << setw (0) << s[2];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << xdisp  << setw (0) << s[0];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s[1];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << ydisp  << setw (0) << s[2];
             stream << endl;
 
             xstart = x, ystart = y, slen = 0;
@@ -185,21 +186,21 @@ void print_batches_ascii_subj (SEQ& xseq, const char* ascy, BATCH *b_ptr, int b_
         }
         else
             blen = 0, b_cnt--, b_ptr++;
-        
+
         //print accumulated lines
         if ((slen > width - 7) || b_cnt <= 0)
         {
             //null terminate all strings
             for (int i = 0; i < 3; i++)
                 s[i][slen] = 0;
-            
+
             int xdisp = xseq.rev ? xseq.len - xstart - 1 : xstart;
             int ydisp = ystart;
-            stream << endl << setw (margin) << "" << setw (6) << xdisp  << setw (0) << s[0];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s[1];
-            stream << endl << setw (margin) << "" << setw (6) << ydisp  << setw (0) << s[2];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << xdisp  << setw (0) << s[0];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s[1];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << ydisp  << setw (0) << s[2];
             stream << endl;
-            
+
             xstart = x, ystart = y, slen = 0;
         }
     }
@@ -264,9 +265,9 @@ void print_batches_3 (AA_SEQ& xseq, AA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIGH
             for (int i = 0; i < 3; i++)
                 s[i][slen] = 0;
 
-            stream << endl << setw (margin) << "" << setw (6) << xstart << setw (0) << s [0];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s [1];
-            stream << endl << setw (margin) << "" << setw (6) << ystart << setw (0) << s [2];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << xstart << setw (0) << s [0];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s [1];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << ystart << setw (0) << s [2];
             stream << endl;
 
             xstart = x, ystart = y, slen = 0;
@@ -318,7 +319,7 @@ void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIG
             sprintf (s[1] + slen, "   ");
             sprintf (s[2] + slen, "%s", aa2str [yc]);
             for (int i = 0; i < 3; i++)
-                s[3][slen + i] = nn2char[yseq.get_base (y + i)];
+                s[3][slen + i] = base2char (yseq.get_base (y + i));
             sprintf (s[4] + slen, "   ");
             y += 3, slen += 3;
         }
@@ -328,7 +329,7 @@ void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIG
             s[0][slen] = '-';
             s[1][slen] = ' ';
             s[2][slen] = '-';
-            s[3][slen] = nn2char[yseq.get_base (y)];
+            s[3][slen] = base2char(yseq.get_base (y));
             s[4][slen] = ' ';
             y++, slen++;
         }
@@ -344,7 +345,7 @@ void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIG
             for (int i = 0; i < 3; i++)
             {
                 // s[1][slen + i] = wc;
-                s[3][slen + i] = nn2char[yseq.get_base (y + i)];
+                s[3][slen + i] = base2char (yseq.get_base (y + i));
             }
             sprintf (s[2] + slen, "%s", aa2str [yc]);
 
@@ -369,11 +370,11 @@ void print_batches_an (AA_SEQ& xseq, NA_SEQ& yseq, BATCH *b_ptr, int b_cnt, WEIG
             int xdisp = xseq.rev ? xseq.len - xstart - 1 : xstart;
             int ydisp = yseq.rev ? yseq.len - ystart - 1 : ystart;
 
-            stream << endl << setw (margin) << "" << setw (6) << xdisp  << setw (0) << s [0];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s [1];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s [2];
-            stream << endl << setw (margin) << "" << setw (6) << ydisp  << setw (0) << s [3];
-            stream << endl << setw (margin) << "" << setw (6) << " "    << setw (0) << s [4];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << xdisp  << setw (0) << s [0];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s [1];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s [2];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << ydisp  << setw (0) << s [3];
+            stream << endl << setw (margin) << EMPTY_STR << setw (6) << SPACE_STR    << setw (0) << s [4];
             stream << endl;
 
             xstart = x, ystart = y, slen = 0;

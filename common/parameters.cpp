@@ -21,15 +21,16 @@
 
 #define __parameters_cpp__
 #include "parameters.h"
-#include "fileutils.h"
-#include "rerror.h"
 #include <ctype.h>
 #include <iterator>
 #include <fstream>
 #include <ios>
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
+#include "fileutils.h"
+#include "rerror.h"
 #include "portability.h"
+#include "common_str.h"
 
 static const int bufsz = 1024;
 static const char whitespace [] = "\t ";
@@ -109,7 +110,7 @@ void Parameters::writeHelp (std::ostream& o, const char* header)
 bool Parameters::read (std::istream& istr)
 {
     char buf [bufsz];
-    std::string cursectname = "";
+    std::string cursectname = EMPTY_STR;
     ParametersSection* cursection = NULL;
 
     while (istr.getline (buf, bufsz))
@@ -140,7 +141,7 @@ bool Parameters::read (std::istream& istr)
                 if (val_start >= 0)
                     value.assign (s, val_start, s.length () - val_start);
                 else
-                    value.assign ("");
+                    value.assign (EMPTY_STR);
                 setParameter (cursectname.c_str (), name.c_str (), value.c_str ());
             }
         }
@@ -204,9 +205,9 @@ const char* Parameters::getParameter (const char* sectname, const char* parname)
 const char* Parameters::getDefault (const char* sectname, const char* parname)
 {
     sectmap::iterator sitr = sections_.find (sectname);
-    if (sitr == sections_.end ()) return "";
+    if (sitr == sections_.end ()) return EMPTY_STR;
     ParametersSection::parmap::iterator pitr = sitr->second.parameters_.find (parname);
-    if (pitr == sitr->second.parameters_.end ()) return "";
+    if (pitr == sitr->second.parameters_.end ()) return EMPTY_STR;
     return pitr->second.def_value_.c_str ();
 }
 
@@ -267,7 +268,7 @@ void Parameters::setFloat  (const char* sectname, const char* parname, double va
 
 void Parameters::setBoolean (const char* sectname, const char* parname, bool value)
 {
-    const char* bv = ((value) ? ("TRUE") : ("FALSE"));
+    const char* bv = ((value) ? (TRUE_STR) : (FALSE_STR));
     setParameter (sectname, parname, bv);
 }
 

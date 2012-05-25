@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __ktsearch_params_h__
@@ -38,7 +38,7 @@ class KTSearch_params : public Search_params
     int min_thresh_;
     int max_thresh_;
     int min_len_;
-    bool fast_mode_;
+    unsigned step_;
     std::string kdistr_;
 
     double gip_;
@@ -81,7 +81,7 @@ public:
     int  min_thresh () const {return min_thresh_;}
     int  max_thresh () const {return max_thresh_;}
     int  min_len () const {return min_len_;}
-    bool fast_mode () const {return fast_mode_;}
+    unsigned step () const {return step_;}
     const char*  kdistr () const {return kdistr_.c_str ();}
     double gip () const {return gip_;}
     double gep () const {return gep_;}
@@ -101,7 +101,7 @@ public:
     void min_thresh (int opt) { min_thresh_ = opt;}
     void max_thresh (int opt) { max_thresh_ = opt;}
     void min_len (int opt) { min_len_ = opt;}
-    void fast_mode (bool opt) { fast_mode_ = opt;}
+    void step (unsigned opt) { step_ = opt;}
     void kdistr (const char* opt) { kdistr_ = opt;}
     void gip (double opt) { gip_ = opt;}
     void gep (double opt) { gep_ = opt;}
@@ -121,7 +121,7 @@ public:
     virtual const char* min_thresh_default () const;
     virtual const char* max_thresh_default () const;
     virtual const char* min_len_default () const;
-    virtual const char* fast_mode_default () const;
+    virtual const char* step_default () const;
     virtual const char* kdistr_default () const;
     virtual const char* gip_default () const;
     virtual const char* gep_default () const;
@@ -141,7 +141,7 @@ public:
     virtual const char* min_thresh_help () const;
     virtual const char* max_thresh_help () const;
     virtual const char* min_len_help () const;
-    virtual const char* fast_mode_help () const;
+    virtual const char* step_help () const;
     virtual const char* kdistr_help () const;
     virtual const char* gip_help () const;
     virtual const char* gep_help () const;

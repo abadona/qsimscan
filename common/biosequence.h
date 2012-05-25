@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __biosequence_h__
@@ -29,21 +29,13 @@
 
 //common sequence translation helpers
 
-#define NNNUM 4
-#define AANUM 24
 
-extern const char* const nn2char;
-//extern const char* const aa2char;
-extern const char* const aa2str[AANUM];
+extern const char* const aa2str [AANUM];
 extern const char* const gcode_c;
 extern const char* const gcode_c_rev;
-extern const int gcode_b[64];
-extern const int gcode_b_rev[64];
+extern const int gcode_b [64];
+extern const int gcode_b_rev [64];
 
-inline int  char2nn (char c)
-{
-    return char2base (c);
-}
 
 
 //---------------------------------------------------------------------------------
@@ -128,7 +120,7 @@ struct NN_SEQ:SEQ
         return (NN_SEQ&) SEQ::operator = (other);
     }
     int         bases_per_int () {return 12;}
-    char        code2char (int code) {return nn2char [code];}
+    char        code2char (int code) {return number2base [code];}
 
     unsigned    get_bases (int pos);
     unsigned    get_base (int pos);
@@ -248,7 +240,7 @@ struct NA_SEQ:SEQ
         return (NA_SEQ&) SEQ::operator = (other);
     }
     int         bases_per_int () {return 12;}
-    char        code2char (int code) {return nn2char [code];}
+    char        code2char (int code) {return number2base [code];}
 
     unsigned    get_bases (int pos);
     unsigned    get_base (int pos);

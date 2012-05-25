@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __align_h__
@@ -25,8 +25,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <rerror.h>
-#include "biosequence.h"
 #include "sequtil.h"
+#include "biosequence.h"
 #include "weights.h"
 
 #define ALIGN_DIAG 0
@@ -37,16 +37,16 @@
 #define ALIGN_HSKIP 4
 #define ALIGN_VSKIP 8
 
-#pragma pack (push, 4)
+// #pragma pack (push, 4)
 
 struct ALIGN_VECT
 {
     int w;
     int h;
     int r;
-};
+} __attribute__ ((packed));
 
-#pragma pack (pop)
+// #pragma pack (pop)
 
 class ALIGN
 {

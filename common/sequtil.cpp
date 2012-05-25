@@ -21,18 +21,19 @@
 
 #define __sequtil_cpp__
 
-#include "sequtil.h"
-#include <string.h>
+#include <cstring>
 #include <iomanip>
 #include <ios>
+#include "sequtil.h"
+#include "common_str.h"
 
-void n_revert_seq (char* dest, const char* src, int len, int beg)
+void n_revert_seq (char* dest, const char* src, unsigned len, unsigned beg)
 {
     for (int ii = 0; ii < len; ii ++)
         put_base (dest, len - ii - 1, ((~get_base (src, ii+beg)) & 0x3));
 }
 
-bool n_ascii2binary (char* dest, int destlen, const char* source, int start, int len)
+bool n_ascii2binary (char* dest, unsigned destlen, const char* source, unsigned start, unsigned len)
 {
     if (destlen < ((len + 3) >> 2))
         return false;
@@ -43,12 +44,12 @@ bool n_ascii2binary (char* dest, int destlen, const char* source, int start, int
     return true;
 }
 
-bool n_binary2ascii (char* dest, int destlen, const char* source, int start, int len)
+bool n_binary2ascii (char* dest, unsigned destlen, const char* source, unsigned start, unsigned len)
 {
     if (destlen < len)
         return false;
 
-    for (int i = start; i < start + len; i ++)
+    for (unsigned i = start; i < start + len; i ++)
         dest [i - start] = base2char (get_base (source, i));
     // only zero-terminate if there is enough space in dest
     if (destlen > len)
@@ -57,12 +58,12 @@ bool n_binary2ascii (char* dest, int destlen, const char* source, int start, int
     return true;
 }
 
-void n_countnucs (int& a, int& g, int& c, int& t, const char* src, int start, int len)
+void n_countnucs (int& a, unsigned & g, unsigned & c, unsigned & t, const char* src, unsigned start, unsigned len)
 {
     a = g = t = c = 0;
     if (len == -1) len = strlen (src) - start;
 
-    for (int i = start; i < start + len; i ++)
+    for (unsigned i = start; i < start + len; i ++)
         switch (tolower (src [i]))
         {
         case 't':   t ++; break;
@@ -72,9 +73,9 @@ void n_countnucs (int& a, int& g, int& c, int& t, const char* src, int start, in
         }
 }
 
-std::ostream& output_seq (std::ostream& o, const char* buffer, int buflen, int chars_in_line, bool counts, bool decades, int first_off)
+std::ostream& output_seq (std::ostream& o, const char* buffer, unsigned buflen, unsigned chars_in_line, bool counts, bool decades, unsigned first_off)
 {
-    int cnt = 0;
+    unsigned cnt = 0;
 
     while (cnt < buflen)
     {
@@ -82,7 +83,7 @@ std::ostream& output_seq (std::ostream& o, const char* buffer, int buflen, int c
         {
             if (cnt) o << std::endl;
             if (counts) o << std::setw (first_off - 1) << std::right << cnt + 1 << " " << std::setw (0);
-            else o << std::setw (first_off) << /*std::right <<*/ "" << std::setw (0);
+            else o << std::setw (first_off) << /*std::right <<*/ EMPTY_STR << std::setw (0);
         }
         else if (decades && (cnt % 10 == 0))
         {
@@ -95,41 +96,42 @@ std::ostream& output_seq (std::ostream& o, const char* buffer, int buflen, int c
     return o;
 }
 
-std::ostream& fasta_output_seq (std::ostream& o, const char* buffer, int buflen, int chars_per_line)
+std::ostream& fasta_output_seq (std::ostream& o, const char* buffer, unsigned buflen, unsigned chars_per_line)
 {
     return output_seq (o, buffer, buflen, chars_per_line, false, false, 0);
 }
 
-std::ostream& gb_output_seq (std::ostream& o, const char* buffer, int buflen)
+std::ostream& gb_output_seq (std::ostream& o, const char* buffer, unsigned buflen)
 {
     return output_seq (o, buffer, buflen, 60, true, true, 10);
 }
 
-                        // A   B   C   D   E   F   G   H   I   J   K   L   M   N   O   P   Q   R   S   T   U   V   W   X   Y   Z   *
-const char aa2number [] = {0,  23, 4,  3,  6,  13, 7,  8,  9,  23, 11, 10, 12, 2,  23, 14, 5,  1,  15, 16, 23, 19, 17, 22, 18, 21, 23 };
+                         // A   B   C   D   E   F   G   H   I   J   K   L   M   N   O   P   Q   R   S   T   U   V   W   X   Y   Z   *
+const char aa2number []  = {0,  23, 4,  3,  6,  13, 7,  8,  9,  23, 11, 10, 12, 2,  23, 14, 5,  1,  15, 16, 23, 19, 17, 22, 18, 21, 23 };
 
-                        // 0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20  21  22  23
+                         // 0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20  21  22  23
 const char number2aa [] = {'A','R','N','D','C','Q','E','G','H','I','L','K', 'M','F','P','S','T','W','Y','V',' ','Z','X','*' };
 
+const char number2base [] = {'a', 'g', 'c' , 't'};
 
 
-bool a_ascii2binary (char* dest, int destlen, const char* source, int start, int len)
+bool a_ascii2binary (char* dest, unsigned destlen, const char* source, unsigned start, unsigned len)
 {
     if (destlen < len)
         return false;
 
-    for (int i = start; i < start + len; i ++)
+    for (unsigned i = start; i < start + len; i ++)
         dest [i - start] = char2aa (source [i]);
 
     return true;
 }
 
-bool a_binary2ascii (char* dest, int destlen, const char* source, int start, int len)
+bool a_binary2ascii (char* dest, unsigned destlen, const char* source, unsigned start, unsigned len)
 {
     if (destlen < len)
         return false;
 
-    for (int i = start; i < start + len; i ++)
+    for (unsigned i = start; i < start + len; i ++)
         dest [i - start] = aa2char (source [i]);
 
     return true;
@@ -193,12 +195,12 @@ int char2aa (char c)
 }
 */
 
-int swap_batches (BATCH* batches, int batch_no)
+unsigned swap_batches (BATCH* batches, unsigned batch_no)
 {
-    int totlen = 0;
-    int xpos;
+    unsigned totlen = 0;
+    unsigned xpos;
     BATCH* b = batches;
-    for (int idx = 0; idx < batch_no; idx ++)
+    for (unsigned idx = 0; idx < batch_no; idx ++)
     {
         xpos = b->xpos;
         b->xpos = b->ypos;
@@ -209,7 +211,7 @@ int swap_batches (BATCH* batches, int batch_no)
     return totlen;
 }
 
-int len_batches (const BATCH* batches, int batch_no)
+unsigned len_batches (const BATCH* batches, unsigned batch_no)
 {
     int totlen = 0;
     for (int idx = 0; idx < batch_no; idx ++)
@@ -217,13 +219,13 @@ int len_batches (const BATCH* batches, int batch_no)
     return totlen;
 }
 
-int count_matches (const char* xseq, const char* yseq, const BATCH* batches, int batch_no)
+unsigned count_matches (const char* xseq, const char* yseq, const BATCH* batches, unsigned batch_no)
 {
-    int matches = 0;
+    unsigned matches = 0;
     const BATCH* curb;
-    int xp, yp;
-    int pos;
-    for (int idx = 0; idx < batch_no; idx ++)
+    unsigned xp, yp;
+    unsigned pos;
+    for (unsigned idx = 0; idx < batch_no; idx ++)
     {
         curb = batches + idx;
         xp = curb->xpos;
@@ -236,12 +238,12 @@ int count_matches (const char* xseq, const char* yseq, const BATCH* batches, int
     }
     return matches;
 }
-int count_gaps (const BATCH* batches, int batch_no)
+unsigned count_gaps (const BATCH* batches, unsigned batch_no)
 {
-    int gaplen = 0;
-    int lastx, lasty;
+    unsigned gaplen = 0;
+    unsigned lastx, lasty;
     const BATCH* curb;
-    for (int idx = 0; idx < batch_no; idx ++)
+    for (unsigned idx = 0; idx < batch_no; idx ++)
     {
         curb = batches + idx;
         if (idx)
@@ -251,3 +253,99 @@ int count_gaps (const BATCH* batches, int batch_no)
     }
     return gaplen;
 }
+
+QWORD LTUPLE_MASKS [] = {
+    0x0000000000000000LL,
+    0x0000000000000003LL,
+    0x000000000000000FLL,
+    0x000000000000003FLL,
+    0x00000000000000FFLL,
+    0x00000000000003FFLL,
+    0x0000000000000FFFLL,
+    0x0000000000003FFFLL,
+    0x000000000000FFFFLL,
+    0x000000000003FFFFLL,
+    0x00000000000FFFFFLL,
+    0x00000000003FFFFFLL,
+    0x0000000000FFFFFFLL,
+    0x0000000003FFFFFFLL,
+    0x000000000FFFFFFFLL,
+    0x000000003FFFFFFFLL,
+    0x00000000FFFFFFFFLL,
+    0x00000003FFFFFFFFLL,
+    0x0000000FFFFFFFFFLL,
+    0x0000003FFFFFFFFFLL,
+    0x000000FFFFFFFFFFLL,
+    0x000003FFFFFFFFFFLL,
+    0x00000FFFFFFFFFFFLL,
+    0x00003FFFFFFFFFFFLL,
+    0x0000FFFFFFFFFFFFLL,
+    0x0003FFFFFFFFFFFFLL,
+    0x000FFFFFFFFFFFFFLL,
+    0x003FFFFFFFFFFFFFLL,
+    0x00FFFFFFFFFFFFFFLL,
+    0x03FFFFFFFFFFFFFFLL,
+    0x0FFFFFFFFFFFFFFFLL,
+    0x3FFFFFFFFFFFFFFFLL,
+    0xFFFFFFFFFFFFFFFFLL
+};
+
+DWORD TUPLE_MASKS [] = {
+    0x00000000,
+    0x00000003,
+    0x0000000F,
+    0x0000003F,
+    0x000000FF,
+    0x000003FF,
+    0x00000FFF,
+    0x00003FFF,
+    0x0000FFFF,
+    0x0003FFFF,
+    0x000FFFFF,
+    0x003FFFFF,
+    0x00FFFFFF,
+    0x03FFFFFF,
+    0x0FFFFFFF,
+    0x3FFFFFFF,
+    0xFFFFFFFF,
+};
+
+BYTE LTUPLE_SHIFTS [] = {
+    64,
+    62,
+    60,
+    58,
+    56,
+    54,
+    52,
+    50,
+    48,
+    46,
+    44,
+    42,
+    40,
+    38,
+    36,
+    34,
+    32,
+    30,
+    28,
+    26,
+    24,
+    22,
+    20,
+    18,
+    16,
+    14,
+    12,
+    10,
+    8,
+    6,
+    4,
+    2,
+    0
+};
+
+const BYTE* const TUPLE_SHIFTS = LTUPLE_SHIFTS + 16;
+
+

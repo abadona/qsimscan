@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2012.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -187,7 +187,7 @@ bool Nsimscan::prepare_searcher ()
     searcher_->l_thresh      = p_->min_len ();
     searcher_->max_offs      = p_->max_shift ();
     searcher_->g_period      = p_->gap_period ();
-    searcher_->fast_mode     = p_->fast_mode ();
+    searcher_->xstep         = p_->step ();
     searcher_->k_gep         = gecost;
     searcher_->k_gip         = gicost;
 
@@ -326,7 +326,7 @@ bool Nsimscan::report_results_handler ()
 
 // naming convention
 const char* Nsimscan::process_name () {return ::process_name ();}
-const char* Nsimscan::description () {return "Fast nucleotide sequence similarity search, based on QSimScan algorithm";}
+const char* Nsimscan::description () {return "Fast nucleotide sequence similarity search, based on YABLAST algorithm";}
 const char* Nsimscan::version () {return VERSION;}
 const char* Nsimscan::processing_item_name ()
 {
