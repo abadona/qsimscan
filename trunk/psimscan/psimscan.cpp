@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2012.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -298,7 +298,7 @@ bool Psimscan::report_results_handler ()
 
 // naming convention
 const char* Psimscan::process_name () {return ::process_name ();}
-const char* Psimscan::description () {return "Fast protein similarity search, based on YABLAST algorithm";}
+const char* Psimscan::description () {return "Fast protein similarity search, based on PSimScan algorithm";}
 const char* Psimscan::version () {return VERSION;}
 const char* Psimscan::processing_item_name ()
 {

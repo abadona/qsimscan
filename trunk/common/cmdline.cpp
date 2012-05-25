@@ -20,11 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////
 
 //#pragma warning (disable: 4503)
+#include <cstring>
 #include "cmdline.h"
 #include "resource.h"
 #include "cmdline_s.h"
+#include "common_str.h"
 #include "rerror.h"
-#include <cstring>
 
 
 KeyFormat::KeyFormat (const char* shortopts, const char** longopts, const char* name, const char* section, const char* parameter, bool optional, bool has_arg, const char* arg_type, const char* def_value, const char* description)
@@ -311,7 +312,7 @@ const char* CmdLine :: getArg (int no)
     return arguments_ [no].c_str ();
 }
 
-const unsigned MAX_LONGOPTS = 64;
+const unsigned MAX_LONGOPTS = 256;
 const unsigned MAX_LONGOPT_LEN = 512;
 
 void CmdLine :: parse (int argc, char** argv, bool strict)
@@ -320,20 +321,20 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
 
     Arglist arglist;
     Optdict optdict;
-    
 
     // allocate storage for long options spec
     unsigned longopts_no = 0;
     KeysFormat::iterator kitr;
     char longopts_spec_buf [MAX_LONGOPTS][MAX_LONGOPT_LEN];
     char* longopts_spec [MAX_LONGOPTS];
-    for (kitr = keys_format_.begin (); kitr != keys_format_.end (); kitr ++) longopts_no += (*kitr).longopts_.size ();
+    for (kitr = keys_format_.begin (); kitr != keys_format_.end (); kitr ++) 
+        longopts_no += (*kitr).longopts_.size ();
     if (longopts_no + 1 >= MAX_LONGOPTS)
-        ers << "Too many command line options" << Throw;
+        ers << "Too many command line options in command line format definition" << ThrowEx(InternalRerror);
 
     // fill in options specs and make option->spec map
     std::map <std::string, KeyFormat*> opt2spec;
-    std::string shortopts_spec;
+    std::string shortopts_spec (EMPTY_STR);
 
     int lidx = 0;
     for (kitr = keys_format_.begin (); kitr != keys_format_.end (); kitr ++)
@@ -401,7 +402,7 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
             }
             else
             {
-                keys_ [(*k).second->name_] = (const char*) "";
+                keys_ [(*k).second->name_] = EMPTY_STR;
             }
             // DEBUG
             // printf ("CMDL PAR '%s' : '%s'", (*k).second->name_.c_str (), val);
@@ -445,7 +446,6 @@ void CmdLine :: parse (int argc, char** argv, bool strict)
         error_report_ += "Too few command-line arguments. Please use -h for help.\n";
         ok_ = false;
     }
-    
 }
 
 KeyFormat* CmdLine :: keyFormat (const char* name)

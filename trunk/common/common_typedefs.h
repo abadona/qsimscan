@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __common_typedefs_h__
@@ -29,8 +29,8 @@
 typedef std::vector <bool> BoolVect;
 typedef std::vector <int> IntVect;
 typedef std::vector <unsigned int> UIntVect;
+typedef std::vector <std::string> StrVect;
 typedef std::set <int> IntSet;
-typedef std::vector<std::string> StrVect;
-typedef std::set<std::string> StrSet;
+typedef std::set <std::string> StrSet;
 
 #endif

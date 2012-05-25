@@ -32,7 +32,7 @@ static const char* GAP_PERIOD_DEFAULT = "10";
 static const char* MIN_THRESH_DEFAULT = "70";
 static const char* MAX_THRESH_DEFAULT = "55";
 static const char* MIN_LEN_DEFAULT = "45";
-static const char* FAST_MODE_DEFAULT = FALSE_STR;
+static const char* STEP_DEFAULT = "1";
 static const char* KDISTR_DEFAULT = EMPTY_STR;
 
 static const char* GIP_DEFAULT = "2.0";
@@ -57,7 +57,7 @@ static const char* GAP_PERIOD_HELP = "Minimal period between gaps";
 static const char* MIN_THRESH_HELP = "Detection threshold at MIN_LEN";
 static const char* MAX_THRESH_HELP = "Detection threshold at infine length";
 static const char* MIN_LEN_HELP = "Minimal length of detected similarity";
-static const char* FAST_MODE_HELP = "Step over 4 nucleotides at a time";
+static const char* STEP_HELP = "Number of positions in subject sequence to step over at a time";
 static const char* KDISTR_HELP = "Tuple distribution file (flat by default)";
 
 static const char* GIP_HELP = "Gap initiation penalty";
@@ -96,7 +96,7 @@ void KTSearch_params::add_parameters_ktsearch ()
         {"MIN_THRESH",  INTEGER_STR, min_thresh_default (), min_thresh_help ()},
         {"MAX_THRESH",  INTEGER_STR, max_thresh_default (), max_thresh_help ()},
         {"MIN_LEN",     INTEGER_STR, min_len_default (),    min_len_help ()},
-        {"FAST_MODE",   BOOLEAN_STR, fast_mode_default (),  fast_mode_help ()},
+        {"STEP",        INTEGER_STR, step_default (),       step_help ()},
         {"KDISTR",      STRING_STR,  kdistr_default (),     kdistr_help ()}
     };
     parameters_->addSection (KTSEARCH_SECTNAME,        "Tuple lookup search parameters", KTSEARCH_SECTION,       sizeof (KTSEARCH_SECTION) / sizeof (Parameter_descr));
@@ -153,7 +153,7 @@ bool KTSearch_params::interpreteParameters ()
         min_thresh  (parameters_->getInteger  (KTSEARCH_SECTNAME, "MIN_THRESH"));
         max_thresh  (parameters_->getInteger  (KTSEARCH_SECTNAME, "MAX_THRESH"));
         min_len     (parameters_->getInteger  (KTSEARCH_SECTNAME, "MIN_LEN"));
-        fast_mode   (parameters_->getBoolean  (KTSEARCH_SECTNAME, "FAST_MODE"));
+        step        ((unsigned) parameters_->getInteger  (KTSEARCH_SECTNAME, "STEP"));
         kdistr      (parameters_->getParameter(KTSEARCH_SECTNAME, "KDISTR"));
 
         gip         (parameters_->getFloat    (ALIGN_SECTNAME, "GIP"));
@@ -177,7 +177,7 @@ static const char* logapper []   = {"gap_period", NULL};
 static const char* lominthr []   = {"it", "minthr", NULL};
 static const char* lomaxthr []   = {"xt", "maxthr", NULL};
 static const char* lominlen []   = {"il", "minlen", NULL};
-static const char* lofast   []   = {"fast", NULL};
+static const char* lostep   []   = {"step", NULL};
 static const char* lokdistr []   = {"kdistr", NULL};
 static const char* logep    []   = {"gep", NULL};
 static const char* logip    []   = {"gip", NULL};
@@ -204,8 +204,8 @@ void KTSearch_params::add_cmdline_ktsearch ()
     keys_format_.push_back (KeyFormat (EMPTY_STR,  lomaxthr,   "max_thr",  KTSEARCH_SECTNAME,  "MAX_THRESH",  true, true, INTEGER_STR, max_thresh_default (), max_thresh_help ()));
     keys_format_.push_back (KeyFormat (EMPTY_STR,  lominlen,   "min_len",  KTSEARCH_SECTNAME,  "MIN_LEN",     true, true, INTEGER_STR, min_len_default (), min_len_help ()));
 
-    keys_format_.push_back (KeyFormat ("q",        lofast,     "fast",     KTSEARCH_SECTNAME,  "FAST_MODE",   true, false, BOOLEAN_STR, inverse_bs (fast_mode_default ()), fast_mode_help ()));
-    keys_format_.push_back (KeyFormat (EMPTY_STR,  lokdistr,   "kdistr",   KTSEARCH_SECTNAME,  "KDISTR",      true, true,  STRING_STR,  kdistr_default (), kdistr_help ()));
+    keys_format_.push_back (KeyFormat ("q",        lostep,     "step",     KTSEARCH_SECTNAME,  "STEP",        true, true, INTEGER_STR, step_default (), step_help ()));
+    keys_format_.push_back (KeyFormat (EMPTY_STR,  lokdistr,   "kdistr",   KTSEARCH_SECTNAME,  "KDISTR",      true, true, STRING_STR,  kdistr_default (), kdistr_help ()));
 }
 void KTSearch_params::add_cmdline_align ()
 {
@@ -288,9 +288,9 @@ const char* KTSearch_params::min_len_default () const
     return MIN_LEN_DEFAULT;
 }
 
-const char* KTSearch_params::fast_mode_default () const
+const char* KTSearch_params::step_default () const
 {
-    return FAST_MODE_DEFAULT;
+    return STEP_DEFAULT;
 }
 
 const char* KTSearch_params::kdistr_default () const
@@ -384,9 +384,9 @@ const char* KTSearch_params::min_len_help () const
     return MIN_LEN_HELP;
 }
 
-const char* KTSearch_params::fast_mode_help () const
+const char* KTSearch_params::step_help () const
 {
-    return FAST_MODE_HELP;
+    return STEP_HELP;
 }
 
 const char* KTSearch_params::kdistr_help () const

@@ -22,26 +22,25 @@
 #include "biosequence.h"
 #include "rerror.h"
 
-const char* const nn2char = "agct";
-
-//const char* const aa2char = "ARNDCQEGHILKMFPSTWYVBZX*";
-
 const char* const aa2str[AANUM] = {\
 "Ala", "Arg", "Asn", "Asp", "Cys", "Gln", "Glu", "Gly",\
 "His", "Ile", "Leu", "Lys", "Met", "Phe", "Pro", "Ser",\
 "Thr", "Trp", "Tyr", "Val", "BBB", "ZZZ", "XXX", "STP"};
 
-const char* const gcode_c_rev 	= "KKNNRRSSTTTTIMIIEEDDGGGGAAAAVVVVQQHHRRRRPPPPLLLL**YY*WCCSSSSLLFF";
-const char* const gcode_c = "KEQ*RGR*TAPSIVLLKEQ*RGRWTAPSMVLLNDHYSGRCTAPSIVLFNDHYSGRCTAPSIVLF";
+// standard genetic code - kept as const data to avoid loading from database
 
-const int gcode_b_rev[64] = {\
-11, 11, 2, 2, 1, 1, 15, 15, 16, 16, 16, 16, 9, 12, 9, 9, 6, 6, 3, 3, 7, 7, 7, 7, 0, 0, 0, 0,\
-19, 19, 19, 19, 5, 5, 8, 8, 1, 1, 1, 1, 14, 14, 14, 14, 10, 10, 10, 10, 23, 23, 18, 18, 23,\
+const char* const gcode_c_rev = "KKNNRRSSTTTTIMIIEEDDGGGGAAAAVVVVQQHHRRRRPPPPLLLL**YY*WCCSSSSLLFF";
+
+const char* const gcode_c     = "KEQ*RGR*TAPSIVLLKEQ*RGRWTAPSMVLLNDHYSGRCTAPSIVLFNDHYSGRCTAPSIVLF";
+
+const int gcode_b_rev[64] = {
+11, 11, 2, 2, 1, 1, 15, 15, 16, 16, 16, 16, 9, 12, 9, 9, 6, 6, 3, 3, 7, 7, 7, 7, 0, 0, 0, 0,
+19, 19, 19, 19, 5, 5, 8, 8, 1, 1, 1, 1, 14, 14, 14, 14, 10, 10, 10, 10, 23, 23, 18, 18, 23,
 17, 4, 4, 15, 15, 15, 15, 10, 10, 13, 13};
 
-const int gcode_b[64] = {\
-11, 6, 5, 23, 1, 7, 1, 23, 16, 0, 14, 15, 9, 19, 10, 10, 11, 6, 5, 23, 1, 7, 1, 17, 16, 0,\
-14, 15, 12, 19, 10, 10, 2, 3, 8, 18, 15, 7, 1, 4, 16, 0, 14, 15, 9, 19, 10, 13, 2, 3, 8, 18,\
+const int gcode_b[64] = {
+11, 6, 5, 23, 1, 7, 1, 23, 16, 0, 14, 15, 9, 19, 10, 10, 11, 6, 5, 23, 1, 7, 1, 17, 16, 0,
+14, 15, 12, 19, 10, 10, 2, 3, 8, 18, 15, 7, 1, 4, 16, 0, 14, 15, 9, 19, 10, 13, 2, 3, 8, 18,
 15, 7, 1, 4, 16, 0, 14, 15, 9, 19, 10, 13};
 
 

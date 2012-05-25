@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2012.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,14 +21,7 @@
 
 #include "nsimscan_params.h"
 
-static const char* HEADER = "Tool for searching for nucleotide sequence similarities (based on QSIMSCAN algorithm by SciDM)";
-extern const char* VERSION;
-
-Nsimscan_params::Nsimscan_params ()
-:
-KTSearch_params (HEADER, NULL, VERSION)
-{
-}
+static const char* HEADER = "Tool for searching for nucleotide sequence similarities (based on YABLAST algorithm by SciDM)";
 
 Process_params* process_params_factory ()
 {

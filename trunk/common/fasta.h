@@ -16,18 +16,20 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __fasta_h__
 #define __fasta_h__
 
-#include <stdio.h>
+#include <cstdio>
 #include "platform.h"
 
 #define MAX_HDR_LEN 8000
-#define MAX_NAME_LEN 80
+#define MAX_NAME_LEN 160
 #define MAX_LINE_LEN 10000
+// #define INIT_SEQ_LEN 300000000ULL // 300M
+#define INIT_SEQ_LEN 1000000ULL // 1M
 
 class FastaFile
 {
@@ -51,21 +53,21 @@ class FastaFile
     void add_seq ();
 
 public:
-    FastaFile ();
-    FastaFile (const char* name);
+    FastaFile (ulonglong init_sz = INIT_SEQ_LEN);
+    FastaFile (const char* name, ulonglong init_sz = INIT_SEQ_LEN);
     ~FastaFile ();
 
-    bool       open (const char* name);
-    bool       close ();
-    bool       next ();
-    bool       seek (ulonglong off);
-    bool       is_open () const {return f_ != NULL;}
-    
-    void       fetch_hdr () { parse_hdr (); }
+    bool        open (const char* name);
+    bool        close ();
+    bool        next ();
+    bool        seek (ulonglong off);
+    bool        is_open () const {return f_ != NULL;}
+    void        fetch_hdr () { parse_hdr (); }
 
     const char* cur_name () const;
     const char* cur_hdr  () const;
     const char* cur_seq  () const;
+    char*       cur_seq_buf ();
     unsigned    cur_seq_len () const { return seqlen_; }
     unsigned    cur_no  () const;
     ulonglong   tot_len () const;

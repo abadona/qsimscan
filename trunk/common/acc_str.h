@@ -16,14 +16,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __acc_str_h__
 #define __acc_str_h__
 
-#ifndef __acc_str_cpp__
+#include <common_str.h>
 
+#ifndef __acc_str_cpp__
+#if 0
 extern const char* TRUE_STR;
 extern const char* FALSE_STR;
 extern const char* YES_STR;
@@ -49,6 +51,7 @@ extern const char* STRING_STR;
 extern const char* FLOAT_STR;
 extern const char* DOUBLE_STR;
 extern const char* OBJNAME_STR;
+#endif
 
 extern const char* FAIL_OPEN_SUBSYSTEM;
 extern const char* FAIL_CLONE_TYPE;
@@ -135,6 +138,10 @@ extern const char* NCBI_TAXID_NOMEN_ABBR;
 extern const char* FEATURE_KEYS_CLASSIFICATION_NAME;
 extern const char* FEATURE_QUALS_CLASSIFICATION_NAME;
 extern const char* NCBI_TAXONOMY_CLASSIFICATION_NAME;
+extern const char* EBI_TAXONOMY_CLASSIFICATION_NAME;
+extern const char* SEQ_FILE_PATH_CLASSIFICATION_NAME;
+extern const char* SEQ_FILE_PATH_CLASSIFICATION_DESCR;
+
 
 extern const char* NUCL_GC_ASSOC_NAME;
 extern const char* MITO_GC_ASSOC_NAME;
@@ -152,11 +159,5 @@ extern const char* SEQ_MAP_CLUSTERING_NAME;
 
 
 #endif
-
-#include <stddef.h>
-
-const char* inverse_bs (const char* bs); // inverse_bool_string
-bool bool_eval (const char* bs, bool* value = NULL); // returns True if valid boolean value and sets value; otherwice returns false
-const char* bool_str (bool val);
 
 #endif // __seqtools_acc_str_h__

@@ -16,13 +16,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __RESOURCE_H__
 #define __RESOURCE_H__
 
-#include <stdio.h>
+#include <cstdio>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include "portability.h"
 #include "rerror.h"
 
 class FileWrapper
@@ -92,6 +95,77 @@ public:
         return f_;
     }
     FILE* operator* ()
+    {
+        return f_;
+    }
+};
+class FhandleWrapper
+{
+    int f_;
+    mutable bool controlled_;
+public:
+
+    FhandleWrapper (const char* fname, int oflags, mode_t omode = 0, bool control = true)
+    {
+        f_ = ::sci_open (fname, oflags, omode);
+        controlled_ = control;
+    }
+    FhandleWrapper (int f, bool control = true)
+    :
+    f_ (f),
+    controlled_ (control)
+    {
+    }
+    FhandleWrapper ()
+    :
+    f_ (-1),
+    controlled_ (true)
+    {
+    }
+    FhandleWrapper (const FhandleWrapper& from)
+    :
+    f_ (from.f_),
+    controlled_ (from.controlled_)
+    {
+        from.controlled_ = false;
+    }
+    ~FhandleWrapper ()
+    {
+        free ();
+    }
+    FhandleWrapper& operator = (const FhandleWrapper& from)
+    {
+        free ();
+        f_ = from.f_;
+        controlled_ = from.controlled_;
+        from.controlled_ = false;
+        return *this;
+    }
+    FhandleWrapper& operator = (int nf)
+    {
+        free ();
+        f_ = nf;
+        controlled_ = true;
+        return *this;
+    }
+    bool operator ! () const
+    {
+        return (f_ == -1);
+    }
+    void free ()
+    {
+        if (controlled_ && f_)
+        {
+            ::sci_close (f_);
+            f_ = -1;
+        }
+    }
+    int release ()
+    {
+        controlled_ = false;
+        return f_;
+    }
+    int operator* ()
     {
         return f_;
     }

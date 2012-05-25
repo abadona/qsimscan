@@ -20,16 +20,23 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <fcntl.h>
+#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
+#include <cstdarg>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <limits>
 
 #include <fstream>
 #include <ios>
 
 #include "portability.h"
+#include "resource.h"
+#include "common_str.h"
 
 // file access mode flags
 #if defined (_MSC_VER)
@@ -69,7 +76,7 @@ void expand_wildcards (const char* expr, std::vector <std::string>& files, bool 
         _splitpath (expr, drive, dir, name, ext);
         do
         {
-            _makepath (fullp, drive, dir, gbfile.name, "");
+            _makepath (fullp, drive, dir, gbfile.name, EMPTY_STR);
             files.push_back (fullp);
         }
         while (_findnext (hFile, &gbfile) == 0);
@@ -235,7 +242,7 @@ StrVec split_path (const std::string& path)
 std::string join_path (StrVec components)
 {
     printf ("\njoin_path\n");
-    std::string rv = "";
+    std::string rv = EMPTY_STR;
     StrVec::const_iterator itr = components.begin ();
     for (;itr != components.end (); itr ++)
     {
@@ -249,7 +256,7 @@ std::string join_path (StrVec components)
 
 std::string join_path (const char* comp0, ...)
 {
-    std::string rv = "";
+    std::string rv = EMPTY_STR;
     va_list argl;
     va_start (argl, comp0);
     const char* comp = comp0;
@@ -535,4 +542,163 @@ void BufferedWriter::flush ()
         cpos = 0;
     }
 }
+
+ulonglong get_open_file_size (int fhandle)
+{
+    off_t curpos = ::sci_lseek (fhandle, 0, SEEK_CUR);
+    if (-1 == curpos)
+        ers << "Unable to determine current position in file" << ThrowEx (OSRerror);
+    off_t fsz = ::sci_lseek (fhandle, 0, SEEK_END);
+    if (-1 == fsz)
+        ers << "Unable to seek file to end" << ThrowEx (OSRerror);
+    if (-1 == ::sci_lseek (fhandle, curpos, SEEK_SET))
+        ers << "Unable to seek file to " << curpos << ThrowEx (OSRerror);
+    return (ulonglong) fsz;
+}
+
+static bool dir_useful (const char* dirname)
+{
+    struct sci_stat_struc stat_buf;
+
+    if (-1 == sci_stat (dirname, &stat_buf)) return false;
+
+    if (!S_ISDIR (stat_buf.st_mode)) return false;
+
+    gid_t gid = getgid ();
+    uid_t uid = getuid ();
+
+    bool readable = stat_buf.st_mode & S_IROTH;
+    if (!readable && gid == stat_buf.st_gid) readable = stat_buf.st_mode & S_IRGRP;
+    if (!readable && uid == stat_buf.st_uid) readable = stat_buf.st_mode & S_IRUSR;
+
+    bool writeable = stat_buf.st_mode & S_IWOTH;
+    if (!writeable && gid == stat_buf.st_gid) writeable = stat_buf.st_mode & S_IWGRP;
+    if (!writeable && uid == stat_buf.st_uid) writeable = stat_buf.st_mode & S_IWUSR;
+
+    bool executeable = stat_buf.st_mode & S_IXOTH;
+    if (!executeable && gid == stat_buf.st_gid) executeable = stat_buf.st_mode & S_IXGRP;
+    if (!executeable && uid == stat_buf.st_uid) executeable = stat_buf.st_mode & S_IXUSR;
+
+    return readable && writeable && executeable;
+}
+
+static const char *TRYENV [] = {"TMP", "TEMP", "TMPDIR", "TEMPDIR"};
+static const char *TRYDIR [] = {"/temp", "/tmp", "."};
+
+
+std::string temp_dir (const char* tmpdir)
+{
+    // if directory not passed in, guess one
+    std::string tn;
+    if (!tmpdir || !*tmpdir)
+    {
+        // create list of candidate temporary directory names
+        StrVec candidate_temp_dir_names;
+        // add values from environment
+        for (const char** tryenv = TRYENV; tryenv != TRYENV + sizeof (TRYENV) / sizeof (*TRYENV); tryenv ++)
+            if ((tmpdir = getenv (*tryenv)) && is_dir (tmpdir))
+                candidate_temp_dir_names.push_back (tmpdir);
+        // add hardcoded values
+        for (const char** cand = TRYDIR; cand != TRYDIR + sizeof (TRYDIR) / sizeof (*TRYDIR); cand ++)
+            if (is_dir (*cand))
+                candidate_temp_dir_names.push_back (*cand);
+        // find if any of them suitable
+        for (StrVec::iterator ni = candidate_temp_dir_names.begin (); ni != candidate_temp_dir_names.end (); ni ++)
+            if (dir_useful (ni->c_str ()))
+            {
+                tn = ni->c_str ();
+                break;
+            }
+    }
+    else
+    {
+        if (!dir_useful (tmpdir))
+            ers << "Passed in temp directory (" << tmpdir << ") is not useful" << Throw;
+        tn = tmpdir;
+    }
+    return tn;
+}
+
+static const char DEFAULT_TEMP_FILE_PREFIX [] = "temp_";
+static const char TEMP_FILE_TEMPL_SUFFIX [] = "XXXXXX";
+
+typedef std::set <unsigned int> UintSet;
+
+std::string make_temp_fname (const char* tmpdir, const char* prefix)
+{
+    // if directory not passed in, guess one
+    std::string tn = temp_dir (tmpdir);;
+
+    // if prefix not passed in, use default
+    if (!prefix) prefix = DEFAULT_TEMP_FILE_PREFIX;
+
+    // get temp directory listing
+    StrVec dircontent = listdir (tn);
+
+    // find all entries matching prefix and having numeric postfix, get list of numbers
+    UintSet postfixes;
+    unsigned prefix_len = prefix ? strlen (prefix) : 0;
+    for (StrVec::iterator ii = dircontent.begin (); ii != dircontent.end (); ii ++)
+    {
+        // check if prefix matches
+        if (prefix_len && (ii->substr (0, prefix_len) != prefix))
+            continue;
+        // check if postfix is numeric and get the number
+        unsigned number = 0;
+        std::string::iterator sitr;
+        for (sitr = ii->begin () + prefix_len; sitr != ii->end (); sitr ++)
+        {
+            number *= 10;
+            if (!isdigit (*sitr))
+                break;
+            else
+                number += *sitr - '0';
+        }
+        if (sitr != ii->end ())
+            continue;
+        // store number to postfixes set
+        postfixes.insert (number);
+    }
+    // now retrieve the numbers using first gap
+    // make a set for quick presence check
+    unsigned prev = 0;
+    for (UintSet::iterator nitr = postfixes.begin (); nitr != postfixes.end (); nitr ++)
+        if (prev + 1 < *nitr)
+            break; // found the gap in sequence
+        else
+            prev = *nitr;
+    if (prev == std::numeric_limits<unsigned>::max ()) // just for sanity :)
+        ers << "No more temp file names available for prefix " << (prefix ? prefix : "") << " in directory " << tn << Throw;
+
+    // prev + 1 is the right number
+    std::ostringstream name (tn, std::ios::out | std::ios::app);
+    name << PATH_SEPARATOR;
+    if (prefix) name << prefix;
+    name << prev + 1;
+    return name.str ();
+}
+
+
+int make_linked_temp_file (std::string& dest, const char* tmpdir, const char* prefix)
+{
+    if (!prefix) prefix = DEFAULT_TEMP_FILE_PREFIX;
+    std::string dirname (temp_dir (tmpdir));
+    std::string templ = join_path (dirname.c_str (), prefix, NULL);
+    templ += TEMP_FILE_TEMPL_SUFFIX;
+    MemWrapper <char> buffer (templ.size () + 1);
+    strcpy (buffer, templ.c_str ());
+    int fhandle = mkstemp (buffer);
+    dest = buffer;
+    return fhandle;
+}
+
+int make_temp_file ()
+{
+    std::string fname;
+    int fhandle = make_linked_temp_file (fname);
+    if (fhandle != -1)
+        ::unlink (fname.c_str ()); // do not check for errors.
+    return fhandle;
+}
+
 

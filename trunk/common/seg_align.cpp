@@ -63,7 +63,7 @@ static void make_pos_ordered_sim_index (ARVect& sims, int max_ovl, UIntVect& tar
     std::sort (target.begin (), target.end (), CompareSimIdxByPos (sims, max_ovl));
 }
 
-void SegAlign :: fill_trace (ARVect& sims, UIntVect& order, TraceVect& trace)
+void SegAlign :: fill_trace (ARVect& sims, UIntVect& order, BTraceVect& trace)
 {
     // walk all similarities preceeding current by X axis
         // if continuation is possible
@@ -105,7 +105,7 @@ void SegAlign :: fill_trace (ARVect& sims, UIntVect& order, TraceVect& trace)
     }
 }
 
-unsigned SegAlign::find_continuations (TraceVect& trace, BoolVect& continuations)
+unsigned SegAlign::find_continuations (BTraceVect& trace, BoolVect& continuations)
 {
     continuations.resize (trace.size ());
     std::fill (continuations.begin (), continuations.end (), false);
@@ -116,7 +116,7 @@ unsigned SegAlign::find_continuations (TraceVect& trace, BoolVect& continuations
     return std::count (continuations.begin (), continuations.end (), false);
 }
 
-void SegAlign::make_score_order (TraceVect& trace, BoolVect& continuations, unsigned resno, UIntVect& target)
+void SegAlign::make_score_order (BTraceVect& trace, BoolVect& continuations, unsigned resno, UIntVect& target)
 {
     unsigned p = 0;
     target.resize (resno);
@@ -126,7 +126,7 @@ void SegAlign::make_score_order (TraceVect& trace, BoolVect& continuations, unsi
     std::sort (target.begin (), target.end (), CompareTraceIdxByScore (trace));
 }
 
-void SegAlign::backtrace_from (unsigned idx, const char* tseq, TraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove)
+void SegAlign::backtrace_from (unsigned idx, const char* tseq, BTraceVect& trace, ARVect& sims, BoolVect& processed, BoolVect& to_remove)
 {
     // backtrace:
     // while there is preceeding sim:
@@ -248,7 +248,7 @@ bool SegAlign::merge (ARVect& sims, const char* tseq)
     make_pos_ordered_sim_index (sims, max_ovl_, order);
 
     // Allocate array of prev_best control structures  (one per sim)
-    TraceVect trace (sims.size ());
+    BTraceVect trace (sims.size ());
 
     // fill in the trace
     fill_trace (sims, order, trace);

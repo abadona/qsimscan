@@ -20,6 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <iomanip>
+#include <exception>
 #include "process_thread.h"
 #include "i64out.h"
 #include "rerror.h"
@@ -87,14 +88,6 @@ void process_thread_function (void* arglist)
         }
         if (process->error_) // no need for synchronisation here
             process->save_results_ = false;
-
-#ifdef NOTHREADS
-        else if ((process->current () % 500) == 0)
-        {
-            process->report_state (std::cerr);
-			std::cerr << std::flush;
-        }
-#endif
     }
     while (!finish);
 
@@ -206,6 +199,12 @@ bool Process::init (Process_params* params)
         error (str);
     }
 #if !defined (DONT_CATCH_UNKNOWN)
+    catch (std::exception& e)
+    {
+        std::ostringstream str;
+        str << "Standard exception: " << e.what () << " caught during INITIALIZATION stage " << std::endl << std::flush;
+        error (str);
+    }
     catch (...)
     {
         std::ostringstream str;
@@ -213,7 +212,6 @@ bool Process::init (Process_params* params)
         error (str);
     }
 #endif
-
     if (toRet)
     {
         CRBEG
@@ -244,6 +242,15 @@ bool Process::next ()
         error (str);
     }
 #if !defined (DONT_CATCH_UNKNOWN)
+    catch (std::exception& e)
+    {
+        std::ostringstream str;
+        str << "Standard exception: " << e.what () << " caught during PROCESSING stage " << std::endl
+            << "phase " << phase () << " (" << phase_name (phase ())
+            << ") , subphase " << subphase () << " (" << subphase_name (phase (), subphase ())
+            << ") at " << processing_item_name () << " " << current () << " of " << total () << "." << std::endl << std::flush;
+        error (str);
+    }
     catch (...)
     {
         std::ostringstream str;
@@ -274,6 +281,20 @@ bool Process::report_results ()
         str << "Error during REPORT stage: " << (const char*) e << std::endl << std::flush;
         error (str);
     }
+#if !defined (DONT_CATCH_UNKNOWN)
+    catch (std::exception& e)
+    {
+        std::ostringstream str;
+        str << "Exception: " << e.what () << " caught during results reproting" << std::endl << std::flush;
+        error (str);
+    }
+    catch (...)
+    {
+        std::ostringstream str;
+        str << "Unhandled exception caught during reporting results" << std::endl << std::flush;
+        error (str);
+    }
+#endif
     return toRet;
 }
 
@@ -297,6 +318,10 @@ bool Process::close ()
         error (str);
     }
 #if !defined (DONT_CATCH_UNKNOWN)
+    catch (std::exception& e)
+    {
+        error (e.what ());
+    }
     catch (...)
     {
         std::ostringstream str;
@@ -415,26 +440,26 @@ void Process::subphase (long subphase_no)
     CREND
 }
 
-longlong Process::incrcur ()
+longlong Process::incrcur (longlong incr)
 {
     CRBEG
-    longlong toR = current_ ++;
+    longlong toR = current_ += incr;
     CREND
     return toR;
 }
 
-longlong  Process::incrskipped ()
+longlong  Process::incrskipped (longlong incr)
 {
     CRBEG
-    longlong toR = skipped_ ++;
+    longlong toR = skipped_ += incr;
     CREND
     return toR;
 }
 
-longlong Process::incrresno ()
+longlong Process::incrresno (longlong incr)
 {
     CRBEG
-    longlong toR = res_no_ ++;
+    longlong toR = res_no_ += incr;
     CREND
     return toR;
 }
@@ -482,9 +507,9 @@ void Process::report_phase_switch (std::ostream& o)
     o << std::endl;
 }
 
-void Process::report_header (std::ostream& o)
+void Process::report_header (std::ostream& o, const char* procname)
 {
-    o << process_name () << " version " << version () << ", by Scientific Data Management, Glenview, IL" << std::endl << "  " << description () << std::endl << std::flush;
+    o << (procname ? procname : process_name ()) << " version " << version () << ", by Scientific Data Management (SciDM.org)" << std::endl << "  " << description () << std::endl << std::flush;
 }
 
 void Process::report_final (std::ostream& o)

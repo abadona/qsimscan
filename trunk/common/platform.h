@@ -16,11 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
-// For any questions please contact SciDM team by email at scidmteam@yahoo.com
+// For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef __PLATFORM_H__
 #define __PLATFORM_H__
+
+#include "compile_time_macro.h"
 
 #ifdef _MSC_VER
 typedef __int64 longlong;
@@ -32,8 +34,10 @@ typedef long long unsigned int ulonglong;
 
 #if defined (__x86__) || defined (__powerpc__)
 #define SCIDM_LITTLE_ENDIAN
+//#warning LITTLE ENDIAN
 #elif defined (__mips__) || defined (__alpha__) || defined (__rx000__)
 #define SCIDM_BIG_ENDIAN
+#warning BIG ENDIAN
 #else
 #error Byte order unknown
 #endif
@@ -44,21 +48,60 @@ typedef unsigned char BYTE;
 typedef char SBYTE;
 typedef unsigned short WORD;
 typedef short SWORD;
-#ifndef _MSC_VER
 typedef unsigned int DWORD;
-#else
-typedef unsigned long DWORD;
-#endif
 typedef int SDWORD;
 typedef ulonglong QWORD;
 typedef longlong SQWORD;
 
+static void dummy ()
+{
+    ASSERT_EXACT_BITSIZE (BYTE, 8)
+    ASSERT_EXACT_BITSIZE (SBYTE, 8)
+    ASSERT_EXACT_BITSIZE (WORD, 16)
+    ASSERT_EXACT_BITSIZE (SWORD, 16)
+    ASSERT_EXACT_BITSIZE (DWORD, 32)
+    ASSERT_EXACT_BITSIZE (SDWORD, 32)
+    ASSERT_EXACT_BITSIZE (QWORD, 64)
+    ASSERT_EXACT_BITSIZE (SQWORD, 64)
+}
+
 #ifdef SCIDM_LITTLE_ENDIAN
-#define GET32_U(ptr) (*(int*)(ptr))
-#define GET32_UR(ptr) ((ptr[0]<<24)|(ptr[1]<<16)|(ptr[2]<<8)|ptr[3])
+
+#define GET32_U(ptr) (*(const DWORD*)(ptr))
+#define GET32_UR(ptr) ( (((DWORD) ((const BYTE*) ptr) [0]) << 24) | \
+                        (((DWORD) ((const BYTE*) ptr) [1]) << 16) | \
+                        (((DWORD) ((const BYTE*) ptr) [2]) << 8 ) | \
+                        (((DWORD) ((const BYTE*) ptr) [3])      ) )
+
+#define GET64_U(ptr) (*(const QWORD*)(ptr))
+#define GET64_UR(ptr) ( (((QWORD) ((const BYTE*) ptr) [0]) << 56) | \
+                        (((QWORD) ((const BYTE*) ptr) [1]) << 48) | \
+                        (((QWORD) ((const BYTE*) ptr) [2]) << 40) | \
+                        (((QWORD) ((const BYTE*) ptr) [3]) << 32) | \
+                        (((QWORD) ((const BYTE*) ptr) [4]) << 24) | \
+                        (((QWORD) ((const BYTE*) ptr) [5]) << 16) | \
+                        (((QWORD) ((const BYTE*) ptr) [6]) << 8 ) | \
+                        (((QWORD) ((const BYTE*) ptr) [7])      ) )
+
 #else
-#define GET32_U(ptr) ((ptr[0]<<24)|(ptr[1]<<16)|(ptr[2]<<8)|ptr[3])
-#define GET32_UR(ptr) (*(int*)(ptr))
+
+#define GET32_U(ptr)  ( (((DWORD) ((const BYTE*) ptr) [0]) << 24) | \
+                        (((DWORD) ((const BYTE*) ptr) [1]) << 16) | \
+                        (((DWORD) ((const BYTE*) ptr) [2]) << 8 ) | \
+                        (((DWORD) ((const BYTE*) ptr) [3])      ) )
+#define GET32_UR(ptr) (*(const DWORD*)(ptr))
+
+
+#define GET64_U(ptr)  ( (((QWORD) ((const BYTE*) ptr) [0]) << 56) | \
+                        (((QWORD) ((const BYTE*) ptr) [1]) << 48) | \
+                        (((QWORD) ((const BYTE*) ptr) [2]) << 40) | \
+                        (((QWORD) ((const BYTE*) ptr) [3]) << 32) | \
+                        (((QWORD) ((const BYTE*) ptr) [4]) << 24) | \
+                        (((QWORD) ((const BYTE*) ptr) [5]) << 16) | \
+                        (((QWORD) ((const BYTE*) ptr) [6]) << 8 ) | \
+                        (((QWORD) ((const BYTE*) ptr) [7])      ) )
+#define GET64_UR(ptr) (*(const QWORD*)(ptr))
+
 #endif
 
 bool cpu_simd ();
