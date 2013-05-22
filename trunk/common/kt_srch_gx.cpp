@@ -699,11 +699,11 @@ void KT_SEARCH::scan_l1_stepped ()
     int dword_reminder = 16 - kt_size;
     int shift = 0;
     int baseoff = 0;
-    DWORD seqw;
+    DWORD seqw = GET32_U (s);
 
     for (xpos = 0; xpos < xend; xpos += xstep)
     {
-        // find if last boubdary is still good
+        // find if last boundary is still good
         while (xpos > ((bytebound + shift) << 2) + dword_reminder) 
             ++shift;
         if (shift)
@@ -713,14 +713,14 @@ void KT_SEARCH::scan_l1_stepped ()
             shift = 0;
             baseoff = xpos - (bytebound << 2);
             seqw = GET32_U (s);
-            seqw >> (baseoff << 1);
+            seqw >>= (baseoff << 1);
         }
-        else 
-            seqw >>= 2;
 
         //get next K-tuple
         ktup = seqw;
         ktup &= kt_mask;
+        seqw >>= 2;
+
 
         //get K-tuple info
         k_cnt = ki[ktup].cnt;
