@@ -60,11 +60,11 @@ static const char MIN_LEN_DEFAULT [] = "0";      // aminoacids
 
 // Help
 
-static const char MAX_QUERIES_NUMBER_HELP [] = "Maximum expected number of queries in single search";
-static const char MAX_TOTAL_QUERIES_LEN_HELP [] = "Maximum expected sum of query sequence lengths";
+static const char MAX_QUERIES_NUMBER_HELP [] = "maximum expected number of queries in single search";
+static const char MAX_TOTAL_QUERIES_LEN_HELP [] = "maximum expected sum of query sequence lengths";
 
 static const char K_SIZE_HELP [] = "tuple size";
-static const char APPROX_HELP [] = "Maximum diversification (fraction of self-score)";
+static const char APPROX_HELP [] = "maximum diversification (fraction of self-score)";
 static const char K_THRESH_HELP [] = "initial hit threshold (in self-correlation averages)";
 static const char MAX_SHIFT_HELP [] = "maximum detectible gap size";
 static const char STEP_HELP [] = "size of a step, in aa residues, over subject sequence";
@@ -73,18 +73,18 @@ static const char EXTEND_BAND_HELP [] = "band extension (multiplier for maximal 
 static const char WIDEN_BAND_HELP [] = "number of diagonals to the sides to leftmost and rightmost hits to check in band alignment";
 static const char DIST_FACT_HELP [] = "multiplier for inter-match distance cost";
 
-static const char MATRIX_NAME_HELP [] = "BLOSUM62";
-static const char GEP_HELP [] = "Gap extension penalty (multiplier for matrix average match)";
-static const char GIP_HELP [] = "Gap initiation penalty (multiplier for matrix average match)";         // in matrix averages
+static const char MATRIX_NAME_HELP [] = "aminoacid substitution weight matrix to use (file name; matrix should be in NCBI format)";
+static const char GEP_HELP [] = "gap extension penalty (multiplier for matrix average match)";
+static const char GIP_HELP [] = "gap initiation penalty (multiplier for matrix average match)";         // in matrix averages
 
-static const char EVAL_EVAL_HELP [] = "Evalue evaluation using Karlin-Altschul statistics";
-static const char MIN_SCORE_HELP [] = "Minimal similarity score";
-static const char MIN_LEN_HELP [] = "Minimal similarity length";
+static const char EVAL_EVAL_HELP [] = "compute evalue using Karlin-Altschul statistics";
+static const char MIN_SCORE_HELP [] = "minimal similarity score";
+static const char MIN_LEN_HELP [] = "minimal similarity length";
 
 
-static const char QUERY_NAME_HELP [] = "Query : set of protein sequences (workspace name for NSeq{1} object)";
-static const char SEARCH_NAME_HELP [] = "Target : set of protein sequences (workspace name for NSeq{1} object)";
-static const char OUTPUT_NAME_HELP [] = "Output file name or output name in database (workspace name for Sim{1} object)";
+static const char QUERY_NAME_HELP [] = "query : set of protein sequences (workspace name for NSeq{1} object)";
+static const char SEARCH_NAME_HELP [] = "subject : set of protein sequences (workspace name for NSeq{1} object)";
+static const char OUTPUT_NAME_HELP [] = "output file name ";
 
 
 // section names

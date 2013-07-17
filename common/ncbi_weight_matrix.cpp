@@ -40,7 +40,8 @@ unsigned readNcbiMatrix (const char* fname, unsigned max_alpha_size, char* alpha
     unsigned alphaSize = 0;
 
     FileWrapper fi (fname, "rt");
-    if (!fi) ers << fname << ThrowEx(FileNotFoundRerror);
+    if (!fi) 
+        ers << fname << ". This or other aminoacid substitution weight matrices can be downloaded from NCBI (ftp://ftp.ncbi.nlm.nih.gov/blast/matrices)" << ThrowEx(FileNotFoundRerror);
 
     while (fgets (buf, BUFSZ, *fi))
     {
