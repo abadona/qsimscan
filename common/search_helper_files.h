@@ -27,7 +27,7 @@
 #include "weights.h"
 #include "fasta.h"
 
-#include <limits.h>
+#include <limits>
 #include <ostream>
 
 
@@ -63,18 +63,18 @@ public:
     int* create_ktuple_distribution (int ksize, double sim_level, int& mismatch_score);
 
     // load queries
-    unsigned load_queries_nn (const char* fname, std::vector <NN_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = INT_MAX);
-    unsigned load_queries_aa (const char* fname, std::vector <AA_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = INT_MAX);
-    unsigned load_queries_na (const char* fname, std::vector <NA_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = INT_MAX);
+    unsigned load_queries_nn (const char* fname, std::vector <NN_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = std::numeric_limits <unsigned>::max ());
+    unsigned load_queries_aa (const char* fname, std::vector <AA_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = std::numeric_limits <unsigned>::max ());
+    unsigned load_queries_na (const char* fname, std::vector <NA_SEQ>& dest, unsigned min_len, unsigned max_len, unsigned* total = NULL, unsigned beg = 0, unsigned end = std::numeric_limits <unsigned>::max ());
 
     // search; use SCIDM::INVALUD_ID for global search across all objects in db
-    void init_nn_search (const char* fname, unsigned beg = 0, unsigned end = INT_MAX);
+    void init_nn_search (const char* fname, unsigned beg = 0, unsigned end = std::numeric_limits<unsigned>::max ());
     NN_SEQ* next_nn_seq (unsigned min_len, unsigned max_len);
 
-    void init_aa_search (const char* fname, unsigned beg = 0, unsigned end = INT_MAX);
+    void init_aa_search (const char* fname, unsigned beg = 0, unsigned end = std::numeric_limits<unsigned>::max ());
     AA_SEQ* next_aa_seq (unsigned min_len, unsigned max_len);
 
-    void init_na_search (const char* fname, unsigned beg = 0, unsigned end = INT_MAX);
+    void init_na_search (const char* fname, unsigned beg = 0, unsigned end = std::numeric_limits<unsigned>::max ());
     NA_SEQ* next_na_seq (unsigned min_len, unsigned max_len);
 
     ulonglong current () const; // position, not record number
