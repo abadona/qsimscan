@@ -216,7 +216,7 @@ NN_SEQ*      Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_le
                 if (!n_xseq_.seq || target_.cur_seq_len () > reserved_seqspace_)
                 {
                     if (n_xseq_.seq)
-                        delete [] n_xseq_.seq; 
+                        delete [] n_xseq_.seq;
                     reserved_seqspace_ = (target_.cur_seq_len () + 3) >> 1; // reserve two times as much as needed ((len + 3)/ 4) * 2) = (len + 3) / 2
                     try {
                     n_xseq_.seq = new char [reserved_seqspace_];
@@ -258,7 +258,7 @@ AA_SEQ* Search_helper_files::next_aa_seq (unsigned min_len, unsigned max_len)
                 if (!p_xseq_.seq || target_.cur_seq_len () > reserved_seqspace_)
                 {
                     if (p_xseq_.seq)
-                        delete [] p_xseq_.seq; 
+                        delete [] p_xseq_.seq;
                     reserved_seqspace_ = (target_.cur_seq_len () + 1) << 1; // reserve two times as much as needed ((len + 1) * 2)
                     try {
                     p_xseq_.seq = new char [reserved_seqspace_];
@@ -266,7 +266,7 @@ AA_SEQ* Search_helper_files::next_aa_seq (unsigned min_len, unsigned max_len)
                     if (!p_xseq_.seq)
                         ERR(NOEMEM);
                 }
-                        
+
                 p_xseq_.len = target_.cur_seq_len ();
                 a_ascii2binary (p_xseq_.seq, p_xseq_.len, target_.cur_seq (), 0, p_xseq_.len);
                 p_xseq_.rev = 0;
@@ -302,7 +302,7 @@ NA_SEQ* Search_helper_files::next_na_seq (unsigned min_len, unsigned max_len)
                 if (!na_xseq_.seq || target_.cur_seq_len () > reserved_seqspace_)
                 {
                     if (na_xseq_.seq)
-                        delete [] na_xseq_.seq; 
+                        delete [] na_xseq_.seq;
                     reserved_seqspace_ = (target_.cur_seq_len () + 3) >> 1; // reserve two times as much as needed ((len + 3)/ 4) * 2) = (len + 3) / 2
                     try {
                     n_xseq_.seq = new char [reserved_seqspace_];
@@ -310,7 +310,7 @@ NA_SEQ* Search_helper_files::next_na_seq (unsigned min_len, unsigned max_len)
                     if (!n_xseq_.seq)
                         ERR(NOEMEM);
                 }
-                        
+
                 na_xseq_.len = target_.cur_seq_len ();
                 n_ascii2binary (na_xseq_.seq, int ((na_xseq_.len + 3) >> 2), target_.cur_seq (), 0, na_xseq_.len);
                 na_xseq_.rev = 0;
@@ -339,14 +339,14 @@ struct Nameent
             strncpy (namebuf, n, MAX_NAME_LEN);
             namebuf [MAX_NAME_LEN] = 0;
         }
-        else 
+        else
             *namebuf = 0;
         if (h)
         {
             strncpy (hdrbuf, h, MAX_HDR_LEN);
             hdrbuf [MAX_HDR_LEN] = 0;
         }
-        else 
+        else
             *hdrbuf = 0;
     }
 };
@@ -895,8 +895,16 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 eval_align_loc (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_res->subject_, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
-                q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                if (cur_res->reverse_)
+                {
+                    q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len);
+                    q_start = fwd_qry.len - batches [0].xpos;
+                }
+                else
+                {
+                    q_start = batches [0].xpos + 1;
+                    q_end = batches [batch_no-1].xpos + batches [batch_no-1].len;
+                }
                 s_start = batches [0].ypos + 1;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
@@ -1010,7 +1018,7 @@ bool Search_helper_files::output_results_tab_aa (AlignResultStorage& resrec, uns
                 o<< std::setprecision (2) << std::noshowpoint << e_value << TAB_STR <<
                     std::setprecision (2) << std::noshowpoint << std::fixed << sw_score << TAB_STR <<
                     cur_res->q_auto_score_ << TAB_STR <<
-                    cur_res->t_auto_score_ << TAB_STR << 
+                    cur_res->t_auto_score_ << TAB_STR <<
                     cigar_buf << std::endl;
             }
         }
@@ -1097,8 +1105,16 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 eval_align_loc (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_res->subject_, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
-                q_start = cur_res->reverse_ ? fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len) : batches [0].xpos + 1;
-                q_end = cur_res->reverse_ ? fwd_qry.len - batches [0].xpos : batches [batch_no-1].xpos + batches [batch_no-1].len;
+                if (cur_res->reverse_)
+                {
+                    q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len);
+                    q_start = fwd_qry.len - batches [0].xpos;
+                }
+                else
+                {
+                    q_start = batches [0].xpos + 1;
+                    q_end = batches [batch_no-1].xpos + batches [batch_no-1].len;
+                }
                 s_start = batches [0].ypos + 1;
                 s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
