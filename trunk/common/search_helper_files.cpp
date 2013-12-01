@@ -897,7 +897,7 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 // here query IS x!
                 if (cur_res->reverse_)
                 {
-                    q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len);
+                    q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len)+1;
                     q_start = fwd_qry.len - batches [0].xpos;
                 }
                 else
