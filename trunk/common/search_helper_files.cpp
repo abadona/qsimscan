@@ -1105,6 +1105,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 eval_align_loc (cur_res->reverse_ ? *rev_qry_p : fwd_qry, cur_res->subject_, w, batches, batch_no, &p_identity, &mismatches, &alignment_length, &gap_openings, &gap_length);
 
                 // here query IS x!
+                // zero-based, end excluded
                 if (cur_res->reverse_)
                 {
                     q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len);
@@ -1112,7 +1113,7 @@ bool Search_helper_files::output_results_tab_nn (AlignResultStorage& resrec, uns
                 }
                 else
                 {
-                    q_start = batches [0].xpos + 1;
+                    q_start = batches [0].xpos;
                     q_end = batches [batch_no-1].xpos + batches [batch_no-1].len;
                 }
                 s_start = batches [0].ypos + 1;
