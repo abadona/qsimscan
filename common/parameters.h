@@ -27,7 +27,7 @@
 #include "platform.h"
 #include <map>
 #include <ostream>
-#include "ParametersSection.h"
+#include "parameters_section.h"
 
 #ifndef __parameters_cpp__
 extern const char* volatile_section_name;

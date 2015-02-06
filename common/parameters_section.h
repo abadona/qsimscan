@@ -19,8 +19,8 @@
 // For any questions please contact SciDM team by email at team@scidm.org
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef __parameters_list_h__
-#define __parameters_list_h__
+#ifndef __parameters_section_h__
+#define __parameters_section_h__
 #pragma warning (disable:4786)
 
 #include <string>
@@ -67,4 +67,4 @@ struct ParametersSection
 };
 
 
-#endif //__parameters_list_h__
+#endif //__parameters_section_h__
