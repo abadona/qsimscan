@@ -205,7 +205,7 @@ void Search_helper_files::init_nn_search (const char* fname, unsigned beg, unsig
 NN_SEQ*      Search_helper_files::next_nn_seq (unsigned min_len, unsigned max_len)
 {
     if (!iter_init_ || iter_done_)
-        return false;
+        return NULL;
     while (target_.next ())
     {
         if (target_no_ >= end_) break;
@@ -247,7 +247,7 @@ void Search_helper_files::init_aa_search (const char* fname, unsigned beg, unsig
 AA_SEQ* Search_helper_files::next_aa_seq (unsigned min_len, unsigned max_len)
 {
     if (!iter_init_ || iter_done_)
-        return false;
+        return NULL;
     while (target_.next ())
     {
         if (target_no_ >= end_) break;
@@ -291,7 +291,7 @@ void Search_helper_files::init_na_search (const char* fname, unsigned beg, unsig
 NA_SEQ* Search_helper_files::next_na_seq (unsigned min_len, unsigned max_len)
 {
     if (!iter_init_ || iter_done_)
-        return false;
+        return NULL;
     while (target_.next ())
     {
         if (target_no_ >= end_) break;

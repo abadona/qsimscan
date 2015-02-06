@@ -40,7 +40,6 @@ SYSINCLUDE_DIRS=
 SYSINCLUDE_DIRS_SPEC=$(addprefix -I,$(SYSINCLUDE_DIRS))
 
 OBJS = \
-ParametersSection.o \
 common_errors.o \
 common_str.o \
 fileutils.o \
@@ -50,6 +49,7 @@ platform.o \
 rerror.o \
 tracer.o \
 cmdline.o \
+parameters_section.o \
 parameters.o \
 process_params.o \
 cmdline.o \

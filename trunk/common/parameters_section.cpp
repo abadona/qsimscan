@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <iterator>
-#include "ParametersSection.h"
+#include "parameters_section.h"
 
 bool ParametersSection::writeHelp (std::ostream& ostr)
 {
