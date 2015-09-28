@@ -897,16 +897,18 @@ bool Search_helper_files::output_results_m8_nn (AlignResultStorage& resrec, unsi
                 // here query IS x!
                 if (cur_res->reverse_)
                 {
-                    q_end = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len)+1;
-                    q_start = fwd_qry.len - batches [0].xpos;
+                    q_start = fwd_qry.len - (batches [batch_no-1].xpos + batches [batch_no-1].len)+1;
+                    q_end = fwd_qry.len - batches [0].xpos;
+                    s_start = batches [batch_no-1].ypos + batches [batch_no-1].len;
+                    s_end = batches [0].ypos + 1;
                 }
                 else
                 {
                     q_start = batches [0].xpos + 1;
                     q_end = batches [batch_no-1].xpos + batches [batch_no-1].len;
+                    s_start = batches [0].ypos + 1;
+                    s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 }
-                s_start = batches [0].ypos + 1;
-                s_end = batches [batch_no-1].ypos + batches [batch_no-1].len;
                 e_value = cur_res->chi2_;
                 bit_score = cur_res->al_score_;
 
