@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2015.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -35,7 +35,8 @@ class MergingResultStorage : public AlignResultStorage
     typedef std::vector < AlignResult > ARVect;
     typedef std::map < longlong, ARVect > QryResults;
 
-    QryResults accum_;
+    QryResults accum_fwd_;
+    QryResults accum_rev_;
     unsigned accum_no_;
     longlong cur_sid_;
 

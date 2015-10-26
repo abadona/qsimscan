@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2015.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -38,15 +38,27 @@ bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse,
         cur_sid_ = sid;
     }
     AlignResult r (sid, reverse, al_score, score, chi2, evalue, bitscore, q_auto_score, t_auto_score, batch_no, batches, binsubj, subjid, subjlen);
-    accum_ [qid].push_back (r);
+    if (reverse)
+        accum_rev_ [qid].push_back (r);
+    else
+        accum_fwd_ [qid].push_back (r);
     accum_no_ ++;
+    return true;
 }
 
 void MergingResultStorage::flush (const char* tseq)
 {
     if (!accum_no_)
         return;
-    for (QryResults::iterator qi = accum_.begin (); qi != accum_.end (); qi ++)
+    QryResults::iterator qi;
+    for (qi = accum_fwd_.begin (); qi != accum_fwd_.end (); qi ++)
+    {
+        ARVect& alignments = (*qi).second;
+        merger_.merge (alignments, tseq);
+        for (ARVect::iterator ri = alignments.begin (); ri != alignments.end (); ri ++)
+            AlignResultStorage::add_result ((*qi).first, *ri);
+    }
+    for (qi = accum_rev_.begin (); qi != accum_rev_.end (); qi ++)
     {
         ARVect& alignments = (*qi).second;
         merger_.merge (alignments, tseq);
@@ -58,7 +70,10 @@ void MergingResultStorage::flush (const char* tseq)
 
 void MergingResultStorage::clear_accum ()
 {
-    for (QryResults::iterator ii = accum_.begin (); ii != accum_.end (); ii ++)
+    QryResults::iterator ii;
+    for (ii = accum_fwd_.begin (); ii != accum_fwd_.end (); ii ++)
+        (*ii).second.clear ();
+    for (ii = accum_rev_.begin (); ii != accum_rev_.end (); ii ++)
         (*ii).second.clear ();
     accum_no_ = 0;
 }
@@ -66,5 +81,5 @@ void MergingResultStorage::clear_accum ()
 bool MergingResultStorage::reset ()
 {
     clear_accum ();
-    AlignResultStorage::reset ();
+    return AlignResultStorage::reset ();
 }

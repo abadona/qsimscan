@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2015.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -30,11 +30,11 @@ SimMergerBase  BlastResultsBatch :: null_merger_;
 BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int rep_len, int rep_perc, bool triangle_only, SimMergerBase& merger)
 :
 MergingResultStorage (merger, keep_per_query),
+total_found_ (0),
+passed_repeats_ (0),
 rep_percent_ (rep_perc),
 rep_len_ (rep_len),
 rep_buf_ (NULL),
-total_found_ (0),
-passed_repeats_ (0),
 triangle_only_ (triangle_only)
 {
     if (rep_len_)

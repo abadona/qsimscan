@@ -1,6 +1,6 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// This software module is developed by SCIDM team in 1999-2008.
+// This software module is developed by SCIDM team in 1999-2015.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -35,12 +35,13 @@ class SimMerger : public SimMergerBase
         MAX_DOM_OVL_DEF_ = 5,
     };
 
-    SegAlign seg_aligner_;
-
-    bool merge_thr_;
     bool merge_rep_;
     bool merge_dom_;
+    bool merge_thr_;
     unsigned max_rep_orp_;
+
+    SegAlign seg_aligner_;
+
 
     bool merge_repeats (ARVect& sims, const char* tseq);
     bool merge_domains (ARVect& sims, const char* tseq);
