@@ -7,10 +7,10 @@ Authors:
   Vlad Novichkov
   Victor Joukov
   
-Copytight (c) 1998-2012, SciDM group: Denis Kaznadzey, Vlad Novichkov, Victor Joukov
+Copytight (c) 1998-2015, SciDM (Scientific Data Management)
 
 License: 
-  GNU public license version 3.
+  MIT license (see LICENSE.txt).
 
 Requirements:
   GCC/G++ version 4+
