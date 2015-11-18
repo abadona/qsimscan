@@ -35,7 +35,7 @@ class BlastResultsBatch : public ResultReciever_blast_batch, public MergingResul
     bool triangle_only_;
 
 public:
-    BlastResultsBatch (int keep_per_query, int rep_len = 0, int rep_perc = 0, bool triangle_only = false, SimMergerBase& merger = null_merger_);
+    BlastResultsBatch (int keep_per_query, int keep_per_target, int rep_len = 0, int rep_perc = 0, bool triangle_only = false, SimMergerBase& merger = null_merger_);
     virtual ~BlastResultsBatch () {}
     virtual bool match_found  (NN_SEQ& xseq, NN_SEQ& yseq, BATCH* batches, int batch_no, int matches);
     int totalFound () const {return total_found_;}

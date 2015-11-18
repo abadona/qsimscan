@@ -57,7 +57,7 @@ bool AlignResultStorage :: add_result (longlong query_id, longlong search_id, bo
     return true;
 }
 
-bool AlignResultStorage :: add_result (longlong query_id, AlignResult& r)
+bool AlignResultStorage :: add_result (longlong query_id, const AlignResult& r)
 {
     // if this is a first result for given y, expand the queue to desired size
     ResultQueue* q;

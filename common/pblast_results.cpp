@@ -18,9 +18,9 @@
 
 SimMergerBase PblastResults :: null_merger_;
 
-PblastResults::PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval, unsigned res_per_qry, SimMergerBase& merger)
+PblastResults::PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval, unsigned res_per_qry, unsigned res_per_target, SimMergerBase& merger)
 :
-MergingResultStorage (merger, res_per_qry),
+MergingResultStorage (merger, res_per_qry, res_per_target),
 total_found_ (0),
 min_score_ (min_score),
 min_len_ (min_len),

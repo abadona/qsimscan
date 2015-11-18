@@ -31,7 +31,7 @@ private:
     unsigned max_per_query_;
 
 protected:
-    bool add_result (longlong query_id, AlignResult& r);
+    bool add_result (longlong query_id, const AlignResult& r);
 
 public:
 

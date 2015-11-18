@@ -13,12 +13,13 @@
 
 #include "merging_result_storage.h"
 
-MergingResultStorage::MergingResultStorage (SimMergerBase& merger, unsigned capacity)
+MergingResultStorage::MergingResultStorage (SimMergerBase& merger, unsigned capacity, unsigned res_per_target)
 :
 AlignResultStorage (capacity),
 merger_ (merger),
-cur_sid_ (-1),
-accum_no_ (0)
+res_per_target_ (res_per_target),
+accum_no_ (0),
+cur_sid_ (-1)
 {
 }
 
@@ -38,24 +39,84 @@ bool MergingResultStorage::add_result (longlong qid, longlong sid, bool reverse,
     return true;
 }
 
+struct AlignResultWrapper
+{
+    const AlignResult* align_;
+    longlong query_;
+
+    AlignResultWrapper ()
+    :
+    align_ (NULL),
+    query_ (0)
+    {
+    }
+    AlignResultWrapper (const AlignResult& align, longlong query)
+    :
+    align_ (&align),
+    query_ (query)
+    {
+    }
+    AlignResultWrapper (const AlignResultWrapper& oth)
+    :
+    align_ (oth.align_),
+    query_ (oth.query_)
+    {
+    }
+    AlignResultWrapper& operator = (const AlignResultWrapper& oth)
+    {
+        align_ = oth.align_;
+        query_ = oth.query_;
+    }
+    bool operator < (const AlignResultWrapper& other) const
+    {
+        return *align_ < *(other.align_);
+    }
+    bool operator == (const AlignResultWrapper& other) const
+    {
+        return *align_ == *(other.align_);
+    }
+};
+typedef PQueue <AlignResultWrapper> ARWQueue;
+
+
 void MergingResultStorage::flush (const char* tseq)
 {
     if (!accum_no_)
         return;
     QryResults::iterator qi;
+    ARWQueue besthits (res_per_target_);
     for (qi = accum_fwd_.begin (); qi != accum_fwd_.end (); qi ++)
     {
         ARVect& alignments = (*qi).second;
         merger_.merge (alignments, tseq);
         for (ARVect::iterator ri = alignments.begin (); ri != alignments.end (); ri ++)
-            AlignResultStorage::add_result ((*qi).first, *ri);
+        {
+            if (res_per_target_)
+                besthits.push (AlignResultWrapper (*ri, (*qi).first));
+            else
+                AlignResultStorage::add_result ((*qi).first, *ri);
+        }
     }
     for (qi = accum_rev_.begin (); qi != accum_rev_.end (); qi ++)
     {
         ARVect& alignments = (*qi).second;
         merger_.merge (alignments, tseq);
         for (ARVect::iterator ri = alignments.begin (); ri != alignments.end (); ri ++)
-            AlignResultStorage::add_result ((*qi).first, *ri);
+        {
+            if (res_per_target_)
+                besthits.push (AlignResultWrapper (*ri, (*qi).first));
+            else
+                AlignResultStorage::add_result ((*qi).first, *ri);
+        }
+    }
+    if (res_per_target_)
+    {
+        const ARWQueue::ElemVec& wrappers = besthits.data ();
+        for (unsigned pp = 0, sent = besthits.size (); pp != sent; ++pp)
+        {
+            const AlignResultWrapper& wrapper = wrappers [pp];
+            AlignResultStorage::add_result (wrapper.query_, *wrapper.align_);
+        }
     }
     clear_accum ();
 }

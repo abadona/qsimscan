@@ -19,9 +19,9 @@
 
 SimMergerBase  BlastResultsBatch :: null_merger_;
 
-BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int rep_len, int rep_perc, bool triangle_only, SimMergerBase& merger)
+BlastResultsBatch :: BlastResultsBatch (int keep_per_query, int keep_per_target,  int rep_len, int rep_perc, bool triangle_only, SimMergerBase& merger)
 :
-MergingResultStorage (merger, keep_per_query),
+MergingResultStorage (merger, keep_per_query, keep_per_target),
 total_found_ (0),
 passed_repeats_ (0),
 rep_percent_ (rep_perc),

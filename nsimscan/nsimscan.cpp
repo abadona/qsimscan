@@ -161,7 +161,7 @@ bool Nsimscan::prepare_searcher ()
 
     // do we need score threshold here?
     sim_merger_ = new SimMerger (!p_->nomerge_threads (), p_->merge_repeats (), p_->merge_domains (), *wm_, p_->gip (), p_->gep (), p_->gap_cap ()*p_->gip (), p_->max_dom_ovl (), p_->max_rep_orp ());
-    results_ = new BlastResultsBatch (p_->res_per_query (), p_->rep_len (), int (p_->rep_percent ()), false, *sim_merger_);
+    results_ = new BlastResultsBatch (p_->res_per_query (), p_->res_per_target (), p_->rep_len (), int (p_->rep_percent ()), false, *sim_merger_);
 
     // create the searcher
     int total_queries_count = query_set_length_ * (p_->search_reverse () ? 2 : 1);

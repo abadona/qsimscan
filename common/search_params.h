@@ -16,6 +16,8 @@
 
 #include <process_params.h>
 
+# define SUBJ_BEST_HITS 1
+
 class Search_params : public Process_params
 {
 public:
@@ -46,6 +48,7 @@ public:
     OUT_MODE out_mode_;
     bool append_;
     int  res_per_query_;
+    int  res_per_target_;
     int  print_aligns_;
 
     std::string query_name_;
@@ -94,6 +97,7 @@ public:
     int  max_rep_orp () const {return max_rep_orp_;}
     float gap_cap () const {return gap_cap_;}
     int  res_per_query () const {return res_per_query_;}
+    int  res_per_target () const {return res_per_target_;}
     int  print_aligns () const {return print_aligns_;}
     OUT_MODE out_mode () const {return out_mode_;}
     bool append () const {return append_;}
@@ -115,6 +119,7 @@ public:
     void max_rep_orp (int opt) {max_rep_orp_ = opt;}
     void gap_cap (float opt) {gap_cap_ = opt;}
     void res_per_query (int opt) {res_per_query_ = opt;}
+    void res_per_target (int opt) {res_per_target_ = opt;}
     void print_aligns (int opt) {print_aligns_ = opt;}
     void out_mode (OUT_MODE opt) {out_mode_ = opt;}
     void append (bool opt) {append_ = opt;}
@@ -136,6 +141,7 @@ public:
     virtual const char* max_rep_orp_default () const;
     virtual const char* gap_cap_default () const;
     virtual const char* res_per_query_default () const;
+    virtual const char* res_per_target_default () const;
     virtual const char* print_aligns_default () const;
     virtual const char* out_mode_default () const;
     virtual const char* append_default () const;
@@ -157,6 +163,7 @@ public:
     virtual const char* max_rep_orp_help () const;
     virtual const char* gap_cap_help () const;
     virtual const char* res_per_query_help () const;
+    virtual const char* res_per_target_help () const;
     virtual const char* print_aligns_help () const;
     virtual const char* out_mode_help () const;
     virtual const char* append_help () const;

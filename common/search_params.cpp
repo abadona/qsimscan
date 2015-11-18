@@ -28,6 +28,7 @@ static const char* MAX_DOM_OVL_DEFAULT = "20";
 static const char* MAX_REP_ORP_DEFAULT = "30";
 static const char* GAP_CAP_DEFAULT = "4.0";
 static const char* RES_PER_QUERY_DEFAULT = "500";
+static const char* RES_PER_TARGET_DEFAULT = ZERO_STR;
 static const char* PRINT_ALIGNS_DEFAULT = "50";
 static const char* OUT_MODE_DEFAULT = "TEXT";
 static const char* APPEND_DEFAULT = FALSE_STR;
@@ -49,6 +50,7 @@ static const char* MAX_DOM_OVL_HELP = "Maximum overlap of merged domains";
 static const char* MAX_REP_ORP_HELP = "Maximum orphan for reduced repeats";
 static const char* GAP_CAP_HELP = "Gap cost limiting factor for long-range similarity merge: multiplier for gap initiaition cost";
 static const char* RES_PER_QUERY_HELP = "Number of best matches to keep per query";
+static const char* RES_PER_TARGET_HELP = "Number of best matches to keep per subject, 0 for no limit";
 static const char* PRINT_ALIGNS_HELP = "Number of alignments to print in the report";
 static const char* OUT_MODE_HELP = "Output mode. Valid modes are TEXT, TAB, TABX, M8, M9";
 static const char* APPEND_HELP = "Append results to existing output object (or file)";
@@ -79,6 +81,7 @@ static const char* lomxlen  []     = {"maxslen", NULL};
 static const char* lomxqlen []     = {"maxqlen", NULL};
 static const char* lomnlen  []     = {"minslen", NULL};
 static const char* lorespq  []     = {"rpq", "res_per_qry", NULL};
+static const char* lorespt  []     = {"rps", "res_per_subj", NULL};
 static const char* lopral   []     = {"apq", "print_align", NULL};
 static const char* looutmode[]     = {"om", "omode", "outmode", NULL};
 static const char* loappend []     = {"ap", "append", NULL};
@@ -132,6 +135,9 @@ void Search_params::add_cmdline_dbout_control ()
 void Search_params::add_cmdline_res_filters ()
 {
     keys_format_.push_back (KeyFormat (EMPTY_STR, lorespq,   "res_per_qry",  SEARCH_OUTPUT_SECTNAME,  "RES_PER_QUERY",    true, true, INTEGER_STR, res_per_query_default (), res_per_query_help ()));
+#ifdef SUBJ_BEST_HITS
+    keys_format_.push_back (KeyFormat (EMPTY_STR, lorespt,   "res_per_subj", SEARCH_OUTPUT_SECTNAME,  "RES_PER_SUBJECT",  true, true, INTEGER_STR, res_per_target_default (), res_per_target_help ()));
+#endif
     keys_format_.push_back (KeyFormat (EMPTY_STR, lopral,    "print_aligns", SEARCH_OUTPUT_SECTNAME,  "PRINT_ALIGNS",     true, true, INTEGER_STR, print_aligns_default (), print_aligns_help ()));
 
 }
@@ -223,6 +229,9 @@ void Search_params::add_parameters_res_filters ()
     Parameter_descr SEARCH_OUTPUT_SECTION [] =
     {
         {"RES_PER_QUERY",   INTEGER_STR,  res_per_query_default (),  res_per_query_help ()},
+#ifdef SUBJ_BEST_HITS
+        {"RES_PER_SUBJECT", INTEGER_STR,  res_per_target_default (),  res_per_target_help ()},
+#endif
         {"PRINT_ALIGNS",    INTEGER_STR,  print_aligns_default (), print_aligns_help ()},
     };
     parameters_->addSection (SEARCH_OUTPUT_SECTNAME, "Search output parameters", SEARCH_OUTPUT_SECTION, sizeof (SEARCH_OUTPUT_SECTION) / sizeof (Parameter_descr));
@@ -284,6 +293,9 @@ bool Search_params::interpreteParameters ()
     max_rep_orp    (parameters_->getInteger (SIM_MERGE_SECTNAME, "MAX_REP_ORP"));
     gap_cap        (parameters_->getFloat (SIM_MERGE_SECTNAME, "GAP_CAP"));
     res_per_query  (parameters_->getInteger (SEARCH_OUTPUT_SECTNAME, "RES_PER_QUERY"));
+#ifdef SUBJ_BEST_HITS
+    res_per_target (parameters_->getInteger (SEARCH_OUTPUT_SECTNAME, "RES_PER_SUBJECT"));
+#endif
     print_aligns   (parameters_->getInteger (SEARCH_OUTPUT_SECTNAME, "PRINT_ALIGNS"));
 
     const char* omode = parameters_->getParameter (SEARCH_OUTPUT_SECTNAME, "OUT_MODE");
@@ -324,6 +336,11 @@ const char* Search_params::min_seq_len_default () const
 const char* Search_params::res_per_query_default () const
 {
     return RES_PER_QUERY_DEFAULT;
+}
+
+const char* Search_params::res_per_target_default () const
+{
+    return RES_PER_TARGET_DEFAULT;
 }
 
 const char* Search_params::print_aligns_default () const
@@ -426,6 +443,11 @@ const char* Search_params::min_seq_len_help () const
 const char* Search_params::res_per_query_help () const
 {
     return RES_PER_QUERY_HELP;
+}
+
+const char* Search_params::res_per_target_help () const
+{
+    return RES_PER_TARGET_HELP;
 }
 
 const char* Search_params::print_aligns_help () const

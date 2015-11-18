@@ -145,7 +145,7 @@ bool Psimscan::prepare_searcher ()
 
     wm_ = new WEIGHTS<int, 24> (p_->matrix_name (), p_->matrix_name (), p_->gip (), p_->gep ());
     sim_merger_ = new SimMerger (true, p_->merge_repeats (), p_->merge_domains (), *wm_, p_->gip (), p_->gep (), p_->gap_cap ()*p_->gip (), p_->max_dom_ovl (), p_->max_rep_orp ());
-    results_ = new PblastResults (p_->min_score(), p_->min_len (), wm_, p_->eval_eval(), p_->res_per_query (), *sim_merger_);
+    results_ = new PblastResults (p_->min_score(), p_->min_len (), wm_, p_->eval_eval(), p_->res_per_query (), p_->res_per_target (), *sim_merger_);
 
     // create the searcher
     searcher_ = new PKTSCAN (wm_, results_, p_->k_size (), p_->max_queries_number (), query_aas_, p_->max_seq_len ());

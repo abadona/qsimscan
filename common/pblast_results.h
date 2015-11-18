@@ -37,7 +37,7 @@ class PblastResults : public ResultReciever_pblast, public MergingResultStorage
     double K0mean_, lambda0mean_, Hmean_, alpha_mean_;
     ResFreqType trg_freq_;
 public:
-    PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval = true, unsigned res_per_qry = 0, SimMergerBase& merger = null_merger_);
+    PblastResults (double min_score, int min_len, WMatrixType *w, bool eval_eval = true, unsigned res_per_qry = 0, unsigned res_per_target = 0, SimMergerBase& merger = null_merger_);
     bool match_found  (SEQ& query_seq, SEQ& target_seq, BATCH* batches, int batch_no, double score, double q_auto_score, double t_auto_score);
     int totalFound ();
 };

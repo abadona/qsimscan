@@ -144,6 +144,10 @@ public:
         heap_ok_ = false;
         return values_;
     }
+    const ElemVec& data () const
+    {
+        return values_;
+    }
 };
 
 #endif // __pqueue_h__
