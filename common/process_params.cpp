@@ -50,7 +50,7 @@ parameters_ (NULL),
 cmdline_ (NULL),
 help_mode_ (false),
 parameters_read_ (false),
-parfname_ (parfname_default_),
+def_parfname_ (parfname_default_),
 templates_prepared_ (false),
 verbose_ (false),
 overwrite_ (false)
@@ -59,7 +59,6 @@ overwrite_ (false)
     {
         def_parfname_ = procname;
         def_parfname_ += ".cfg";
-        parfname_ = def_parfname ();
     }
 }
 
@@ -77,7 +76,7 @@ static const char* loversion []     = {"version", NULL};
 static const char* loverbose []     = {"verb", "verbose", NULL};
 static const char* lodbgout []      = {"debug", NULL};
 static const char* loconfig []      = {"config", NULL};
-static const char* loconfigw []     = {"outcfg", NULL};
+static const char* loconfigf []     = {"outcfg", NULL};
 static const char* loover []        = {"ov", "over", "overwrite", NULL};
 
 static const char* lohlp_help       = "Prints help on command line usage";
@@ -85,7 +84,8 @@ static const char* lohlp_xhelp      = "Prints extended help on command line usag
 static const char* lohlppar_help    = "Prints help on parameters file format";
 static const char* loversion_help   = "Prints version information and exits";
 static const char* loconfig_help    = "Configuration file to use";
-static const char* loconfigw_help   = "Save default parameters into the file";
+static const char* loconfigw_help   = "Save parameters under default name";
+static const char* loconfigf_help   = "Save parameters under given name";
 
 
 void Process_params::add_cmdline_srv ()
@@ -100,8 +100,9 @@ void Process_params::add_cmdline_srv ()
 
 void Process_params::add_cmdline_app ()
 {
-    keys_format_.push_back (KeyFormat ("c",       loconfig,  "configfile", EMPTY_STR,        EMPTY_STR,   true, true,  "filename", EMPTY_STR,               loconfig_help));
-    keys_format_.push_back (KeyFormat ("w",       loconfigw, "write_par",  EMPTY_STR,        EMPTY_STR,   true, true,  "filename", def_parfname (),         loconfigw_help));
+    keys_format_.push_back (KeyFormat ("c",       loconfig,  "configfile", EMPTY_STR,        EMPTY_STR,   true, true,  "filename", def_parfname (),         loconfig_help));
+    keys_format_.push_back (KeyFormat ("w",       NULL,      "write_par",  EMPTY_STR,        EMPTY_STR,   true, false, EMPTY_STR,  def_parfname (),         loconfigw_help));
+    keys_format_.push_back (KeyFormat (EMPTY_STR, loconfigf, "par_file",   EMPTY_STR,        EMPTY_STR,   true, true,  "filename", def_parfname (),         loconfigf_help));
 }
 void Process_params::add_cmdline_overwrite ()
 {
@@ -174,7 +175,6 @@ bool Process_params::parseCmdline (int argc, char* argv [], bool strict)
 
         def_parfname_ = procname_;
         def_parfname_ += ".cfg";
-        parfname_ = def_parfname ();
     }
 
 
@@ -208,6 +208,15 @@ bool Process_params::parseCmdline (int argc, char* argv [], bool strict)
     if (help_mode_)
         return false;
 
+    if (cmdline_->hasKey ("write_par") || cmdline_->hasKey ("par_file"))
+    {
+        writecfg_mode_ = true;
+        if (cmdline_->hasKey ("par_file"))
+            out_parfname_ = cmdline_->getValue ("par_file");
+        else
+            out_parfname_ = def_parfname ();
+    }
+
     // check for command line format / syntax error; report and quit
     return cmdline_->isOk ();
 }
@@ -223,28 +232,24 @@ bool Process_params::process ()
 
 bool Process_params::postProcessParams ()
 {
-    if (cmdline_->hasKey ("write_par"))
-    {
+    if (writecfg_mode ())
         writeParams ();
-        return false;
-    }
-
     return true;
 }
 
 bool Process_params::populateParameters ()
 {
     // read the parameters file name if given
-    if (cmdline_->hasKey ("configfile")) parfname_ = cmdline_->getValue ("configfile");
-    else parfname_ = def_parfname ();
+    if (cmdline_->hasKey ("configfile")) in_parfname_ = cmdline_->getValue ("configfile");
+    else in_parfname_ = def_parfname ();
 
-    parameters_read_ = parameters_->readFile (parfname ());
+    parameters_read_ = parameters_->readFile (in_parfname ());
     return true;
 }
 
 void Process_params::writeParams ()
 {
-    const char* fn = cmdline_->getValue ("write_par");
+    const char* fn = out_parfname_.c_str ();
     std::ofstream par_file (fn);
     if (!par_file.is_open ())
         ers << "WARNING: unable to open file " << fn << " for writing. Parameters not saved." << Throw;
@@ -252,7 +257,7 @@ void Process_params::writeParams ()
     {
         parameters_->write (par_file);
         par_file.close ();
-        if (verbose ()) std::clog << "Parameters saved to file :" << fn << std::endl;
+        if (verbose ()) std::clog << "Parameters saved to file: " << fn << std::endl;
     }
 }
 
@@ -327,6 +332,11 @@ CmdLine* Process_params::cmdline ()
 bool Process_params::help_mode () const
 {
     return help_mode_;
+}
+
+bool Process_params::writecfg_mode () const
+{
+    return writecfg_mode_;
 }
 
 bool Process_params::validate ()

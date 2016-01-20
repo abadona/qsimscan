@@ -396,7 +396,7 @@ void Nsimscan::report_self (std::ostream& o)
     if (p_->t_end () != -1) o << ", " << p_->t_end () - p_->t_beg () << " sequences selected for search";
     o << std::endl;
 
-    if      (p_->parameters_read ())   o << "Parameters read from configuration file " << p_->parfname () << " :" << std::endl;
+    if      (p_->parameters_read ())   o << "Parameters read from configuration file " << p_->in_parfname () << " :" << std::endl;
     else  o << "Default parameters used :" << std::endl;
     p_->parameters_->write (o);
     o << "Output stored to file " << p_->output_name () << std::endl << std::flush;

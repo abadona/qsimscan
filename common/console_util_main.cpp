@@ -33,18 +33,26 @@ int console_main (int argc, char* argv [])
 {
     ObjWrapper <Process_params> params = process_params_factory ();
 
+    bool quit_arfer_params_proc = false;
     if (!params->parseCmdline (argc, argv))
     {
-        if (!params->help_mode ())
+        if (params->help_mode ())
+            return 0;
+        if (params->writecfg_mode ())
+            quit_arfer_params_proc = true;
+        else
         {
             params->cmdline ()->reportErrors (std::cerr);
             return -1;
         }
-        else
-            return 0;
     }
     if (!params->process ())
         ers << "Error pocessing parameters" << Throw;
+    if (quit_arfer_params_proc)
+    {
+        params->cmdline ()->reportErrors (std::cerr);
+        return -1;
+    }
 
     // set the logging level according to verbose / debug parameters
     Logger::LEVEL level = params->verbose () ? Logger::INFO : Logger::WARNING;

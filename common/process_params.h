@@ -56,10 +56,12 @@ protected:
     std::string procname_;
     std::string version_;
     bool help_mode_;
+    bool writecfg_mode_;
 
     CmdLine* cmdline_;
     // SCIDM::Session_ptr session_;
-    std::string parfname_;
+    std::string in_parfname_;
+    std::string out_parfname_;
     std::string def_parfname_;
 
     KeysFormat keys_format_;
@@ -94,6 +96,7 @@ public:
     virtual ~Process_params ();
 
     bool help_mode () const;
+    bool writecfg_mode () const;
     CmdLine* cmdline ();
     const char* procname () { return procname_.c_str ();}
 
@@ -101,7 +104,8 @@ public:
     bool parseCmdline (int argc, char* argv [], bool strict = true);
     bool process ();
     void writeParams ();
-    const char* parfname () const {return parfname_.c_str ();}
+    const char* out_parfname () const {return out_parfname_.c_str ();}
+    const char* in_parfname () const {return in_parfname_.c_str ();}
     virtual const char* def_parfname () const {return def_parfname_.c_str ();}
     bool parameters_read () {return parameters_read_;}
 
