@@ -1,0 +1,144 @@
+<WARNING: This file is under construction>
+
+NSimScan is a tool for searching similarities in nucleotide sequences. It compares a set of query sequences to a set of subject sequences, finds alignments that meet quality criteria, and reports them. Different aspects of NSimScan operation are controlled through program parameters. 
+
+
+QUICK START
+
+The simplest usage is specifying only three required parameters, such as:
+
+   > nsimscan queries.fasta subjects.fasta query-subject.sim
+
+this will find alignments longer then 45 bp with identity over 70% (for 45-bp alignments) and down to 55% (for very long alignments), keep 500 best alignments per query for which 50 best will be reported in details.
+
+The -v parameter can be used for progress report, and --om to set the output mode (text alignments by default). The output mode M8 matches NCBI Legacy BLAST -m8 (and Blast+ -outfmt 6) tabular output. The command for this is:
+
+   > nsimscan -v --om M8 queries.fasta subjects.fasta query-subject.sim
+
+Following are parameters for few useful scenarios:
+
+Quick search for strong similarities (over 85% identity), output in 'tabular blast' format:
+
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+
+Quick search for strong best hits (over 85% identity), output in 'tabular blast' format:
+
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --rps 1 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+
+If subject set contains sequences longer then 10 Mb, add --maxslen MAX_SUBJ_LEN. For human genome assembly with joined chromosomes:
+
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 --maxslen 250000000 QUERIES.fasta Hg19.fasta RESULTS.sim
+
+Even faster search for longer (over 100 bp) near-identical matches (over 90% identity)
+
+   > nsimscan -v -k 12 --it 90 --xt 90 --il 100 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+
+Sensitive search for more distant (over ~55% identity) and longer (over 80 bp) similarities, merging distinct similarity domains:
+
+   > nsimscan -v -k 9 -t 130 --it 55 --xt 50 --il 80 --mdom --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+
+
+
+NOTE ABOUT MEMORY CONSUMPTION
+
+As query sequence are loaded in memory at once, and the tuple index is constructed over all of them, large query sets may imply extensive memory usage. Minimal memory usage is approximately 200*query_set_size. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory fiitprint.
+The space taken by results can be reduced by using redundancy / repeats filters or by limiting number of results kept per query (see below, in parameters description)
+
+
+PARAMETERS: OPTIONAL AND REQUIRED
+
+The processing parameters can be set on command line or by using config file. Majority of the parameters are optional; if they are not specified, the default values for them are used. There are three required parameters:
+  QUERIES_FILE   - the name for the file with "query" sequences 
+  SUBJECTS_FILE  - the name for the file with "subject" sequences 
+  OUTPUT_NAME    - the name for the file where results are written
+Presently, nsimscan supports fasta as input format (for both querues and subjects), and a number of output formats (see below)
+The required parameters have to be specified on the command line after all optional parameters. The values of required parameters stored in config file are ignored.
+
+
+HELP MODE
+
+NSimScan can be executed in one of 3 "help output" modes:
+    brief, toggled by "-h" command line switch; 
+    complete, toggled by "--help" command line switch, and 
+    parameters file help, toggled by "--help_par" command line switch.
+
+
+CONFIGURATION FILE
+
+NSimScan loads default config file if it finds it in current directory. The name for the default config file follows the name of nsimscan executable with ".cfg" extension. Usually it is 'nsimscan.cfg'. If the nsimscan executable is renamed or run using differently named symlink, the config file would follow that name.  
+
+NSimScan can be instructed to load different configuration file using "-c CFG_FILE_NAME" command line switch. 
+It can also be instructed to write out the configuration file for current set of parameters using "--outcfg CFG_FILE_NAME" command line parameter, or "-w" switch, causing to save the config file with default name.
+
+The parameters explicitely given on command line override the parameters from the configuration file.
+
+Configuration file is a text file, consisting of sections. The section name is given in square braces and placed on separate line. The parameters belonging to a section are given on follwing line, one parameter per line. The parameters are given in NAME = VALUE form.
+
+
+PARAMETER CATEGORIES
+
+  INPUT FILTERING (corresponds to [PRE_FILTER] section of config file)
+
+  --nofwd       : "no forward" : Do not search forward chain (corresponds to FORWARD = False setting in config file)
+  --norev       : "no reverse" : Do not search reverse chain (corresponds to REVERSE = False setting in config file)
+  --maxqlen     : "maximal query length" : Skip queries longer then given length, default is 10Mb (corresponds to MAX_QRY_LEN in config file)
+  --maxslen     : "maximal sequence length" : Skip query or subject sequence longer then given length, default is 10 Mb (corresponds to MAX_SEQ_LEN in config file)
+  --minslen     : "minimal sequence length" : Skip query or subject sequence shorter then given length, default is 40 (corresponds to MIN_SEQ_LEN in config file)
+  --qbeg        : "queries begin at" : The ordinal number of the first query sequence in the input file that is searched. The preceeding sequences are skipped (corresponds to Q_BEG in config file)
+  --qend        : "queries end at" : The sequence at this ordinal number in the query set, and all sequence beyond it, are skipped (corresponds to Q_END in config file) 
+  --tbeg        : "targets begin at" : The ordinal number of the first subject ("target") sequence in the input file that is searched. The preceeding sequences are skipped (corresponds to T_BEG in config file)
+  --tend        : "targets end at" : The sequence at this ordinal number in the subject ("target") set, and all sequence beyond it, are skipped (corresponds to T_END in config file) 
+
+  HIT DETECTION AND PROCESSING (corresponds to [KTSEARCH] section of config file)
+
+  -k, --ksize   : "k-tuple size" : the size of a word used in lookup table. Valid range is from 8 to 12. Shorter tuples provide for more sensitive search, but slower, due to large number of candidates generated. Default 11. (corresponds to K_SIZE in config file)
+  -t, --kthresh : "k threshold"  : diagonal score threshold that triggers further processing. The primary hits through lookup table are placed on the diagonals, increasing diagonal scores. When diagonal score goes over the threshold set by this parameter, the hit is considered a similarity candidate. Each matching k-tuple increases diagonal score according to the tuple weight, loaded from tuple frequency file. If no such file is provided, the value of 100 is used. The overlapping portions of mathcing k-tuples are counted only once. Default --kthresh is 310, roughly corresponding to more then 3 adjacent matches of size k on the same diagonal. This value creates a very strong filter, we recommend to lower it for most searches. (corresponds to K_THRESH in config file)
+  --approx      : "approximate lookup" : turns on lookup by k-tuples with 1 mismatch. Increases sensitivity with minimal reduction in speed, but also increases memory footprint by an order of magnitude. Off by default. (corresponds to APPROX in config file)
+  --mxshift     : "max diagonal shift" : controls over how many adjacent diagonals the hit score propagates. Default 3. (corresponds to MAX_SHIFT in config file)
+  -q, --step    : "lookup step" : controls how many bases on the subject are skipped between lookups. For dense similarities, skipping some positions does not affect the scores of diagonals, since only some of overlapping matches get skipped. Using steps over 1 reduce the number of lookups and increases speed (using step 4 can increase speed up to 4-fold). Default 1. (corresponds to STEP in config file)
+  --kred        : "redundancy lookup" : controls maximal shift for k-tuple redundancy check. The match is not added to the diagonal if matching word is same as the word matching at any of previous --kred positions. Default 2. (corresponds to REP_LOOKUP in config file)
+  --il, --minlen: "min length" : minimal length of the alignment reported. Default 45. (corresponds to MIN_LEN in config file)
+  --it, --minthr: "threshold at minlen" : the minimal percent identity at minimal allowed alignment length. Default 70. (corresponds to MIN_THRESH in config file)
+  --xt, --maxthr: "threshold at maxlen" : the minimal percent identity at maximal possible (longest of query and subject) alignment lengths. Default 55. (corresponds to MAX_THRESH in config file)
+  --kdistr      : "tuple distribution" : file with k-tuple frequencies. This is a binary file, containing array of 4-byte integer values (encoded as little-endians). The binary-compressed tuple at 2 bits per base serves as an index into the frequencies array, with following base encodings: A as 0, G as 1, C as 2 and T as 3. This file is to be produced by external means. (corresponds to KDISTR in config file)
+  --gap_period  : "gap period" : sets limit on the number of gaps in alignment. If number of gap openings multiplied by gap period is over alignment length, the alignment is considered too fragmented and not reported. Default 10. (corresponds to GAP_PERIOD in config file)
+
+  ALIGNMENT SCORING (corresponds to [ALIGN] section of config file)
+
+  --gip
+  --gep
+  --simlev
+
+  SIMILARITY FILTERING (corresponds to [FILTERS] section of config file)
+  
+  --minlen
+  --replen
+  --replev
+  
+  SIMILARITY MERGE (corresponds to [SIM_MERGE] section of config file)
+
+  --mdom, --md
+  --dovl, --do
+  --gcap, --gc
+  --mrep, --mr
+  --rorp, ro
+  --nothr, --nt
+  
+  STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of config file)
+  -v, --verb
+  --ov
+  --debug
+  
+  OUTPUT CONTROL (corresponds to [SEARCH_OUTPUT] section of config file)
+  --om
+  --ap, -a
+  --rpq
+  --rps
+  --apq
+  
+
+   
+
+
+
+
