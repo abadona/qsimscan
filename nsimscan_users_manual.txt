@@ -42,7 +42,7 @@ Sensitive search for more distant (over ~55% identity) and longer (over 80 bp) s
 
 NOTE ABOUT MEMORY CONSUMPTION
 
-As query sequence are loaded in memory at once, and the tuple index is constructed over all of them, large query sets may imply extensive memory usage. Minimal memory usage is approximately 200*query_set_size. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory fiitprint.
+As query sequence are loaded in memory at once, and the tuple index is constructed over all of them, large query sets may imply extensive memory usage. Minimal memory usage is approximately 200*query_set_size. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory footprint.
 The space taken by results can be reduced by using redundancy / repeats filters or by limiting number of results kept per query (see below, in parameters description)
 
 
