@@ -36,13 +36,47 @@ Even faster search for longer (over 100 bp) near-identical matches (over 90% ide
 
 Sensitive search for more distant (over ~55% identity) and longer (over 80 bp) similarities, merging distinct similarity domains:
 
-   > nsimscan -v -k 9 -t 130 --it 55 --xt 50 --il 80 --mdom --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+   > nsimscan -v -k 9 -t 120 --it 55 --xt 50 --il 80 --mdom --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
 
+
+ALGORITHM DESCRIPTION
+
+1) NSimScan first reads all query sequences and constructs lookup table on them. In the lookup table, the locations of every k-mere in query sequences are recorded. The size of the k-mere for lookup table is controlled by the '-k' parameter. The lookup table is directly addressable by the binary-encoded k-mere. If 'approximate' mode is enabled, the locations of inexact matches (with one substitution) are also recorded.
+
+2) The redundant sequential k-meres are not recorded in the lookup table. The exent of redundancy check is controlled by "--kred" parameter. It defines minimal proximity of the occurrences of the same k-mere on query sequence. Repeated k-mere occurrences located in positions not more distant than kred are not recorded in lookup table.
+
+3) Optionally, the array of k-mere frequenciess is read from the external file (given by "--kdistr" parameter). Based on these frequencies, the relative weights of k-meres are computed. If file is not given, the weights of all k-meres are considered same and equal to 100.
+
+4) The array of 'diagonal' structures, representing similarity matrix diagonals, is allocated (number of diagonals = number of query positions + number of subject positions. Number of query positions doubles if reverse chain is also searched. The 'diagonal' structure keeps track of the cumulative score of matches along that diagonal and few adjucent ones. The width of the group of diagonales evaluated together is controlled by "--mxshift" parameter.
+
+5) Then subject sequences are read one-by-one, sequentially. 
+
+6) The k-mere is retrieved for every position in the subject sequence, sequentially. Using the lookup table, the locations of this k-mere in the queries are retrieved. Sequential occurrences of same k-meres on subject located closer than "kred" bases from each other are not looked up. 
+
+7) For each of these locations, the corresponding 'diagonal' structure is updated. The diagoonal score is computed based on the k-mere weight, offset or overlap relateive to previous hit, and scores of nearby diagonals. For the isolated match, the weight of the k-mere is added to the diagonal score. If match to the prior position of the diagonal is already recorded, the weight for non-verlapping portion of current match is added. If prior prior non-overlapping match is recorded for a neighbor diagonal (located closer than "--mxshift" from the current one), the that score is transferred to the current diagonal and implied gap cost is subtracted.
+
+8) When diagonal score exceeds 'diagonal score threshold' (given by -t/--kthresh command line parameter), the diagonal is passed to the alignment evaluator. Score threshold for single non-redundant match is 100; if the k-mere distribution is not loaded, all matches are considered such. For real distributions, overrepresented k-meres would have lower scores. 
+
+9) Alignment evaluator is a greedy heuristic algorithm that constructs the alignment in one pass, by extending the matching zone along current and several neighboring diagonales in both direction while alignment score increases. This procedure is very fast - linear with respect to the alignment length. More speed is achieved by aligning binary-compressed representations of both query and subject sequences using bitwise arithmetics. While constructing such alignment, only gaps shorter than "--mxshift" bases are considered.
+
+10) Alignments constructed by the evaluator are checked against 'length/identity' filter. This fiter is controlled by 3 parameters: minimal alignment length (--minlen), short match identity threshold (--minthr) and long match identity threshold (--maxthr). Maxthr should never be smaller then minthr. To pass the filter the alignment should be longer then minlen, and similarity score should be over minlen*(maxthr-minthr) + align_length*maxthr. 
+
+12) Alignments optionally checked with 'tandem repeat'/ redundancy filter. This filter computes the score of the alignments produced by shifting one of the strand up to "--replen" positions forward and backward, and comparing this score to the score of the original, unshifted alignment. If the 'shifted' score is over "--replev" percent of original one, the aligned sequence is considered redundant, and alignment is dropped. This filter is on by default, with replen = 4 and replev = 50. It can be turrned off by setting  --replen to 0.
+
+13) Since the alignment evaluator is triggered every time the disgonal score over the threshold is observed, the series of similar alignments are getting computed for many successive positions of relatively long and strong similarities. Due to the greedyness of the alignment algorithm, such alignments may differ. The single best scoring one is selected out of the group of such overlapping alignments.
+
+14) The alignments produced by evaluator can not contain gaps longer than mxshift. Thus alignments are often found as a series of shorter 'domain' alignments. They can be optionally merged into single continous alignment. The merging finds optimal arrangement of alignment domains using dynamic programming based algorithm. Merging is enabled by "--mdom" parameter.
+
+15) The repetitive sequences produce series of repetitive alignments. If only one (best) representative out of a such series is of the interest, the user may envoke optional repeat selection 
+
+16) The number of alignments reported per query is always subject to a limit, 500 by default, set by "--rpq" parameter. If more than "--rpq" good alignments found for some query, only "--rpq" best ones are reported.
+
+17) Optionally, the number of alignment per subject can also be limited. The number is controlled by "--rps" parameter. This limiting is disabled by default.
 
 
 NOTE ABOUT MEMORY CONSUMPTION
 
-As query sequence are loaded in memory at once, and the tuple index is constructed over all of them, large query sets may imply extensive memory usage. Minimal memory usage is approximately 200*query_set_size. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory footprint.
+As query sequence are loaded in memory at once, and both the k-mere index and diagonal array are constructed over all of them, large query sets may imply extensive memory usage. Memory usage is approximately 200*query_set_size bytes. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory footprint.
 The space taken by results can be reduced by using redundancy / repeats filters or by limiting number of results kept per query (see below, in parameters description)
 
 
@@ -97,11 +131,11 @@ PARAMETER CATEGORIES
   --approx      : "approximate lookup" : turns on lookup by k-tuples with 1 mismatch. Increases sensitivity with minimal reduction in speed, but also increases memory footprint by an order of magnitude. Off by default. (corresponds to APPROX in config file)
   --mxshift     : "max diagonal shift" : controls over how many adjacent diagonals the hit score propagates. Default 3. (corresponds to MAX_SHIFT in config file)
   -q, --step    : "lookup step" : controls how many bases on the subject are skipped between lookups. For dense similarities, skipping some positions does not affect the scores of diagonals, since only some of overlapping matches get skipped. Using steps over 1 reduce the number of lookups and increases speed (using step 4 can increase speed up to 4-fold). Default 1. (corresponds to STEP in config file)
-  --kred        : "redundancy lookup" : controls maximal shift for k-tuple redundancy check. The match is not added to the diagonal if matching word is same as the word matching at any of previous --kred positions. Default 2. (corresponds to REP_LOOKUP in config file)
+  --kred        : "redundancy lookup" : controls maximal shift for k-mere redundancy check. The match is not added to the diagonal if matching word is same as the word matching at any of previous --kred positions. Default 2. (corresponds to REP_LOOKUP in config file)
   --il, --minlen: "min length" : minimal length of the alignment reported. Default 45. (corresponds to MIN_LEN in config file)
   --it, --minthr: "threshold at minlen" : the minimal percent identity at minimal allowed alignment length. Default 70. (corresponds to MIN_THRESH in config file)
   --xt, --maxthr: "threshold at maxlen" : the minimal percent identity at maximal possible (longest of query and subject) alignment lengths. Default 55. (corresponds to MAX_THRESH in config file)
-  --kdistr      : "tuple distribution" : file with k-tuple frequencies. This is a binary file, containing array of 4-byte integer values (encoded as little-endians). The binary-compressed tuple at 2 bits per base serves as an index into the frequencies array, with following base encodings: A as 0, G as 1, C as 2 and T as 3. This file is to be produced by external means. (corresponds to KDISTR in config file)
+  --kdistr      : "k-tuple distribution" : file with k-mere frequencies. This is a binary file, containing array of 4-byte integer values (encoded as little-endians). The binary-compressed k-mere (at 2 bits per base) serves as an index into the frequencies array, with following base encodings: A as 0, G as 1, C as 2 and T as 3. This file is to be produced by external means. (corresponds to KDISTR in config file)
   --gap_period  : "gap period" : sets limit on the number of gaps in alignment. If number of gap openings multiplied by gap period is over alignment length, the alignment is considered too fragmented and not reported. Default 10. (corresponds to GAP_PERIOD in config file)
 
   ALIGNMENT SCORING (corresponds to [ALIGN] section of config file)
