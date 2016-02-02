@@ -2,95 +2,113 @@
    NSimScan User's Guide
 ===========================
 
-NSimScan is a tool for searching similarities in nucleotide sequences. It compares a set of query sequences to a set of subject sequences, finds alignments that meet quality criteria, and reports them. Different aspects of NSimScan operation are controlled through program parameters. 
+
+OVERVIEW
+===========================
+
+NSimScan is a tool for searching similarities in nucleotide sequences. It compares a set of query sequences to a set of subject sequences, finds alignments that meet quality criteria, and reports them. Different aspects of NSimScan operation are controlled through the program parameters. 
+
 
 QUICK START
+===========================
 
-The simplest usage is specifying only three required parameters, such as:
+The simplest NSimScan usage scenario includes only three required parameters:
 
-   > nsimscan queries.fasta subjects.fasta query-subject.sim
+   > nsimscan QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
-this will find alignments longer then 45 bp with identity over 70% (for 45-bp alignments) and down to 55% (for very long alignments), keep 500 best alignments per query for which 50 best will be reported in details.
+Search directed by the above command line will execute default settings and find alignments longer than 45 bp with identities from over 70% (for 45-bp alignments) to 55% for very long alignments. It will record 500 best alignments per query, for which 50 best will be reported in detail.
 
-The -v parameter can be used for progress report, and --om to set the output mode (text alignments by default). The output mode M8 matches NCBI Legacy BLAST -m8 (and Blast+ -outfmt 6) tabular output. The command for this is:
+-v parameter is used for progress report;
+--om parameter is used to define the output mode (by default it is text alignments). The output mode M8 matches NCBI Legacy BLAST -m8 (and Blast+ -outfmt 6) tabular output. NSimScan command line utilizing these additional twFTDIo parameters will look like:
 
-   > nsimscan -v --om M8 queries.fasta subjects.fasta query-subject.sim
+   > nsimscan -v --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
-Following are parameters for few useful scenarios:
+Below we briefly describe a few useful search scenarios utilizing additional sets of parameters. Detailed description of the parameters used in NSimScan is provided in the following sections of the Manual.
 
 Quick search for strong similarities (over 85% identity), output in 'tabular blast' format:
 
-   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
-Quick search for strong best hits (over 85% identity), output in 'tabular blast' format:
+Quick search for strong best hits (over 85% identity; --rps parameter defines the number of best hits to report), output in 'tabular blast' format:
 
-   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --rps 1 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --rps 1 --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
-If subject set contains sequences longer then 10 Mb, add --maxslen MAX_SUBJ_LEN. For human genome assembly with joined chromosomes:
+If a subject set contains sequences longer than 10 Mb, you can add --maxslen MAX_SUBJ_LEN. For human genome assembly with joined chromosomes, the command line would be:
 
-   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 --maxslen 250000000 QUERIES.fasta Hg19.fasta RESULTS.sim
+   > nsimscan -v -k 11 -t 210 --it 85 --xt 85 --om M8 --maxslen 250000000 QUERIES_FILE.fasta Hg19.fasta OUTPUT_NAME.sim
 
-Even faster search for longer (over 100 bp) near-identical matches (over 90% identity)
+An even faster search for longer (over 100 bp) near-identical matches (over 90% identity):
 
-   > nsimscan -v -k 12 --it 90 --xt 90 --il 100 --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+   > nsimscan -v -k 12 --it 90 --xt 90 --il 100 --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
-Sensitive search for more distant (over ~55% identity) and longer (over 80 bp) similarities, merging distinct similarity domains:
+A sensitive search for more distant (over ~55% identity) and longer (over 80 bp) similarities, merging distinct similarity domains:
 
-   > nsimscan -v -k 9 -t 120 --it 55 --xt 50 --il 80 --mdom --om M8 QUERIES.fasta SUBJECTS.fasta RESULTS.sim
+   > nsimscan -v -k 9 -t 120 --it 55 --xt 50 --il 80 --mdom --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
+
 
 
 ALGORITHM DESCRIPTION
+===========================
 
-1) NSimScan first reads all query sequences and constructs lookup table on them. In the lookup table, the locations of every k-mere in query sequences are recorded. The size of the k-mere for lookup table is controlled by the '-k' parameter. The lookup table is directly addressable by the binary-encoded k-mere. If 'approximate' mode is enabled, the locations of inexact matches (with one substitution) are also recorded.
+1) As its initial operation, NSimScan reads all query sequences and constructs a lookup table, recording all locations of every k-mere in the query sequences. The size of the k-meres for the lookup table is controlled by '-k' parameter. The lookup table is directly addressable by the binary-encoded k-mere. If 'approximate' mode is enabled, the locations of inexact matches (with one substitution) are also recorded.
 
-2) The redundant sequential k-meres are not recorded in the lookup table. The exent of redundancy check is controlled by "--kred" parameter. It defines minimal proximity of the occurrences of the same k-mere on query sequence. Repeated k-mere occurrences located in positions not more distant than kred are not recorded in lookup table.
+2) Redundant sequential k-meres are not recorded in the lookup table. The extent of redundancy check is controlled by "--kred" parameter. It defines minimal proximity of the occurrences of the same k-mere on a query sequence. Repeated k-mere occurrences located closer than kred are not recorded in the lookup table.
 
-3) Optionally, the array of k-mere frequenciess is read from the external file (given by "--kdistr" parameter). Based on these frequencies, the relative weights of k-meres are computed. If file is not given, the weights of all k-meres are considered same and equal to 100.
+3) Optionally, an array of k-mere frequencies is read from an external file (linked by "--kdistr" parameter). Based on these frequencies, relative weights of k-meres are computed. If the file is not linked, the weights of different k-meres are considered the same and equal to 100.
 
-4) The array of 'diagonal' structures, representing similarity matrix diagonals, is allocated (number of diagonals = number of query positions + number of subject positions. Number of query positions doubles if reverse chain is also searched. The 'diagonal' structure keeps track of the cumulative score of matches along that diagonal and few adjucent ones. The width of the group of diagonales evaluated together is controlled by "--mxshift" parameter.
+4) An array of 'diagonal' structures representing similarity matrix diagonals is allocated (The number of diagonals = the number of query positions + the number of subject positions. The number of query positions doubles if reverse chain is also searched.) The 'diagonal' structure keeps track of the cumulative score of matches along a diagonal and a few adjacent ones. The width of the group of diagonals evaluated together is controlled by "--mxshift" parameter.
 
 5) Then subject sequences are read one-by-one, sequentially. 
 
-6) The k-mere is retrieved for every position in the subject sequence, sequentially. Using the lookup table, the locations of this k-mere in the queries are retrieved. Sequential occurrences of same k-meres on subject located closer than "kred" bases from each other are not looked up. 
+6) k-meres are retrieved for every position in the subject sequence, sequentially. Using the lookup table, locations of every k-mere in the query sequences are retrieved. Sequential occurrences of the same k-mere located closer than defined by "--kred" are not looked up. 
 
-7) For each of these locations, the corresponding 'diagonal' structure is updated. The diagoonal score is computed based on the k-mere weight, offset or overlap relateive to previous hit, and scores of nearby diagonals. For the isolated match, the weight of the k-mere is added to the diagonal score. If match to the prior position of the diagonal is already recorded, the weight for non-verlapping portion of current match is added. If prior prior non-overlapping match is recorded for a neighbor diagonal (located closer than "--mxshift" from the current one), the that score is transferred to the current diagonal and implied gap cost is subtracted.
+7) For each of these locations, the corresponding 'diagonal' structure is updated. The diagonal score is computed based on the k-mere weight, offset or overlap relative to previous hits, and scores of nearby diagonals. For an isolated match, the weight of the k-mere is added to the diagonal score. If a match to a prior position of the diagonal is already recorded, the weight for non-overlapping portion of the current match is added. If prior non-overlapping match is recorded for a neighbor diagonal (located closer than "--mxshift" from the current one), that score is transferred to the current diagonal and an implied gap cost is subtracted from the diagonal score.
 
-8) When diagonal score exceeds 'diagonal score threshold' (given by -t/--kthresh command line parameter), the diagonal is passed to the alignment evaluator. Score threshold for single non-redundant match is 100; if the k-mere distribution is not loaded, all matches are considered such. For real distributions, overrepresented k-meres would have lower scores. 
+8) When diagonal score exceeds the 'diagonal score threshold' (set by -t/--kthresh command line parameter), the diagonal is passed to the alignment evaluator. Score threshold for a single non-redundant match is 100; if k-mere distribution table is not loaded, all matches have this score. For real distributions, overrepresented k-meres will have lower scores. 
 
-9) Alignment evaluator is a greedy heuristic algorithm that constructs the alignment in one pass, by extending the matching zone along current and several neighboring diagonales in both direction while alignment score increases. This procedure is very fast - linear with respect to the alignment length. More speed is achieved by aligning binary-compressed representations of both query and subject sequences using bitwise arithmetics. While constructing such alignment, only gaps shorter than "--mxshift" bases are considered.
+9) Alignment evaluator is a greedy heuristic algorithm that constructs an alignment in one go, by extending a matching zone along the current and several neighboring diagonals in both directions while the alignment score increases. This procedure is very fast, being linear with respect to alignment length. Higher speed is achieved by aligning binary-compressed representations of both query and subject sequences using bitwise arithmetic. During the alignment construction, only gaps shorter than "--mxshift" bases are considered.
 
-10) Alignments constructed by the evaluator are checked against 'length/identity' filter. This fiter is controlled by 3 parameters: minimal alignment length (--minlen), short match identity threshold (--minthr) and long match identity threshold (--maxthr). Maxthr should never be smaller then minthr. To pass the filter the alignment should be longer then minlen, and similarity score should be over minlen*(maxthr-minthr) + align_length*maxthr. 
+10) The alignments constructed by the Alignment evaluator are checked against the 'length/identity' filter. This filter is controlled by 3 parameters: minimal alignment length (--minlen), short match identity threshold (--minthr), and long match identity threshold (--maxthr). Maxthr should never be less than minthr. To pass the filter, the alignment needs to be longer then minlen, and its similarity score needs to be over (minlen * minthr + (alignment_length - minlen) * maxthr).
 
-12) Alignments optionally checked with 'tandem repeat'/ redundancy filter. This filter computes the score of the alignments produced by shifting one of the strand up to "--replen" positions forward and backward, and comparing this score to the score of the original, unshifted alignment. If the 'shifted' score is over "--replev" percent of original one, the aligned sequence is considered redundant, and alignment is dropped. This filter is on by default, with replen = 4 and replev = 50. It can be turrned off by setting  --replen to 0.
+12) The alignments are optionally checked with 'tandem repeat'/ redundancy filter. This filter computes the score of the alignments produced by shifting one of the strands up to "--replen" positions forward and backward, and comparing this score to the score of the original, unshifted alignment. If the 'shifted' score is over "--replev" percent of the original one, the aligned sequence is considered redundant, and the alignment is dropped. This filter is on by default, with replen = 4 and replev = 50. It can be turned off by setting  --replen to 0.
 
-13) Since the alignment evaluator is triggered every time the disgonal score over the threshold is observed, the series of similar alignments are getting computed for many successive positions of relatively long and strong similarities. Due to the greedyness of the alignment algorithm, such alignments may differ. The single best scoring one is selected out of the group of such overlapping alignments.
+13) Since the alignment evaluator is triggered every time a diagonal score gets over a threshold, series of similar alignments are being computed for many successive positions of relatively long and strong similarities. Due to the greediness of the alignment algorithm, such alignments may differ. A single best scoring one is selected out of a group of such overlapping alignments.
 
-14) The alignments produced by evaluator can not contain gaps longer than mxshift. Thus alignments are often found as a series of shorter 'domain' alignments. They can be optionally merged into single continous alignment. The merging finds optimal arrangement of alignment domains using dynamic programming based algorithm. Merging is enabled by "--mdom" parameter.
+14) The alignments produced by the Alignment evaluator cannot contain gaps longer than mxshift. Thus, the alignments are often found as a series of shorter 'domain' alignments. These can be optionally merged into a single continuous alignment. The merging works by finding an optimal arrangement of the alignment domains using dynamic programming-based algorithm. Merging is enabled by "--mdom" parameter.
 
-15) The repetitive sequences produce series of repetitive alignments. If only one (best) representative out of a such series is of the interest, the user may envoke optional repeat selection 
+15) Sequences containing multiple repeats produce series of repetitive alignments. If only one (the best) representative of such series is of interest, you may invoke optional repeat selection by adding "--mrep" to command line.
 
-16) The number of alignments reported per query is always subject to a limit, 500 by default, set by "--rpq" parameter. If more than "--rpq" good alignments found for some query, only "--rpq" best ones are reported.
+16) The number of alignments reported per query is always subject to a limit (500 by default) defined by "--rpq" parameter. If more than "--rpq" quality alignments are found per query, only "--rpq" best ones will be reported.
 
-17) Optionally, the number of alignment per subject can also be limited. The number is controlled by "--rps" parameter. This limiting is disabled by default.
+17) Optionally, number of alignments per subject can also be limited. The number is controlled by "--rps" parameter. This limiting is disabled by default.
+
 
 
 NOTE ABOUT MEMORY CONSUMPTION
+===========================
 
-As query sequence are loaded in memory at once, and both the k-mere index and diagonal array are constructed over all of them, large query sets may imply extensive memory usage. Memory usage is approximately 200*query_set_size bytes. 20K of 500-bp queries consume about 2Gb memory for indexes. Found results take additional space. Redundant sequences with many matches can cause huge memory footprint.
-The space taken by results can be reduced by using redundancy / repeats filters or by limiting number of results kept per query (see below, in parameters description)
+As the query sequences are loaded in the memory all at once, and both the k-mere index and the diagonal array are constructed over the entire set, large query sets may imply extensive memory usage. Memory usage is approximately 200*query_set_size bytes. 20K of 500-bp queries consume about 2Gb memory for indexes. The results take additional space. Redundant sequences with many matches can cause huge memory footprint.
+The space taken by the results can be reduced by using redundancy / repeats filters or by limiting the number of results kept per query (see below, in the parameters description)
+
 
 
 PARAMETERS: OPTIONAL AND REQUIRED
+===========================
 
-The processing parameters can be set on command line or by using config file. Majority of the parameters are optional; if they are not specified, the default values for them are used. There are three required parameters:
-  QUERIES_FILE   - the name for the file with "query" sequences 
-  SUBJECTS_FILE  - the name for the file with "subject" sequences 
-  OUTPUT_NAME    - the name for the file where results are written
-Presently, nsimscan supports fasta as input format (for both querues and subjects), and a number of output formats (see below)
-The required parameters have to be specified on the command line after all optional parameters. The values of required parameters stored in config file are ignored.
+
+NSimScan processing parameters can be set on a command line or by using config file. The majority of the parameters are optional; if they are not specified, default values are used. 
+There are three required parameters:
+  QUERIES_FILE   - the name of the file with the "query" sequences 
+  SUBJECTS_FILE  - the name of the file with the "subject" sequences 
+  OUTPUT_NAME    - the name of the file where the results will be written
+Presently, NSimScan supports fasta as the input format (for both queries and subjects), and a number of output formats (see below).
+Required parameters have to be specified on the command line after all optional parameters. Values of required parameters stored in the config file are ignored.
+
 
 
 HELP MODE
+===========================
+
 
 NSimScan can be executed in one of 3 "help output" modes:
     brief, toggled by "-h" command line switch; 
@@ -98,82 +116,100 @@ NSimScan can be executed in one of 3 "help output" modes:
     parameters file help, toggled by "--help_par" command line switch.
 
 
+
 CONFIGURATION FILE
+===========================
 
-NSimScan loads default config file if it finds it in current directory. The name for the default config file follows the name of nsimscan executable with ".cfg" extension. Usually it is 'nsimscan.cfg'. If the nsimscan executable is renamed or run using differently named symlink, the config file would follow that name.  
 
-NSimScan can be instructed to load different configuration file using "-c CFG_FILE_NAME" command line switch. 
-It can also be instructed to write out the configuration file for current set of parameters using "--outcfg CFG_FILE_NAME" command line parameter, or "-w" switch, causing to save the config file with default name.
+NSimScan uses default config file, if the file is located in the current directory. The name for the file follows the name of nsimscan executable with ".cfg" extension. Usually it is 'nsimscan.cfg'. If NSimScan executable is renamed or run using a differently named symlink, the config file should follow that name.  
 
-The parameters explicitely given on command line override the parameters from the configuration file.
+NSimScan can be instructed to load a different configuration file using "-c CFG_FILE_NAME" command line switch. It can also be instructed to write out a configuration file for the current set of parameters using "--outcfg CFG_FILE_NAME" command line parameter or "-w" switch, causing the creation of config file with default name.
 
-Configuration file is a text file, consisting of sections. The section name is given in square braces and placed on separate line. The parameters belonging to a section are given on follwing line, one parameter per line. The parameters are given in NAME = VALUE form.
+Parameters explicitly given on the command line always override those specified in the configuration file.
+
+Configuration file is a sectional text file, where each section’s name is listed in square braces on a separate line. The parameters belonging to each section are listed on the following lines, one parameter per line, in NAME = VALUE form.
+
 
 
 PARAMETER CATEGORIES
+===========================
 
-  INPUT FILTERING (corresponds to [PRE_FILTER] section of config file)
 
-  --nofwd       : "no forward" : Do not search forward chain (corresponds to FORWARD = False setting in config file)
-  --norev       : "no reverse" : Do not search reverse chain (corresponds to REVERSE = False setting in config file)
-  --maxqlen     : "maximal query length" : Skip queries longer then given length, default is 10Mb (corresponds to MAX_QRY_LEN in config file)
-  --maxslen     : "maximal sequence length" : Skip query or subject sequence longer then given length, default is 10 Mb (corresponds to MAX_SEQ_LEN in config file)
-  --minslen     : "minimal sequence length" : Skip query or subject sequence shorter then given length, default is 40 (corresponds to MIN_SEQ_LEN in config file)
-  --qbeg        : "queries begin at" : The ordinal number of the first query sequence in the input file that is searched. The preceeding sequences are skipped (corresponds to Q_BEG in config file)
-  --qend        : "queries end at" : The sequence at this ordinal number in the query set, and all sequence beyond it, are skipped (corresponds to Q_END in config file) 
-  --tbeg        : "targets begin at" : The ordinal number of the first subject ("target") sequence in the input file that is searched. The preceeding sequences are skipped (corresponds to T_BEG in config file)
-  --tend        : "targets end at" : The sequence at this ordinal number in the subject ("target") set, and all sequence beyond it, are skipped (corresponds to T_END in config file) 
+  INPUT FILTERING (corresponds to [PRE_FILTER] section of the config file)
 
-  HIT DETECTION AND PROCESSING (corresponds to [KTSEARCH] section of config file)
+  --nofwd       : "no forward" : Do not search forward chain (corresponds to FORWARD = False setting in the config file)
+  --norev       : "no reverse" : Do not search reverse chain (corresponds to REVERSE = False setting in the config file)
+  --maxqlen     : "maximal query length" : Skip queries longer than a given length; default setting is 10Mb (corresponds to MAX_QRY_LEN in the config file)
+  --maxslen     : "maximal sequence length" : Skip query or subject sequences longer than the given length; default setting is 10 Mb (corresponds to MAX_SEQ_LEN in the config file)
+  --minslen     : "minimal sequence length" : Skip query or subject sequences shorter than the given length; default setting is 40 (corresponds to MIN_SEQ_LEN in the config file)
+  --qbeg        : "queries begin at" : the number of the first query sequence in the input file that will be searched. All preceding sequences will be skipped (corresponds to Q_BEG in the config file)
+  --qend        : "queries end at" : the sequence with this original number and all sequences beyond that will be skipped (corresponds to Q_END in the config file) 
+  --tbeg        : "targets begin at" : the number of the first subject ("target") sequence in the input file that will be searched. All preceding sequences will be skipped (corresponds to T_BEG in the config file)
+  --tend        : "targets end at" : Subject ("target") sequence with this number and all sequences beyond that will be skipped (corresponds to T_END in the config file) 
 
-  -k, --ksize   : "k-tuple size" : the size of a word used in lookup table. Valid range is from 8 to 12. Shorter tuples provide for more sensitive search, but slower, due to large number of candidates generated. Default 11. (corresponds to K_SIZE in config file)
-  -t, --kthresh : "k threshold"  : diagonal score threshold that triggers further processing. The primary hits through lookup table are placed on the diagonals, increasing diagonal scores. When diagonal score goes over the threshold set by this parameter, the hit is considered a similarity candidate. Each matching k-tuple increases diagonal score according to the tuple weight, loaded from tuple frequency file. If no such file is provided, the value of 100 is used. The overlapping portions of mathcing k-tuples are counted only once. Default --kthresh is 310, roughly corresponding to more then 3 adjacent matches of size k on the same diagonal. This value creates a very strong filter, we recommend to lower it for most searches. (corresponds to K_THRESH in config file)
-  --approx      : "approximate lookup" : turns on lookup by k-tuples with 1 mismatch. Increases sensitivity with minimal reduction in speed, but also increases memory footprint by an order of magnitude. Off by default. (corresponds to APPROX in config file)
-  --mxshift     : "max diagonal shift" : controls over how many adjacent diagonals the hit score propagates. Default 3. (corresponds to MAX_SHIFT in config file)
-  -q, --step    : "lookup step" : controls how many bases on the subject are skipped between lookups. For dense similarities, skipping some positions does not affect the scores of diagonals, since only some of overlapping matches get skipped. Using steps over 1 reduce the number of lookups and increases speed (using step 4 can increase speed up to 4-fold). Default 1. (corresponds to STEP in config file)
-  --kred        : "redundancy lookup" : controls maximal shift for k-mere redundancy check. The match is not added to the diagonal if matching word is same as the word matching at any of previous --kred positions. Default 2. (corresponds to REP_LOOKUP in config file)
-  --il, --minlen: "min length" : minimal length of the alignment reported. Default 45. (corresponds to MIN_LEN in config file)
-  --it, --minthr: "threshold at minlen" : the minimal percent identity at minimal allowed alignment length. Default 70. (corresponds to MIN_THRESH in config file)
-  --xt, --maxthr: "threshold at maxlen" : the minimal percent identity at maximal possible (longest of query and subject) alignment lengths. Default 55. (corresponds to MAX_THRESH in config file)
-  --kdistr      : "k-tuple distribution" : file with k-mere frequencies. This is a binary file, containing array of 4-byte integer values (encoded as little-endians). The binary-compressed k-mere (at 2 bits per base) serves as an index into the frequencies array, with following base encodings: A as 0, G as 1, C as 2 and T as 3. This file is to be produced by external means. (corresponds to KDISTR in config file)
-  --gap_period  : "gap period" : sets limit on the number of gaps in alignment. If number of gap openings multiplied by gap period is over alignment length, the alignment is considered too fragmented and not reported. Default 10. (corresponds to GAP_PERIOD in config file)
 
-  ALIGNMENT SCORING (corresponds to [ALIGN] section of config file)
 
-  --gip         : "gap initi penalty" : cost of gap opening, default 2.0 (corresponds to GIP in config file)
-  --gep         : "gap extension penalty" : cost of gap extension by 1 position, defaul 0.3 (corresponds to GEP in config file)
-  --simlev      : "sim level" : ratio of the penalty for lack of a match to the score of a match. Used in computing a balancing factor for gap cost: gap scores are scaled by (tuple_size/sim_level). Default 0.6. (corresponds to SIM_LEVEL in config file)
+  HIT DETECTION AND PROCESSING (corresponds to [KTSEARCH] section of the config file)
 
-  SIMILARITY FILTERING (corresponds to [FILTERS] section of config file)
+  -k, --ksize   : "k-mere size" : regulates the size of the "word" used in the lookup table. Its valid range is from 8 to 12. Shorter "words" provide for more sensitive but slower search, due to the large number of generated candidates. Default value for this parameter is 11. (Corresponds to K_SIZE in the config file)
+  -t, --kthresh : "k threshold"  : specifies the diagonal score threshold that triggers further processing. Primary hits through the lookup table are placed on diagonals, increasing diagonal scores. When diagonal score goes over a threshold set by this parameter, the hit is considered a similarity candidate. Each matching k-mere increases its diagonal score according to its weight, loaded from the array of k-mere frequencies. If no such file is provided, the value of 100 is used for each k-mere weight. Overlapping portions of matching k-meres are counted only once. Default --kthresh is 250, roughly corresponding to 3 slightly overlapping matches of size k on the same diagonal. This value creates relatively strong filter; we recommend lowering it for most searches. (Corresponds to K_THRESH in the config file)
+  --approx      : "approximate lookup" : turns on the lookup of k-meres with 1 mismatch. It increases the search sensitivity with minimal reduction in speed, but also increases the memory footprint by an order of magnitude. This parameter is off by default. (Corresponds to APPROX in the config file)
+  --mxshift     : "max diagonal shift" : controls the number of adjacent diagonals on which the hit score will be propagated. Default value for this parameter is 3 (corresponds to MAX_SHIFT in the config file).
+  -q, --step    : "lookup step" : controls the number of bases on the subject sequences that are skipped between lookups. For dense similarities, skipping some positions does not affect diagonal scores, since only some of the overlapping matches get skipped. Using steps higher than 1 reduces the number of lookups and increases search speed (using "step 4" can increase search speed up to 4-fold). Default value is 1. (Corresponds to STEP in the config file)
+  --kred        : "redundancy lookup" : controls maximal shift for k-mere redundancy check. The hit are not added to the diagonal if the matching word is the same as the word matching at any of the previous --kred positions. Default value is 2. (Corresponds to REP_LOOKUP in the config file)
+  --il, --minlen: "min length" : minimal length of the reported alignment. Default value is 45. (Corresponds to MIN_LEN in the config file)
+  --it, --minthr: "threshold at minlen" : minimal percent of identity at the minimal allowed alignment length. Default value is 70. (Corresponds to MIN_THRESH in the config file)
+  --xt, --maxthr: "threshold at maxlen" : minimal percent of identity at maximal possible (longest between query and subject) alignment length. Default value is 55. (Corresponds to MAX_THRESH in the config file)
+  --kdistr      : "k-mere distribution" : file containing k-mere frequencies. This is a binary file, containing an array of 4-byte integer values (encoded as little-endians). A binary-compressed k-mere (at 2 bits per base) serves as an index into the frequencies array, with the following base encodings: A as 0, G as 1, C as 2 and T as 3. This file is to be produced by external means. (Corresponds to KDISTR in the config file)
+  --gap_period  : "gap period" : sets a limit on the number of gaps in an alignment. If the number of gap openings multiplied by the gap period is more than alignment length, the alignment is considered too fragmented and is not reported. Default value is 5. (Corresponds to GAP_PERIOD in the config file)
+
+
+
+  ALIGNMENT SCORING (corresponds to [ALIGN] section of the config file)
+
+  --gip         : "gap initiation penalty" : cost of gap opening, default value is 2.0 (corresponds to GIP in the config file)
+  --gep         : "gap extension penalty" : cost of gap extension by 1 position, default value is 0.3 (corresponds to GEP in the config file)
+  --simlev      : "sim level" : ratio of the penalty for the lack of match to the score of match. Used in computing of balancing factor for the gap cost: gap scores are scaled by (tuple_size/sim_level). Default value is 0.6. (Corresponds to SIM_LEVEL in the config file)
+
+
+
+  SIMILARITY FILTERING (corresponds to [FILTERS] section of the config file)
   
-  --minlen     : "min sim len" : minimal length of the reported alignments, default 45 (corresponds to MIN_LEN in config file)
-  --replev     : "repeat level" : score threshold for repeat filtering. If similarity score on shifted ungapped segment is over (repeat_level * unsifted_sim_score), the sequence is considered redundant and alignment is rejected. Default 0.5. (corresponds to REP_PERCENT in config file)
-  --replen     : "repeat length" : maximal shift tested by repeat filter. If set to 0, no repeat filtering is performed. Default 4. (corresponds to REP_LEN in config file)
-  
-  SIMILARITY MERGE (corresponds to [SIM_MERGE] section of config file)
+  --minlen     : "min sim len" : minimal length of reported alignments, default value is 45 (corresponds to MIN_LEN in the config file)
+  --replev     : "repeat level" : score threshold for repeat filtering. If similarity score on a shifted ungapped segment is over (repeat_level * unsifted_sim_score), the sequence is considered redundant and the alignment is rejected. Default value is 0.5. (Corresponds to REP_PERCENT in the config file)
+  --replen     : "repeat length" : maximal shift tested by the repeat filter. If set to 0, no repeat filtering is performed. Default value is 4. (Corresponds to REP_LEN in the config file)
+ 
+ 
 
-  --mdom, --md : "merge domains" : turns on merging distant non-overlapping similarities within a sequence pair. Off by default. (corresponds to MERGE_DOM in config file)
-  --dovl, --do : "domain overlap" : maximum allowed overlap of merged domains. Default 20. (corresponds to MAX_DOM_OVL in config file)
-  --gcap, --gc : "gap cap" : gap cost limiting factor for long-range similarity merge. Uaed as  multiplier for gap initiaition cost. Default 4.0. (corresponds to GAP_CAP in config file)
-  --mrep, --mr : "merge repeats" : turns on mode where only only one best representative per group of repeatitive similarities is reported. Off by default. (corresponds to MERGE_REP in config file)
-  --rorp, --ro : "repeat orphan" : maximum difference between alignments starts and / or ends to consider them repeated. Default 30. (corresponds to MAX_REP_ORP in config file)
-  --nothr, --nt: "no thread merge" : turns off merging close alternative alignments. The one-pass alignment heuristics typically finds many alignments for a similarity zone, which are merged into one best by default. (corresponds to NOMERGE_THR in config file)
+  SIMILARITY MERGING (corresponds to [SIM_MERGE] section of the config file)
+
+  --mdom, --md : "merge domains" : turns on the merging of distant non-overlapping similarities within a sequence pair. Off by default. (Corresponds to MERGE_DOM in the config file)
+  --dovl, --do : "domain overlap" : maximum allowed overlap of merged domains. Default value is 20. (Corresponds to MAX_DOM_OVL in the config file)
+  --gcap, --gc : "gap cap" : gap cost limiting factor for long-range similarity merge. Used as multiplier for gap initiation cost. Default value is 4.0. (Corresponds to GAP_CAP in the config file)
+  --mrep, --mr : "merge repeats" : turns on the mode where only one best representative per group of repetitive similarities is reported. Off by default. (Corresponds to MERGE_REP in the config file)
+  --rorp, --ro : "repeat orphan" : maximum difference between alignment starts and/or ends to consider them repeated. Default value is 30. (Corresponds to MAX_REP_ORP in the config file)
+  --nothr, --nt: "no thread merge" : turns off merging for close alternative alignments. The one-pass alignment heuristics typically finds many alignments for a similarity zone, which are merged into a single best one by default. (Corresponds to NOMERGE_THR in the config file)
   
-  STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of config file)
-  -v, --verb   : "verbose" : turns on progress reporting. (corresponds to VERBOSE in config file)
-  --ov         : "overwrite" : allows overwriting results file if it exists. Disallowed by default. (corresponds to OVERWRITE in config file)
-  --debug      : "debug" : selects debug output verbosity level. Levels 0 through 5 are valid; 0 is default, meaning only report unrecoverable failures. Other values are: 1(errors), 2(warnings), 3(info), 4(debug), 5(trace). (corresponds to DEBUG in config file)
-  
-  OUTPUT CONTROL (corresponds to [SEARCH_OUTPUT] section of config file)
-  --om         : "output mode" : selects type of the output. valid modes are TEXT, TAB, TABX, M8, M9. M8 and M9 correspond to legaxy blast -m8 and -m9 output formats. Default is TEXT. (corresponds to OUT_MODE in config file)
-  --ap, -a     : "append" : append results file if it exists. Off (meaning write new file) by default. (corresponds to APPEND in config file)
-  --rpq        : "results per query" : keep this number of best similarities per query sequence. This number is for combined forward and reverse hits if both strands are enabled. Default 500. (corresponds to RES_PER_QUERY in config file)
-  --rps        : "results per subject" : keep this number of best similarities per subject sequence. Usebul for best hit (or N-best-hits) annotation of subject dataset. Default 0 (unlimited). (corresponds to RES_PER_SUBJECT in config file)
-  --apq        : "alignment per query" : when TEXT output format is selected, defines number of detailed alignments per query printed.
   
 
-   
+STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of the config file)
+
+  -v, --verb   : "verbose" : turns on progress reporting (corresponds to VERBOSE in the config file).
+  --ov         : "overwrite" : allows overwriting the results file if it exists. Disallowed by default. (Corresponds to OVERWRITE in the config file)
+  --debug      : "debug" : selects debug output verbosity level. Levels 0 through 5 are valid; level 0 (default) means that only unrecoverable failures are reported. Other values are: 1(errors), 2(warnings), 3(info), 4(debug), 5(trace). (Corresponds to DEBUG in the config file)
+  
+
+
+  OUTPUT CONTROL (corresponds to [SEARCH_OUTPUT] section of the config file)
+
+  --om         : "output mode" : selects the type of the output. Valid modes are TEXT, TAB, TABX, M8, M9. M8 and M9 correspond to legacy blast -m8 and -m9 output formats. Default output is TEXT. (Corresponds to OUT_MODE in the config file)
+  --ap, -a     : "append" : append the results file if it exists. This setting is off (meaning write a new file) by default. (Corresponds to APPEND in the config file)
+  --rpq        : "results per query" : keep and report a certain number of best similarities per query sequence. This number is for combined forward and reverse hits if searvh in both strands is enabled. Default value is 500. (Corresponds to RES_PER_QUERY in the config file)
+  --rps        : "results per subject" : keep a certain number of best similarities per subject sequence. Useful for "best hit" (or N-best-hits) annotation of subject datasets. Default value is 0 (unlimited). (Corresponds to RES_PER_SUBJECT in the config file)
+  --apq        : "alignment per query" : when TEXT output format is selected, defines the number of detailed alignments per query that will be printed.
 
 
 
-
+TROUBLESHOOTING
+===========================
+If you have questions or concerns, please contact us at dkaznadzey@yahoo.com.
