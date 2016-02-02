@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 //// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
-//// 
+////
 //// This program is free software; you can redistribute, reuse,
 //// or modify it with no restriction, under the terms of the MIT License.
-//// 
+////
 //// This program is distributed in the hope that it will be useful,
 //// but WITHOUT ANY WARRANTY; without even the implied warranty of
 //// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//// 
+////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
@@ -153,8 +153,8 @@ public:
     int g_period;            //mimimum gap period (in nucleotides)
 
     //misc globals
-    int k_matches;            //internal pass 1 result count
-    int b_matches;            //internal pass 2 result count
+    longlong k_matches;            //internal pass 1 result count
+    longlong b_matches;            //internal pass 2 result count
 
     //interface functions
         KT_SEARCH     (int kt_sz,        //k-tuple size
@@ -180,9 +180,9 @@ public:
 
 
     // debug helpers
-    int _diags_found;
-    int _ktups_found;
-    int _nuc_scanned;
+    //int _diags_found;
+    //int _ktups_found;
+    //int _nuc_scanned;
 
 };
 

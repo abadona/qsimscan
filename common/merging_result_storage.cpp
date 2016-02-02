@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 //// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
-//// 
+////
 //// This program is free software; you can redistribute, reuse,
 //// or modify it with no restriction, under the terms of the MIT License.
-//// 
+////
 //// This program is distributed in the hope that it will be useful,
 //// but WITHOUT ANY WARRANTY; without even the implied warranty of
 //// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//// 
+////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +19,8 @@ AlignResultStorage (capacity),
 merger_ (merger),
 res_per_target_ (res_per_target),
 accum_no_ (0),
-cur_sid_ (-1)
+cur_sid_ (-1),
+tot_merged_ (0)
 {
 }
 
@@ -95,6 +96,7 @@ void MergingResultStorage::flush (const char* tseq)
                 besthits.push (AlignResultWrapper (*ri, (*qi).first));
             else
                 AlignResultStorage::add_result ((*qi).first, *ri);
+            ++ tot_merged_;
         }
     }
     for (qi = accum_rev_.begin (); qi != accum_rev_.end (); qi ++)
@@ -108,6 +110,7 @@ void MergingResultStorage::flush (const char* tseq)
             else
                 AlignResultStorage::add_result ((*qi).first, *ri);
         }
+        ++ tot_merged_;
     }
     if (res_per_target_)
     {

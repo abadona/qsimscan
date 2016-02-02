@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 //// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
-//// 
+////
 //// This program is free software; you can redistribute, reuse,
 //// or modify it with no restriction, under the terms of the MIT License.
-//// 
+////
 //// This program is distributed in the hope that it will be useful,
 //// but WITHOUT ANY WARRANTY; without even the implied warranty of
 //// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//// 
+////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
@@ -18,9 +18,9 @@ static const char* SEARCH_REV_DEFAULT = TRUE_STR;
 static const char* REP_LOOKUP_DEFAULT = "2";
 static const char* K_SIZE_DEFAULT = "11";
 static const char* APPROX_DEFAULT = FALSE_STR;
-static const char* K_THRESH_DEFAULT = "310";
+static const char* K_THRESH_DEFAULT = "240";
 static const char* MAX_SHIFT_DEFAULT = "3";
-static const char* GAP_PERIOD_DEFAULT = "10";
+static const char* GAP_PERIOD_DEFAULT = "5";
 static const char* MIN_THRESH_DEFAULT = "70";
 static const char* MAX_THRESH_DEFAULT = "55";
 static const char* MIN_LEN_DEFAULT = "45";

@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 //// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
-//// 
+////
 //// This program is free software; you can redistribute, reuse,
 //// or modify it with no restriction, under the terms of the MIT License.
-//// 
+////
 //// This program is distributed in the hope that it will be useful,
 //// but WITHOUT ANY WARRANTY; without even the implied warranty of
 //// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//// 
+////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
@@ -196,9 +196,9 @@ void KT_SEARCH::init_vars (int max_ynum, int *wts)
         ers << "Insufficient memory for diagonal info array, requested " << max_y_len + max_x_len + 1 << " (" << max_x_len << " max_subj_len + " << max_y_len << " max_qry_len + 1) DIAG_ENTRY structures (" << sizeof (DIAG_ENTRY) << " bytes each, " << (max_y_len + max_x_len + 1)*sizeof (DIAG_ENTRY) / (1024*1024) <<  " Mbytes total)" << Throw;
 
 
-    _ktups_found = 0;
-    _diags_found = 0;
-    _nuc_scanned = 0;
+    // _ktups_found = 0;
+    // _diags_found = 0;
+    // _nuc_scanned = 0;
 }
 
 int KT_SEARCH::add_yseq (NN_SEQ& yseq)
@@ -344,9 +344,9 @@ void KT_SEARCH::reset_y ()
     k_matches = 0;
     b_matches = 0;
 
-    _ktups_found = 0;
-    _diags_found = 0;
-    _nuc_scanned = 0;
+    //_ktups_found = 0;
+    //_diags_found = 0;
+    //_nuc_scanned = 0;
 }
 
 
@@ -486,7 +486,7 @@ void KT_SEARCH::scan_l1 ()
             //get next K-tuple
             ktup = seqw & kt_mask, seqw >>= 2;
 
-            _nuc_scanned ++;
+            // _nuc_scanned ++;
 
             //filter repeating K-tuples
             kt_last = (kt_last + 1) & 0x7;
@@ -500,8 +500,8 @@ void KT_SEARCH::scan_l1 ()
             k_wt  = ki[ktup].wt;
             k_ptr = ki[ktup].ptr;
 
-            if (k_cnt)
-                _ktups_found ++;
+            // if (k_cnt)
+            //    _ktups_found ++;
 
             //for all matched K-tuples
             while (k_cnt--)
@@ -565,7 +565,7 @@ void KT_SEARCH::scan_l1 ()
                     ylen = yi[ynum].len;
 
                     //delimit / filter batch
-                    _diags_found ++;
+                    // _diags_found ++;
                     if (!batches_out)
                         scan_l2_g ();
                     else
@@ -696,7 +696,7 @@ void KT_SEARCH::scan_l1_stepped ()
     for (xpos = 0; xpos < xend; xpos += xstep)
     {
         // find if last boundary is still good
-        while (xpos > ((bytebound + shift) << 2) + dword_reminder) 
+        while (xpos > ((bytebound + shift) << 2) + dword_reminder)
             ++shift;
         if (shift)
         {

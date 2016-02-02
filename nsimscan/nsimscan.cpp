@@ -1,13 +1,13 @@
 //////////////////////////////////////////////////////////////////////////////
 //// This software module is developed by SciDM (Scientific Data Management) in 1998-2015
-//// 
+////
 //// This program is free software; you can redistribute, reuse,
 //// or modify it with no restriction, under the terms of the MIT License.
-//// 
+////
 //// This program is distributed in the hope that it will be useful,
 //// but WITHOUT ANY WARRANTY; without even the implied warranty of
 //// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-//// 
+////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
@@ -375,11 +375,13 @@ void Nsimscan::report_state (std::ostream& o)
         time_t cur_t = cur_time_sec ();
         double speed = double (targets_searched_) / (cur_t - subphase_start_time_sec () + 1);
         double kbpps = double (searched_bps_) / (double (cur_t - subphase_start_time_sec () + 1)*1000);
-        o << ", " << targets_searched_ << " sequences searched ("
-                << std::setprecision (2) << std::fixed << speed << "/sec), "
+        o << ", " << targets_searched_ << " sequences searched (" << std::setprecision (2) << std::fixed << percent_done () << "%, "
+                << std::setprecision (2) << std::fixed << speed << " /s, " << kbpps << " Kb/s)"
                 << res_no () << " " << result_item_name () << " found."
-                << " (" << std::setprecision (2) << std::fixed << percent_done () << "% of target size; "
-                << kbpps << " Kbp/sec, " << results_->totalFound () << " hits)" << std::flush;
+                << "[" << searcher_->k_matches << " diag, " << results_->totalFound () << " hits";
+        if (p_->rep_len ())
+            o << ", " << results_->passedRepeats () << " nr, ";
+        o << results_->tot_merged () << " merged]" << std::flush;
     }
 }
 
@@ -419,7 +421,13 @@ void Nsimscan::report_final (std::ostream& o)
         o << "   " << query_set_length_ - queries_searched_ << " queries were skipped due to length constraints" << std::endl;
     if (skipped_)
         o << "   " << skipped_ << " targets were skipped due to length constraints" << std::endl;
-    o << resno_ << " found similarites saved to file " << p_->output_name ();
+    o << resno_ << " found similarites saved to file " << p_->output_name () << std::endl;
+    o << "    " << searcher_->k_matches << " candidate locations with score over " << p_->k_thresh () << " seen" << std::endl;
+    o << "    " << searcher_->b_matches << " high-scoring alignment segments found" << std::endl;
+    if (p_->rep_len ())
+        o << "    " << results_->passedRepeats () << " passed repeats / redundancy filter" << std::endl;
+    o << "    " << results_->tot_merged () << " similarites after segment / thread merging and repeat selection" << std::endl
+      << "    " << resno_ << " best similarites selected" << std::endl;
     Process::report_final (o);
 }
 
