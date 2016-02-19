@@ -711,7 +711,7 @@ void KT_SEARCH::scan_l1_stepped ()
         //get next K-tuple
         ktup = seqw;
         ktup &= kt_mask;
-        seqw >>= 2;
+        seqw >>= (xstep << 1);
 
 
         //get K-tuple info
