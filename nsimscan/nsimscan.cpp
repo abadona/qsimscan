@@ -376,8 +376,8 @@ void Nsimscan::report_state (std::ostream& o)
         double speed = double (targets_searched_) / (cur_t - subphase_start_time_sec () + 1);
         double kbpps = double (searched_bps_) / (double (cur_t - subphase_start_time_sec () + 1)*1000);
         o << ", " << targets_searched_ << " sequences searched (" << std::setprecision (2) << std::fixed << percent_done () << "%, "
-                << std::setprecision (2) << std::fixed << speed << " /s, " << kbpps << " Kb/s)"
-                << res_no () << " " << result_item_name () << " found."
+                << std::setprecision (2) << std::fixed << speed << " /s, " << kbpps << " Kb/s) "
+                << res_no () << " " << result_item_name () << " found "
                 << "[" << searcher_->k_matches << " diag, " << results_->totalFound () << " hits";
         if (p_->rep_len ())
             o << ", " << results_->passedRepeats () << " nr, ";
@@ -398,8 +398,8 @@ void Nsimscan::report_self (std::ostream& o)
     if (p_->t_end () != -1) o << ", " << p_->t_end () - p_->t_beg () << " sequences selected for search";
     o << std::endl;
 
-    if      (p_->parameters_read ())   o << "Parameters read from configuration file " << p_->in_parfname () << " :" << std::endl;
-    else  o << "Default parameters used :" << std::endl;
+    if (p_->parameters_read ())   o << "Parameters base values are loaded from the configuration file " << p_->in_parfname () <<  std::endl;
+    o << "Parameters used :" << std::endl;
     p_->parameters_->write (o);
     o << "Output stored to file " << p_->output_name () << std::endl << std::flush;
 }
