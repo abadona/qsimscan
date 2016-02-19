@@ -109,8 +109,8 @@ void MergingResultStorage::flush (const char* tseq)
                 besthits.push (AlignResultWrapper (*ri, (*qi).first));
             else
                 AlignResultStorage::add_result ((*qi).first, *ri);
+            ++ tot_merged_;
         }
-        ++ tot_merged_;
     }
     if (res_per_target_)
     {
