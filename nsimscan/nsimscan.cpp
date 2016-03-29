@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <sim_merger.h>
 
-const char* VERSION = "1.0.40 (May 2011)";
+const char* VERSION = "1.1.76 (March 2016)";
 
 Process* process_factory ()
 {

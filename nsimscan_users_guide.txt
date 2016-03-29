@@ -1,16 +1,16 @@
-===========================
+===============================
    NSimScan User's Guide
-===========================
+===============================
 
 
 OVERVIEW
-===========================
+===============================
 
 NSimScan is a tool for searching similarities in nucleotide sequences. It compares a set of query sequences to a set of subject sequences, finds alignments that meet quality criteria, and reports them. Different aspects of NSimScan operation are controlled through the program parameters.
 
 
 QUICK START
-===========================
+===============================
 
 The simplest NSimScan usage scenario includes only three required parameters:
 
@@ -19,7 +19,7 @@ The simplest NSimScan usage scenario includes only three required parameters:
 Search directed by the above command line will execute default settings and find alignments longer than 45 bp with identities from over 70% (for 45-bp alignments) to 55% for very long alignments. It will record 500 best alignments per query, for which 50 top will be reported in detail.
 
 -v parameter enables progress report;
---om parameter is used to select the output mode (by default it is text alignments). The output mode M8 matches NCBI Legacy BLAST -m8 (and Blast+ -outfmt 6) tabular output. NSimScan command line utilizing these additional twFTDIo parameters will look like:
+--om parameter is used to select the output mode (by default it is text alignments). The output mode M8 matches NCBI Legacy BLAST -m8 (and Blast+ -outfmt 6) tabular output. NSimScan command line utilizing these additional two parameters will look like:
 
    > nsimscan -v --om M8 QUERIES_FILE.fasta SUBJECTS_FILE.fasta OUTPUT_NAME.sim
 
@@ -48,7 +48,7 @@ A sensitive search for more distant (over ~55% identity) and longer (over 80 bp)
 
 
 ALGORITHM DESCRIPTION
-===========================
+===============================
 
 1) As its initial operation, NSimScan reads all query sequences and constructs a lookup table, recording all locations of every k-mere in the query sequences. The size of the k-meres for the lookup table is controlled by '-k' parameter. The lookup table is directly addressable by the binary-encoded k-mere. If 'approximate' mode is enabled, the locations of inexact matches (with one substitution) are also recorded.
 
@@ -85,7 +85,7 @@ ALGORITHM DESCRIPTION
 
 
 NOTE ABOUT MEMORY CONSUMPTION
-===========================
+===============================
 
 As the query sequences are loaded in the memory all at once, and both the k-mere index and the diagonal array are constructed over the entire set, large query sets may imply extensive memory usage. Memory usage is approximately 200*query_set_size bytes. 20K of 500-bp queries consume about 2Gb memory for indexes. The results take additional space. Redundant sequences with many matches can cause huge memory footprint.
 The space taken by the results can be reduced by using redundancy / repeats filters or by limiting the number of results kept per query (see below, in the parameters description)
@@ -93,7 +93,7 @@ The space taken by the results can be reduced by using redundancy / repeats filt
 
 
 PARAMETERS: OPTIONAL AND REQUIRED
-===========================
+===============================
 
 
 NSimScan processing parameters can be set on a command line or by using config file. The majority of the parameters are optional; if they are not specified, default values are used.
@@ -107,7 +107,7 @@ Required parameters have to be specified on the command line after all optional 
 
 
 HELP MODE
-===========================
+===============================
 
 
 NSimScan can be executed in one of 3 "help output" modes:
@@ -118,7 +118,7 @@ NSimScan can be executed in one of 3 "help output" modes:
 
 
 CONFIGURATION FILE
-===========================
+===============================
 
 
 NSimScan uses default config file, if the file is located in the current directory. The name for the file follows the name of nsimscan executable with ".cfg" extension. Usually it is 'nsimscan.cfg'. If NSimScan executable is renamed or run using a differently named symlink, the config file should follow that name.
@@ -132,7 +132,7 @@ Configuration file is a sectional text file, where each section’s name is listed
 
 
 PARAMETER CATEGORIES
-===========================
+===============================
 
 
   INPUT FILTERING (corresponds to [PRE_FILTER] section of the config file)
@@ -176,7 +176,7 @@ PARAMETER CATEGORIES
   SIMILARITY FILTERING (corresponds to [FILTERS] section of the config file)
 
   --minlen     : "min sim len" : minimal length of reported alignments, default value is 45 (corresponds to MIN_LEN in the config file)
-  --replev     : "repeat level" : score threshold for repeat filtering. If similarity score on a shifted ungapped segment is over (repeat_level * unsifted_sim_score), the sequence is considered redundant and the alignment is rejected. Default value is 0.5. (Corresponds to REP_PERCENT in the config file)
+  --replev     : "repeat level" : score threshold for repeat filtering. If similarity score on a shifted ungapped segment is over (repeat_level * unshifted_sim_score), the sequence is considered redundant and the alignment is rejected. Default value is 0.5. (Corresponds to REP_PERCENT in the config file)
   --replen     : "repeat length" : maximal shift tested by the repeat filter. If set to 0, no repeat filtering is performed. Default value is 4. (Corresponds to REP_LEN in the config file)
 
 
@@ -192,7 +192,7 @@ PARAMETER CATEGORIES
 
 
 
-STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of the config file)
+  STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of the config file)
 
   -v, --verb   : "verbose" : turns on progress reporting (corresponds to VERBOSE in the config file).
   --ov         : "overwrite" : allows overwriting the results file if it exists. Disallowed by default. (Corresponds to OVERWRITE in the config file)
@@ -210,6 +210,59 @@ STATUS REPORTING AND OUTPUT (corresponds to [GENERIC_OUTPUT] section of the conf
 
 
 
+OUTPUT FORMATS
+===============================
+
+NSimScan supports following output formats (controlled by the '--om' command line switch or by 'SEARCH_OUTPUT:OUT_MODE' parameter in configuration file):
+
+TEXT: detailed (textual) representation of alignments, grouped by query, then by subject. 
+
+TAB:  tab-delimited with following columns:
+
+  qry_id  : QUERY ID            : the first word from fasta header for the query
+  subj_id : SUBJECT ID          : the first word from fasta header for the subject
+  p_iden  : PERCENT IDENTITY    : percentage of matches over aligned bases (gaps not counted) [matches * 100.0 / (matches + mismatches)]
+  al_len  : ALIGNMENT LENGTH    : number of aligned bases (gaps not counted)
+  mism    : MISMATCHES          : number of mismatches
+  gaps    : GAP OPENINGS        : number of gaps
+  gap_len : GAP_LENGTH          : total lengths of gaps
+  qry_beg : QUERY START         : position of first query base covered by the similarity, zero-based
+  qry_end : QUERY END           : position of first query base not covered by similarity, zero based (base following last similarity base)  
+            The reverse match for this output format is interpreted as reverse-complemented query fragment matching forward subject fragment. The qry_beg for reverse match is greater then qry_end.
+            q_end can take value of (-1) for reverse matches or be 1 base beyond the sequence end for forward matches.
+  qry_len : QUERY LENGTH        : length of query sequence
+  sbj_beg : QUERY START         : position of first subject base covered by the similarity, zero-based
+  sbj_end : SUBJECT END         : position of last subject base not covered by similarity, zero based (base following last similarity base). 
+  sbj_len : SUBJECT LENGTH      : length of subject sequence
+  chi_sqr : CHI SQUARE          : Chi-square statistics score for the alignment, with 15 degrees of freedom (event space of 16 replacements, aa, at, ag, ac, ta...tt), given the nucleotide composition of the matching fragments.
+  sw_score: SMITH-WATERMAN SCORE: Smith-Waterman score for the alignment
+  qry_auto: QUERY AUTO SCORE    : Score for query auto-match (equals similarity length)
+  sbj_auto: SUBJECT AUTO SCORE  : Score for query auto-match (equals similarity length)
+  CIGAR   : CIGAR STRING        : CIGAR encoding for the alignment
+
+TABX: identical to TAB, with added comment line on top. The comment line starts with '#', is tab-delimited and contains designators for the columns
+
+M8: tab-delimited, similar to format '8' (-m8) of the legacy BLAST or format 6 of the BLASTX, with e-value replaced by chi-square score, and bitscore - by Smith-Waterman score. Contains following columns:
+  
+  qry_id  : QUERY ID            : the first word from fasta header for the query
+  subj_id : SUBJECT ID          : the first word from fasta header for the subject
+  p_iden  : PERCENT IDENTITY    : percentage of matches over aligned bases (gaps not counted) [matches * 100.0 / (matches + mismatches)]
+  al_len  : ALIGNMENT LENGTH    : number of aligned bases (gaps not counted)
+  mism    : MISMATCHES          : number of mismatches
+  gaps    : GAP OPENINGS        : number of gaps
+  qry_beg : QUERY START         : position of first query base covered by the similarity, one-based
+  qry_end : QUERY END           : position of last query base covered by similarity, one based
+  sbj_beg : QUERY START         : position of first subject base covered by the similarity, one-based
+  sbj_end : SUBJECT END         : position of last subject base covered by similarity, one based 
+    The reverse match for this output format is interpreted as forward query fragment matching reverse-complemented subject fragment. The sbj_beg for reverse match is greater then sbj_end. 
+  chi_sqr : CHI SQUARE          : Chi-square statistics score for the alignment, with 15 degrees of freedom (event space of 16 replacements, aa, at, ag, ac, ta...tt), given the nucleotide composition of the matching fragments.
+  sw_score: SMITH-WATERMAN SCORE: Smith-Waterman score for the alignment
+
+M9: tab-delimited, similar to format '9' (-m9) of the legacy BLAST (with e-value replaced by chi-square score, and bitscore - by Smith-Waterman score.)
+  Identical to M8 with  a comment block added before the block of similarities for each query. The lines in the comment block start with '#', and list the query, the database, and the list of columns.
+
+
 TROUBLESHOOTING
-===========================
+===============================
+
 If you have questions or concerns, please contact us at dkaznadzey@yahoo.com.
