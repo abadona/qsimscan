@@ -242,7 +242,7 @@ TAB:  tab-delimited with following columns:
 
 TABX: identical to TAB, with added comment line on top. The comment line starts with '#', is tab-delimited and contains designators for the columns
 
-M8: tab-delimited, similar to format '8' (-m8) of the legacy BLAST or format 6 of the BLASTX, with e-value replaced by chi-square score, and bitscore - by Smith-Waterman score. Contains following columns:
+M8: tab-delimited, similar to format '8' (-m8) of the legacy BLAST or format 6 of the Blast+, with e-value replaced by chi-square score, and bitscore - by Smith-Waterman score. Contains following columns:
   
   qry_id  : QUERY ID            : the first word from fasta header for the query
   subj_id : SUBJECT ID          : the first word from fasta header for the subject
