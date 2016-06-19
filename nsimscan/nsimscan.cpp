@@ -380,8 +380,8 @@ void Nsimscan::report_state (std::ostream& o)
                 << res_no () << " " << result_item_name () << " found "
                 << "[" << searcher_->k_matches << " diag, " << results_->totalFound () << " hits";
         if (p_->rep_len ())
-            o << ", " << results_->passedRepeats () << " nr, ";
-        o << results_->tot_merged () << " merged]" << std::flush;
+            o << ", " << results_->passedRepeats () << " nr";
+        o << ", "<< results_->tot_merged () << " merged]" << std::flush;
     }
 }
 
