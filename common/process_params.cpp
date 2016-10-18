@@ -18,8 +18,8 @@
 #include "portability.h"
 #include "common_str.h"
 
-static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 1997-2012";
-static const char* DEF_VERSION = "0.9.a";
+static const char* COPYRIGHT_NOTE = "Copyright: Scientific Data Management 1997-2016";
+static const char* DEF_VERSION = "1.0";
 
 const char *empty_longopt_list [] = {NULL};
 const char *Process_params::parfname_default_ = "default.cfg";
