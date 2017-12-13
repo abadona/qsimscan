@@ -648,7 +648,7 @@ bool Search_helper_files::output_results_na (AlignResultStorage& resrec, unsigne
 void eval_align_loc (SEQ& xseq, const char* yseq, WMatrix* w, BATCH* batches, unsigned batch_no, double* p_identity, unsigned* mismatches, unsigned* al_length, unsigned* gap_openings, unsigned* gap_length)
 {
 
-    *p_identity = 0, *mismatches = 0, *al_length = 0, *gap_openings = 0;
+    *p_identity = 0, *mismatches = 0, *al_length = 0, *gap_openings = 0, *gap_length = 0;
     unsigned xp, yp;
     char yc, xc;
     const char* yptr;
