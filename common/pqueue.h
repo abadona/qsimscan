@@ -81,13 +81,13 @@ public:
     {
         values_.resize (maxN);
     }
-    T const& top () const throw (PQueueUnderflow, PQueueNotAHeap)
+    T const& top () const
     {
         if (!heap_ok_) throw PQueueNotAHeap ();
         if (!n_) throw PQueueUnderflow ();
         return values_.front ();
     }
-    bool push (T const& val) throw (PQueueNotAHeap)
+    bool push (T const& val)
     {
         bool toR = false;
         if (!heap_ok_) throw PQueueNotAHeap ();
@@ -111,7 +111,7 @@ public:
         }
         return toR;
     }
-    void pop () throw (PQueueUnderflow, PQueueNotAHeap)
+    void pop ()
     {
         if (!heap_ok_) throw PQueueNotAHeap ();
         if (!n_) throw PQueueUnderflow ();
@@ -129,7 +129,7 @@ public:
     {
         return values_.size ();
     }
-    void setCapacity (int maxN) throw (PQueueRestructure)
+    void setCapacity (int maxN)
     {
         if (n_ > maxN) throw PQueueRestructure ();
         values_.resize (maxN);

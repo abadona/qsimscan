@@ -402,9 +402,7 @@ bool Search_helper_files::output_results_nn (AlignResultStorage& resrec, unsigne
                     if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
                     if (cur_res->q_auto_score_) out_file << "SUBJECT AUTO SCORE " << cur_res->t_auto_score_;
                 }
-
-                out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
-
+                out_file << std::endl << "     " << query_.cur_name () << "(UPPER) START " << cur_res->batches_ [0].xpos << ", " << (*itr).second.namebuf << "(LOWER) START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
                 // print batch
                 if (resno < alignments_no)
                 {
@@ -474,8 +472,7 @@ bool Search_helper_files::output_results_aa (AlignResultStorage& resrec, unsigne
                     if (cur_res->q_auto_score_ && cur_res->t_auto_score_) out_file << ", ";
                     if (cur_res->q_auto_score_) out_file << "SUBJECT AUTO SCORE " << cur_res->t_auto_score_;
                 }
-                out_file << std::endl << "     QUERY START " << cur_res->batches_ [0].xpos << ", " << query_.cur_name () << " START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
-
+                out_file << std::endl << "     " << query_.cur_name () << "(UPPER) START " << cur_res->batches_ [0].xpos << ", " << target_.cur_name () << "(LOWER) START " << cur_res->batches_ [0].ypos << ", LENGTH " << tot_sim_len;
                 // print batch
                 if (resno < alignments_no)
                 {
