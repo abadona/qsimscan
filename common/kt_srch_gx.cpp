@@ -1108,7 +1108,7 @@ void KT_SEARCH::scan_l2_gb_1 ()
   len = 0, b_len = 0, rr = 0;
   rem = __max (x - xlen, y - ylen);
   score = 0, max_score = 0, matches = msum = 0;
-  while (score > max_score - stop_lev)
+  while (score >= max_score - stop_lev)
   {
     //check current diag
     ry = get_12_bases (yseq, y);
@@ -1187,7 +1187,7 @@ void KT_SEARCH::scan_l2_gb_1 ()
   len = b_len, rr = 0;
   rem = __max (- x, - y);
   score = 0, max_score = 0, msum = matches;
-  while (score > max_score - stop_lev)
+  while (score >= max_score - stop_lev)
   {
     //check current diag
     ry = get_12_bases (yseq, y);
@@ -1262,7 +1262,7 @@ void KT_SEARCH::scan_l2_gb_1 ()
 
   int approx_score = b_len;
 
-  if (((matches - penalty) * 100 > b_thresh_l * b_len) && (b_len >= l_thresh) && b_len > (r_num - l_num) * g_period)
+  if (((matches - penalty) * 100 >= b_thresh_l * b_len) && (b_len >= l_thresh) && b_len > (r_num - l_num) * g_period)
   {
     b_matches++;
 
