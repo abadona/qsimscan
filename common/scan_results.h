@@ -13,7 +13,9 @@
 
 #ifndef __scan_results_h__
 #define __scan_results_h__
-#pragma warning (disable:4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
 #include <map>
 #include <platform.h>
 #include <pqueue.h>

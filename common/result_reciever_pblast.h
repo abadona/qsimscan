@@ -13,7 +13,9 @@
 
 #ifndef __result_reciever_pblast_h__
 #define __result_reciever_pblast_h__
-#pragma warning (disable:4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
 
 #include "biosequence.h"
 

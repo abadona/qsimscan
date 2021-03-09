@@ -11,7 +11,10 @@
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
-#pragma warning (disable : 4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
+
 #include "blast_results.h"
 
 blast_results :: blast_results (ALIGN* align, int keep_per_query, double score_thresh, int rep_len, double rep_perc)

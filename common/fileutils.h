@@ -14,7 +14,9 @@
 #ifndef __fileutils_h__
 #define __fileutils_h__
 
-#pragma warning (disable:4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
 #include "structures.h"
 #include "platform.h"
 

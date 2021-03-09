@@ -13,7 +13,9 @@
 
 #ifndef __parameters_section_h__
 #define __parameters_section_h__
-#pragma warning (disable:4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
 
 #include <string>
 #include <map>

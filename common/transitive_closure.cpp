@@ -11,7 +11,9 @@
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4786)
+#endif
 #include "transitive_closure.h"
 #include "rerror.h"
 #include <string.h>

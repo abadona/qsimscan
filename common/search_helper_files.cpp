@@ -656,7 +656,9 @@ void eval_align_loc (SEQ& xseq, const char* yseq, WMatrix* w, BATCH* batches, un
         if (i)
         {
             (*gap_openings) ++;
-            (*gap_length) += (batches [i].xpos - xp) + (batches [i].ypos - yp);
+            unsigned this_gap_len = (batches [i].xpos - xp) + (batches [i].ypos - yp);
+            (*gap_length) += this_gap_len;
+            (*al_length) += this_gap_len;
         }
 
         xp = batches [i].xpos;
@@ -673,7 +675,7 @@ void eval_align_loc (SEQ& xseq, const char* yseq, WMatrix* w, BATCH* batches, un
         }
         (*al_length) += batches [i].len;
     }
-    *p_identity = (double (*al_length) - double (*mismatches)) * 100.0 / double (*al_length);
+    *p_identity = ((*al_length) - double (*mismatches) - double (*gap_length)) * 100.0 / double (*al_length);
 }
 
 void eval_align (SEQ& xseq, SEQ& yseq, WMatrix* w, BATCH* batches, unsigned batch_no, double* p_identity, unsigned* mismatches, unsigned* al_length, unsigned* gap_openings, unsigned* gap_length)
@@ -687,7 +689,9 @@ void eval_align (SEQ& xseq, SEQ& yseq, WMatrix* w, BATCH* batches, unsigned batc
         if (i)
         {
             (*gap_openings) ++;
-            (*gap_length) += (batches [i].xpos - xp) + (batches [i].ypos - yp);
+            unsigned this_gap_len = (batches [i].xpos - xp) + (batches [i].ypos - yp);
+            (*gap_length) += this_gap_len;
+            (*al_length) += this_gap_len;
         }
 
         xp = batches [i].xpos;
@@ -701,7 +705,7 @@ void eval_align (SEQ& xseq, SEQ& yseq, WMatrix* w, BATCH* batches, unsigned batc
         }
         (*al_length) += batches [i].len;
     }
-    *p_identity = (double (*al_length) - double (*mismatches)) * 100.0 / double (*al_length);
+    *p_identity = ((*al_length) - double (*mismatches) - double (*gap_length)) * 100.0 / double (*al_length);
 }
 
 static char const* TAB_STR = "\t";

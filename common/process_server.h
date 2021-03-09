@@ -14,7 +14,9 @@
 #ifndef __process_server_h__
 #define __process_server_h__
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4786)
+#endif
 
 // in order to implement an AppServer, the following should be defined:
 // - Process* process_factory ();

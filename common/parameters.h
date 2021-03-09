@@ -14,7 +14,9 @@
 #ifndef __parameters_h__
 #define __parameters_h__
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4786)
+#endif
 
 #include "platform.h"
 #include <map>

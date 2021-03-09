@@ -10,8 +10,10 @@
 ////
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
-
+#ifdef _MSC_VER
 #pragma warning (disable: 4786)
+#endif
+
 #include "nsimscan.h"
 #include <fileutils.h>
 #include <print_batches.h>

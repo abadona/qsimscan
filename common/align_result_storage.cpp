@@ -11,7 +11,10 @@
 //// For any questions please contact Denis Kaznadzey at dkaznadzey@yahoo.com
 //////////////////////////////////////////////////////////////////////////////
 
-#pragma warning (disable : 4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
+
 #include "sequtil.h"
 #include "align_result_storage.h"
 

@@ -14,7 +14,9 @@
 #ifndef __pblast_results_h__
 #define __pblast_results_h__
 
-#pragma warning (disable : 4786)
+#ifdef _MSC_VER
+#pragma warning (disable: 4786)
+#endif
 #include <platform.h>
 #include "result_reciever_pblast.h"
 #include "merging_result_storage.h"
