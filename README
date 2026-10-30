@@ -6,8 +6,12 @@ Authors:
   Denis Kaznadzey
   Vlad Novichkov
   Victor Joukov
-  
-Copyright (c) 1998-2021, SciDM (Scientific Data Management)
+
+Publications: 
+NSimScan: https://doi.org/10.1093/bioinformatics/btw126
+PSimScan: https://doi.org/10.1371/journal.pone.0058505
+
+Copyright (c) 1998-2026, SciDM (Scientific Data Management)
 
 License: 
   MIT license (see LICENSE.txt).
